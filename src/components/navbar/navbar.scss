@@ -1,0 +1,40 @@
+.nav {
+  width: 100%;
+  height: auto;
+  border-radius: var(--S, 8px);
+  background: #7181ae;
+  padding-bottom: 14px;
+
+  .nav__title {
+    padding: 14px 20px;
+    font-size: 22px;
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  .nav__item {
+    padding: 10px 34px;
+    list-style: none;
+    .nav__link {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    &-btn {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+    }
+
+    &--active {
+      background: #425793;
+    }
+  }
+}
+
+.nav-recommend {
+  border-radius: var(--S, 8px);
+  background: #1e8ffe;
+}
