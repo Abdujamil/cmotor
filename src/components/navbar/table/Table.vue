@@ -4,8 +4,7 @@ import * as XLSX from "xlsx";
 import "@vuepic/vue-datepicker/dist/main.css";
 import "v-calendar/style.css";
 
-
-// Table to Excel 
+// Table to Excel
 const table = ref(null);
 const downloadTable = () => {
   if (table.value) {
@@ -20,7 +19,6 @@ const downloadTable = () => {
     XLSX.writeFile(wb, "table.xlsx");
   }
 };
-
 
 const date = ref(null);
 
@@ -458,36 +456,26 @@ const rows = ref([
 
         <VDatePicker
           v-model="date"
+          mode="date"
           :popover="{ placement: 'bottom-start' }"
           :columns="2"
           is-range
-          borderless 
+          borderless
         >
-          <template locale="ru" #default="{ togglePopover, inputValue, inputEvents }">
+          <template
+            locale="ru"
+            #default="{ togglePopover, inputValue, inputEvents }"
+          >
             <div
               class="flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden"
             >
-              <!-- Кнопка для открытия календаря -->
-              <button
-                class="flex justify-center items-center px-2 bg-accent-100 hover:bg-accent-200 text-accent-700 border-r border-gray-300 dark:bg-gray-700 dark:text-accent-300 dark:border-gray-600 dark:hover:bg-gray-600"
-                @click="togglePopover()"
-              >
-                <IconCalendar class="w-5 h-5" />
+
+              <button class="data-btn" @click="togglePopover()">
+                За всё время
               </button>
-              <!-- Инпут для отображения выбранной даты -->
-              <input
-                :value="inputValue"
-                v-on="inputEvents"
-                class="flex-grow px-2 py-1 bg-white dark:bg-gray-700"
-                placeholder="Выберите диапазон дат"
-              />
             </div>
           </template>
         </VDatePicker>
-
-        <!-- <select >
-          <option value="0">За все время</option>
-        </select> -->
 
         <select>
           <option>Все регионы</option>
@@ -512,7 +500,7 @@ const rows = ref([
           <button @click="cancelForm" class="btn btn-red">Отменить</button>
         </div>
       </div>
-      
+
       <div class="form-fields__selects">
         <div class="w-50">
           <div class="form-fields__selects-row w-25">
@@ -548,8 +536,6 @@ const rows = ref([
                 </option>
               </select>
             </div>
-
-            
 
             <div class="form-fields__select form-fields__selects-carModel">
               <label for="car-model">Модель автомобиля:</label>
