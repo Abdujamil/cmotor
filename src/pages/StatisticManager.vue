@@ -1,0 +1,224 @@
+<script setup>
+import Filter from "../components/filters/Filter.vue";
+import IButton from "../components/installButton/IButton.vue";
+
+const managers = [
+  "Эдуард Мукин",
+  "Турал Мамедли",
+  "Алексей Шевчук",
+  "Армен Мкртчян",
+  "Не представился",
+  "Вадим Гусейнов",
+  "Роман Мкртчян",
+  "Алексей Краюхин",
+  "Павел Дацюк",
+  "Данил Проценко",
+  "Алексей Гостев",
+  "Станислав Питулин",
+  "Антон Терлецкий",
+  "Радик Салахов",
+  "Егор Марчук",
+  "Арсений Камерер",
+  "Владислав Бубнов",
+  "Павел Зрячиков",
+  "Артемий Ефимов",
+  "Константин управляющий",
+  "Сергей Казымов",
+  "Антон Тупицын",
+  "Антон Швалев",
+  "Не представился",
+  "Роман Шералиев",
+  "Артем Чигарьков",
+  "Дамир Шаймерденов",
+  "Никита Гришихин",
+  "Андрей Григорьев",
+  "Ринат Юсупов",
+  "Илья Пятыгин",
+  "Данил Тагиев",
+  "Данил Кучин",
+  "Диннур Фасхутдинов",
+  "Илья Васкевич",
+  "Кирилл Кривцов",
+  "Денис Илюхин",
+  "Кирилл Келлер",
+  "Федор Асадов",
+  "Дмитрий Маник",
+  "Владимир РОП",
+  "Василий Дианов",
+  "Илья Кошман",
+  "Леонид Фотин",
+  "Николай Васильев",
+  "Алексей Ощепков",
+  "Михаил РОП",
+  "Сергей Карпенко",
+  "Не представился",
+  "Оскар Курмакаев",
+  "Никита Аксёнов",
+  "Владислав Петров",
+  "Иван Манцеленко",
+  "Денис Лисин",
+  "Филипп Козырев",
+  "Александр Кузнецов",
+  "Михаил Вахонин",
+  "Данил Королев",
+  "Алексей Бухтияров",
+  "Данил Гриневич",
+  "Алексей Лихачев",
+  "Алексей Ямщиков",
+  "Георгий Сироткин",
+  "Артем Васюков",
+  "Глеб Каменский",
+  "Ярослав Дорошенко",
+  "Турдали Эрназаров",
+  "Кирил Макеев",
+  "Илья Гологузов",
+  "Ян Лалетин",
+  "Захар Русанов",
+  "Павел Мымрин",
+  "Вадим Олексенко",
+  "Дмитрий Гаврилюк",
+  "Вадим Николаев",
+  "Дмитрий Вебер",
+  "Савелий Власов",
+  "Владимир Камагоров",
+  "Юрий Капустинский",
+  "Александр Аносов",
+  "Антон РОП",
+  "Виктор Баханский",
+  "Илья Долженок",
+  "Никита Карепов",
+  "Михаил Гусейнов",
+  "Данил Арнаутов",
+  "Илья Катков",
+  "Владимир Полещук",
+  "Илья Бушмелев",
+  "Леонид Шушарин",
+  "Алексей Фроликов",
+  "Роман Касымов",
+  "Анатолий Саранцев",
+  "Александр Тюрин",
+  "Вячеслав Глазунов"
+];
+</script>
+
+<template>
+  <div>
+    <h2>Сводная по менеджерам</h2>
+  </div>
+  <div class="filters filters-statis-city">
+    <Filter @filterChange="handleFilterChange" />
+    <IButton @click="downloadTable" />
+  </div>
+
+  <div class="table-container">
+    <div ref="table" class="table">
+      <!-- Table Header -->
+      <div class="table-row header">
+        <div class="table-cell">ФИО менеджера</div>
+        <div class="table-cell">Процент обработки звонка</div>
+        <div class="table-cell">Количество звонков</div>
+      </div>
+      <!-- Filtered Table Rows -->
+      <div
+        class="table-row"
+        v-for="(row, index) in managers"
+        :key="index"
+      >
+        <div class="table-cell">{{ row }}</div>
+        <div class="table-cell">{{ row }}</div>
+        <div class="table-cell">{{ row }}</div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style lang="scss" scoped>
+
+.table-container{
+    overflow: auto;
+    max-height: 550px;
+}
+
+.filters-statis-city {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+::-webkit-scrollbar {
+  background-color: rgba(255, 255, 255, 0.5);
+  width: 10px;
+  height: 10px;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+
+
+.table {
+  max-width: 580px;
+  display: flex;
+  flex-direction: column;
+  border-collapse: collapse;
+  width: 100%;
+  background: linear-gradient(0deg, #425793 0%, #425793 100%),
+    linear-gradient(81deg, #e4b656 0%, #cfa54e 0.01%, #b89345 100%),
+    rgba(255, 255, 255, 0.4);
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+.table-row {
+  display: flex;
+}
+
+.table-row.header {
+  background-color: #7181ae;
+  font-weight: bold;
+  text-align: center;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.table-row.header-2 {
+  background: linear-gradient(0deg, #2c3e72 0%, #2c3e72 100%),
+    linear-gradient(81deg, #e4b656 0%, #cfa54e 0.01%, #b89345 100%),
+    rgba(255, 255, 255, 0.4) !important;
+  border-radius: 0;
+}
+
+.table-row.header-2 .table-cell {
+  align-items: start;
+  justify-content: start;
+  padding: 10px 36px;
+}
+
+.table-cell {
+  flex: 1;
+  padding: 10px;
+  color: #ffffff;
+  text-align: center;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.table-row:nth-child(odd) {
+  background: linear-gradient(0deg, #7181ae 0%, #7181ae 100%),
+    linear-gradient(81deg, #e4b656 0%, #cfa54e 0.01%, #b89345 100%),
+    rgba(255, 255, 255, 0.4);
+}
+
+.data-table tbody tr:nth-child(even) {
+  background: none; /* Фон по умолчанию */
+}
+</style>

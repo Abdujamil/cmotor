@@ -4,9 +4,11 @@ import App from "./App.vue";
 import router from "./routes/route";
 import VCalendar from "v-calendar";
 import "v-calendar/style.css";
+import { MaskInput } from 'vue-3-mask';
 
-createApp(App)
-  .use(router)
-  .use(VCalendar, {}) // используйте плагин VCalendar после маршрутизатора
-  .mount("#app");
+const app = createApp(App);
 
+app.use(router);
+app.use(VCalendar, {});
+app.component('MaskInput', MaskInput);
+app.mount("#app");
