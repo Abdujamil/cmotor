@@ -58,25 +58,23 @@
               <label for="manager">Дата:</label>
               <div class="my-calendar">
                 <VDatePicker
-                  v-model="date"
-                  mode="date"
+                  mode="range"
                   :popover="{ placement: 'bottom-start' }"
                   :columns="2"
                   transparent
                   borderless
                   isDark
                   is-range
+                  v-model="selectedDateRange"
+                  locale="ru"
                 >
-                  <template
-                    locale="ru"
-                    #default="{ togglePopover, inputValue, inputEvents }"
-                  >
+                  <template #default="{ togglePopover }">
                     <a
                       style="display: block; width: auto"
                       class="data-btn data-btn-date"
                       @click="togglePopover()"
                     >
-                      Выбрать
+                      {{ formattedDateRange || "Выбрать" }}
                     </a>
                   </template>
                 </VDatePicker>
@@ -210,7 +208,8 @@
 
               <div class="dropdown" @click.stop="toggleDropdown('manager')">
                 <div class="dropdown-toggle">
-                  <span>{{ formData2.manager || "Выбрать" }}</span>
+                  <!-- Отображаем выбранного менеджера или "Выбрать" по умолчанию -->
+                  <span>{{ selectedManager || "Выбрать" }}</span>
                   <span class="dropdown-arrow">
                     <!-- SVG стрелка -->
                     <svg
@@ -864,25 +863,23 @@
               <label for="manager">Дата:</label>
               <div class="my-calendar">
                 <VDatePicker
-                  v-model="formData2.date"
-                  mode="date"
+                  mode="range"
                   :popover="{ placement: 'bottom-start' }"
                   :columns="2"
                   transparent
                   borderless
                   isDark
-                  range
+                  is-range
+                  @update:modelValue="updateDateRange" 
+                  locale="ru"
                 >
-                  <template
-                    locale="ru"
-                    #default="{ togglePopover, inputValue, inputEvents }"
-                  >
+                  <template #default="{ togglePopover }">
                     <a
                       style="display: block; width: auto"
                       class="data-btn data-btn-date"
                       @click="togglePopover()"
                     >
-                      Выбрать
+                      {{ formattedDateRange || "Выбрать" }}
                     </a>
                   </template>
                 </VDatePicker>
@@ -1807,6 +1804,7 @@
             <td>{{ client.id }}</td>
             <td>{{ client.city }}</td>
             <td>{{ client.date }}</td>
+            <!-- <td>{{ formattedDateRange || 'Не выбрано' }}</td> -->
             <td>{{ client.manager }}</td>
             <td>{{ client.phone }}</td>
             <td>{{ client.fio }}</td>
@@ -1868,10 +1866,14 @@
         <!-- Table footer -->
         <tfoot>
           <tr>
-            <td colspan="10"><p>Итоговые значения: 23</p></td>
-            <td colspan="10"><p>Сумма звонков: 1090</p></td>
+            <td colspan="10">
+              <p style="text-transform: uppercase">Итоговые значения</p>
+            </td>
+            <td colspan="10">
+              <p>Сумма звонков: {{ totalItems2 }}</p>
+            </td>
             <td colspan="25">
-              <p>Средний процент по выполнению плана: 95%</p>
+              <p>Средний процент по выполнению плана: {{ totalItems3 }}</p>
             </td>
           </tr>
         </tfoot>
@@ -2099,6 +2101,7 @@ const cancelForm = () => {
   showForm.value = false;
   showFormEdit.value = false;
 };
+
 // Example data for table rows
 const rows = ref([
   {
@@ -2421,8 +2424,32 @@ const onRegionChange = () => {
   selectedCity.value = ""; // Reset city selection when the region changes
 };
 
-// Reactive state for the selected date range
-const selectedDateRange = ref({ start: null, end: null });
+// Реактивное состояние для выбранного диапазона дат
+const selectedDateRange = ref({
+  start: null, // Начальная дата
+  end: null // Конечная дата
+});
+
+// Компьютед для форматирования диапазона дат
+const formattedDateRange = computed(() => {
+  const { start, end } = selectedDateRange.value;
+
+  console.log("Выбранный диапазон дат:", start, end);
+
+  if (!start || !end) return null; // Если дата не выбрана, возвращаем null
+
+  // Функция для форматирования даты в нужный вид (dd.mm.yyyy)
+  const formatDate = (dateString) => {
+    const date = new Date(dateString); // Преобразуем строку в объект даты
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Месяцы начинаются с 0
+    const year = date.getFullYear();
+    return `${day}.${month}.${year}`;
+  };
+
+  // Возвращаем диапазон дат в нужном формате
+  return `${formatDate(start)} до ${formatDate(end)}`;
+});
 
 // Computed property to filter rows based on selected date range
 const filteredRows = computed(() => {
@@ -2460,20 +2487,6 @@ const carsData = ref([]);
 const filteredBrands = ref([]);
 const filteredModels = ref([]);
 
-// // Слежение за изменениями selectedBrand
-// watch(selectedBrand, (newBrand) => {
-//   filteredModels.value = newBrand ? newBrand.models : [];
-//   console.log("Xlick",newBrand);
-//   formData2.avto = newBrand ? newBrand.name : "";
-// });
-
-// // Слежение за изменениями selectedBrand
-// watch(selectedModel, (newModel) => {
-//   console.log("Xlick2",newModel);
-//   formData2.avto = newModel ? formData2.avto + " " + newModel.name : "";
-//   console.log("Xlick2", formData2.avto);
-// });
-
 // Фильтрация брендов
 function filterBrands() {
   const searchText = brandSearch.value.toLowerCase();
@@ -2505,17 +2518,11 @@ function selectModel(model) {
   showModelDropdown.value = false;
 }
 
-// const props = defineProps({
-//   modelValue: String,
-//   managers: Array
-// });
-// const emit = defineEmits(["update:modelValue"]);
-
-// Функция выбора менеджера
+// Функция для выбора менеджера
 const selectManager = (manager) => {
-  // selectedManager.value = manager;
-  emit("update:modelValue", manager); // Обновляем значение в родительском компоненте
+  selectedManager.value = manager; // Устанавливаем выбранного менеджера
   showManagerDropdown.value = false; // Закрываем дропдаун после выбора
+  formData2.value.manager = manager ? manager : "";
 };
 
 // Переключение видимости дропдаунов
@@ -2544,6 +2551,7 @@ function toggleDropdown(type) {
 const selectCity = (city) => {
   selectedCity.value = city;
   showCityDropdown.value = false;
+  formData2.value.city = city ? city : "";
 };
 
 // Обработчик кликов вне области дропдауна
@@ -2564,10 +2572,13 @@ onUnmounted(() => {
 
 // Данные и состояние
 const tableData2 = ref([]); // Все данные с сервера
+const tableData3 = ref([]); // Все данные с сервера
 const loadedData = ref([]); // Отображаемые данные (загружаются постепенно)
 const itemsPerPage = 20; // Количество записей для загрузки за раз
 const currentPage = ref(0); // Текущая страница данных
 const totalItems = ref(0); // Общее количество записей
+const totalItems2 = ref(0);
+const totalItems3 = ref(0);
 const isLoading = ref(false); // Состояние загрузки
 
 // Функция загрузки данных
@@ -2593,11 +2604,49 @@ const handleScroll = (event) => {
   }
 };
 
+watch(tableData2, (newData) => {
+  loadedData.value = newData.slice(0, (currentPage.value + 1) * itemsPerPage);
+});
+
+const calculateAveragePlan = () => {
+  if (tableData3.value.length === 0) {
+    totalItems3.value = 0;
+    return;
+  }
+
+  const totalPlan = tableData3.value.reduce(
+    (sum, plan) => sum + (parseFloat(plan.plan) || 0),
+    0
+  );
+  totalItems3.value = (totalPlan / tableData3.value.length).toFixed(2); // Средний процент, округленный до двух знаков после запятой
+};
+
+// Функция для получения общего количества записей
+const fetchTotalItems = async () => {
+  try {
+    const response = await axios.get(
+      `https://crystal-motors.ru/method.getClients?count=100000`
+    );
+    console.log("Общее количество записей:", response);
+    totalItems2.value = response.data.answer.count;
+    tableData3.value = response.data.answer.items;
+    console.log("Общее количество записей:", totalItems2.value);
+  } catch (error) {
+    console.error(
+      "Ошибка при получении общего количества записей:",
+      error.message
+    );
+    // Выводим дополнительную информацию об ошибке
+    console.error("Детали ошибки:", error.response?.data || error.message);
+  }
+};
+
 // Функция для получения данных клиентов и их обработки
 const fetchClients = async (offset = 0) => {
   try {
-    const response = await axios.get(`https://crystal-motors.ru/method.getClients?count=${itemsPerPage}&offset=${offset}`);
-    console.log("Получено:", response.data.answer.items.length, "записей");
+    const response = await axios.get(
+      `https://crystal-motors.ru/method.getClients?count=${itemsPerPage}&offset=${offset}&order=id_desc`
+    );
     const newData = response.data.answer.items;
     tableData2.value = [...tableData2.value, ...newData]; // Обновляем все данные
     totalItems.value = response.data.answer.total; // Обновляем общее количество записей
@@ -2618,12 +2667,13 @@ const fetchClients = async (offset = 0) => {
 };
 
 // Запрос данных при монтировании компонента
-onMounted(() => {
+onMounted(async () => {
+  await fetchTotalItems(); // Получаем общее количество записей при монтировании
+  calculateAveragePlan(); // Рассчитываем средний процент после обновления данных
   loadMoreData(); // Загружаем первую порцию данных при монтировании
 });
 
 // Состояние данных
-const clients = ref([]);
 const formData2 = ref({
   city: "",
   date: "",
@@ -2651,7 +2701,6 @@ const formData2 = ref({
 });
 const isEditing = ref(false);
 const currentClientId = ref(null);
-
 
 // Объединенное слежение за изменениями selectedBrand и selectedModel
 watchEffect(() => {
@@ -2687,8 +2736,7 @@ const handleSubmit = async () => {
       await axios.post("http://localhost:3000/clients", formData2.value);
       alert("Данные успешно добавлены!");
     }
-    // Сброс формы и обновление списка клиентов
-    // formData2.value = { name: "", email: "", phone: "" };
+
     isEditing.value = false;
     fetchClients();
   } catch (error) {
@@ -2707,7 +2755,16 @@ const addClient = async () => {
     await axios.get(`https://crystal-motors.ru/method.addClient?${params}`);
 
     alert("Данные успешно добавлены!");
-    fetchClients(); // Обновляем список клиентов
+
+    // Очищение текущие данные таблицы перед обновлением
+    tableData2.value = [];
+    loadedData.value = [];
+    currentPage.value = 0; // Сброс страницы на первую
+
+    // Вызовите функцию для обновления списка клиентов
+    await fetchClients();
+
+    // Закройте формы после обновления
     showForm.value = !showForm.value;
     showFormEdit.value = !showFormEdit.value;
   } catch (error) {
@@ -2763,8 +2820,15 @@ const updateClient = async () => {
     );
     console.log(new URLSearchParams(formData2.value).toString());
     alert("Данные успешно обновлены!");
+    // Очищение текущие данные таблицы перед обновлением
+    tableData2.value = [];
+    loadedData.value = [];
+    currentPage.value = 0; // Сброс страницы на первую
+
+    // Вызовите функцию для обновления списка клиентов
+    await fetchClients();
+
     showFormEdit.value = false;
-    fetchClients(); // Обновить список клиентов
     isEditing.value = false; // Закрыть форму редактирования
   } catch (error) {
     console.error("Ошибка при обновлении данных клиента:", error);
@@ -2777,7 +2841,14 @@ const deleteClient = async (id) => {
     console.log("Удаление клиента с ID:", id);
     await axios.get(`https://crystal-motors.ru/method.deleteClient?id=${id}`); // Исправленный URL
     alert("Данные успешно удалены!");
-    fetchClients();
+
+    // Очищение текущие данные таблицы перед обновлением
+    tableData2.value = [];
+    loadedData.value = [];
+    currentPage.value = 0; // Сброс страницы на первую
+
+    // Вызовите функцию для обновления списка клиентов
+    await fetchClients();
   } catch (error) {
     console.error("Ошибка при удалении данных:", error);
   }

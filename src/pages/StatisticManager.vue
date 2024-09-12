@@ -1,3 +1,34 @@
+<template>
+  <div>
+    <h2>Сводная по менеджерам</h2>
+  </div>
+  <div class="filters filters-statis-city">
+    <Filter @filterChange="handleFilterChange" />
+    <IButton @click="downloadTable" />
+  </div>
+
+  <div class="table-container">
+    <div ref="table" class="table">
+      <!-- Table Header -->
+      <div class="table-row header">
+        <div class="table-cell">ФИО менеджера</div>
+        <div class="table-cell">Процент обработки звонка</div>
+        <div class="table-cell">Количество звонков</div>
+      </div>
+      <!-- Filtered Table Rows -->
+      <div
+        class="table-row"
+        v-for="(name, index) in managers.managerName"
+        :key="index"
+      >
+        <div class="table-cell">{{ name }}</div>
+        <div class="table-cell">{{ managers.percentCall[index] }}</div>
+        <div class="table-cell">{{ managers.numberCall[index] }}</div>
+      </div>
+    </div>
+  </div>
+</template>
+
 <script setup>
 import Filter from "../components/filters/Filter.vue";
 import IButton from "../components/installButton/IButton.vue";
@@ -401,37 +432,6 @@ const managers = {
   ]
 };
 </script>
-
-<template>
-  <div>
-    <h2>Сводная по менеджерам</h2>
-  </div>
-  <div class="filters filters-statis-city">
-    <Filter @filterChange="handleFilterChange" />
-    <IButton @click="downloadTable" />
-  </div>
-
-  <div class="table-container">
-    <div ref="table" class="table">
-      <!-- Table Header -->
-      <div class="table-row header">
-        <div class="table-cell">ФИО менеджера</div>
-        <div class="table-cell">Процент обработки звонка</div>
-        <div class="table-cell">Количество звонков</div>
-      </div>
-      <!-- Filtered Table Rows -->
-      <div
-        class="table-row"
-        v-for="(name, index) in managers.managerName"
-        :key="index"
-      >
-        <div class="table-cell">{{ name }}</div>
-        <div class="table-cell">{{ managers.percentCall[index] }}</div>
-        <div class="table-cell">{{ managers.numberCall[index] }}</div>
-      </div>
-    </div>
-  </div>
-</template>
 
 <style lang="scss" scoped>
 .table-container {

@@ -1,6 +1,91 @@
+<template>
+  <div>
+    <h1>Статистика NPS</h1>
+  </div>
+  <div class="filters filters-statis-city">
+    <Filter @filterChange="handleFilterChange" />
+    <IButton @click="downloadTable" />
+  </div>
+
+  <div class="table-container">
+    <div ref="table" class="table">
+      <!-- Table Header -->
+      <div class="table-row header">
+        <div class="table-cell">Город</div>
+        <div class="table-cell">Среднее качество работы салона</div>
+        <div class="table-cell">Сравнение с прошлым периодом</div>
+        <div class="table-cell">Среднее качество работы менеджера</div>
+        <div class="table-cell">Сравнение с прошлым периодом</div>
+        <div class="table-cell">Среднее значение NPS</div>
+        <div class="table-cell">Среднее значение NPS</div>
+      </div>
+      <!-- Filtered Table Rows -->
+
+      <div
+        v-for="(name, index) in displayedData"
+        :key="index"
+        class="table-row"
+      >
+        <div class="table-cell">{{ name }}</div>
+        <div class="table-cell">-</div>
+        <div class="table-cell">{{ managers.numberCall[index] }}</div>
+        <div class="table-cell">-</div>
+        <div class="table-cell">{{ managers.numberCall[index] }}</div>
+        <div class="table-cell">-</div>
+        <div class="table-cell">{{ managers.numberCall[index] }}</div>
+      </div>
+
+      <!-- Table Footer -->
+      <div class="table-row footer">
+        <div class="table-cell">Общие значения:</div>
+        <div class="table-cell">3,4</div>
+        <div class="table-cell">–</div>
+        <div class="table-cell">3,5</div>
+        <div class="table-cell">–</div>
+        <div class="table-cell">3,5</div>
+        <div class="table-cell">–</div>
+      </div>
+    </div>
+
+    <div class="table-nav">
+      <div class="table-nav__header">
+        <p>Выберите статистику:</p>
+      </div>
+
+      <div class="table-nav__btns">
+        <button :class="{ active: currentDataSet === 'nps' }" @click="switchData('nps')">
+          Общий NPS
+        </button>
+        <button :class="{ active: currentDataSet === 'buyers' }" @click="switchData('buyers')">
+          Покупатели
+        </button>
+        <button :class="{ active: currentDataSet === 'commission' }" @click="switchData('commission')">
+          Комиссия
+        </button>
+      </div>
+    </div>
+  </div>
+</template>
+
 <script setup>
+import * as XLSX from "xlsx";
+import { ref, computed } from "vue";
 import Filter from "../components/filters/Filter.vue";
 import IButton from "../components/installButton/IButton.vue";
+
+const downloadTable = () => {
+  if (table.value) {
+    // Преобразуем HTML таблицу в формат рабочего листа Excel
+    const ws = XLSX.utils.table_to_sheet(table.value);
+
+    // Создаем книгу Excel и добавляем рабочий лист
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+
+    // Генерируем и сохраняем файл Excel
+    XLSX.writeFile(wb, "table.xlsx");
+  }
+};
 
 const managers = {
   managerName: [
@@ -303,6 +388,7 @@ const managers = {
   ]
 };
 
+// Общий NPS
 const cities = [
   "Барнаул",
   "Кемерово",
@@ -317,64 +403,66 @@ const cities = [
   "Тюмень",
   "Челябинск"
 ];
+
+// Покупатели
+const citiesP = [
+  "Покупатели",
+  "Покупатели",
+  "Покупатели",
+  "Покупатели",
+  "Покупатели",
+  "Покупатели",
+  "Покупатели",
+  "Покупатели",
+  "Покупатели",
+  "Покупатели",
+  "Покупатели",
+  "Покупатели"
+];
+
+// Комиссия
+const citiesK = [
+  "Комиссия",
+  "Комиссия",
+  "Комиссия",
+  "Комиссия",
+  "Комиссия",
+  "Комиссия",
+  "Комиссия",
+  "Комиссия",
+  "Комиссия",
+  "Комиссия",
+  "Комиссия",
+  "Комиссия"
+];
+
+
+// Состояние текущих данных
+const currentDataSet = ref('nps'); // По умолчанию отображаем NPS
+const displayedData = ref(cities);
+
+// Обработчик переключения данных
+const switchData = (type) => {
+  currentDataSet.value = type; // Устанавливаем активный тип данных
+  if (type === 'nps') {
+    displayedData.value = cities;
+  } else if (type === 'buyers') {
+    displayedData.value = citiesP;
+  } else if (type === 'commission') {
+    displayedData.value = citiesK;
+  }
+};
 </script>
-
-<template>
-  <div>
-    <h1>Статистика NPS</h1>
-  </div>
-  <div class="filters filters-statis-city">
-    <Filter @filterChange="handleFilterChange" />
-    <IButton @click="downloadTable" />
-  </div>
-
-  <div class="table-container">
-    <div ref="table" class="table">
-      <!-- Table Header -->
-      <div class="table-row header">
-        <div class="table-cell">Город</div>
-        <div class="table-cell">Среднее качество работы салона</div>
-        <div class="table-cell">Сравнение с прошлым периодом</div>
-        <div class="table-cell">Среднее качество работы менеджера</div>
-        <div class="table-cell">Сравнение с прошлым периодом</div>
-        <div class="table-cell">Среднее значение NPS</div>
-        <div class="table-cell">Среднее значение NPS</div>
-      </div>
-      <!-- Filtered Table Rows -->
-
-      <div
-        class="table-row"
-        v-for="(name, index) in managers.managerName"
-        :key="index"
-      >
-        <div class="table-cell">{{ name }}</div>
-        <div class="table-cell">{{ managers.percentCall[index] }}</div>
-        <div class="table-cell">{{ managers.numberCall[index] }}</div>
-        <div class="table-cell">{{ managers.percentCall[index] }}</div>
-        <div class="table-cell">{{ managers.numberCall[index] }}</div>
-        <div class="table-cell">{{ managers.percentCall[index] }}</div>
-        <div class="table-cell">{{ managers.numberCall[index] }}</div>
-      </div>
-
-      <!-- Table Footer -->
-      <div class="table-row footer">
-        <div class="table-cell">Общие значения:</div>
-        <div class="table-cell">3,4</div>
-        <div class="table-cell">–</div>
-        <div class="table-cell">3,5</div>
-        <div class="table-cell">–</div>
-        <div class="table-cell">3,5</div>
-        <div class="table-cell">–</div>
-      </div>
-    </div>
-  </div>
-</template>
 
 <style lang="scss" scoped>
 .table-container {
   overflow: auto;
   max-height: 550px;
   border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
 }
 
 .filters-statis-city {
@@ -467,5 +555,26 @@ const cities = [
 
 .data-table tbody tr:nth-child(even) {
   background: none; /* Фон по умолчанию */
+}
+
+.table-nav__btns {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  button {
+    width: 100%;
+    max-width: 207px;
+    border-radius: var(--S, 8px);
+    padding: var(--M, 12px) 32px;
+    background: #7181ae;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+  }
+
+  .active {
+    background: #425793;
+  }
 }
 </style>
