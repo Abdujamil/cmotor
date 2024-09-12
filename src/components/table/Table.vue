@@ -1657,7 +1657,7 @@
       </form>
     </div> -->
 
-    <div class="tablee">
+    <div @scroll="handleScroll" class="tablee">
       <table ref="table" class="data-table">
         <!-- Table headers -->
         <thead>
@@ -1803,7 +1803,7 @@
             </td>
           </tr> -->
 
-          <tr v-for="client in clients" :key="client.id">
+          <tr v-for="client in loadedData" :key="client.id">
             <td>{{ client.id }}</td>
             <td>{{ client.city }}</td>
             <td>{{ client.date }}</td>
@@ -1860,6 +1860,10 @@
               </button>
             </td>
           </tr>
+
+          <tr v-if="loadedData.length === 0">
+            <td colspan="2">Данных нет</td>
+          </tr>
         </tbody>
         <!-- Table footer -->
         <tfoot>
@@ -1885,7 +1889,8 @@ import {
   onUnmounted,
   watch,
   defineEmits,
-  defineProps
+  defineProps,
+  watchEffect
 } from "vue";
 import * as XLSX from "xlsx";
 import "@vuepic/vue-datepicker/dist/main.css";
@@ -2455,12 +2460,19 @@ const carsData = ref([]);
 const filteredBrands = ref([]);
 const filteredModels = ref([]);
 
-// Слежение за изменениями selectedBrand
-watch(selectedBrand, (newBrand) => {
-  filteredModels.value = newBrand ? newBrand.models : [];
-  console.log("Xlick",newBrand);
-  formData2.avto = newBrand ? newBrand.name : "";
-});
+// // Слежение за изменениями selectedBrand
+// watch(selectedBrand, (newBrand) => {
+//   filteredModels.value = newBrand ? newBrand.models : [];
+//   console.log("Xlick",newBrand);
+//   formData2.avto = newBrand ? newBrand.name : "";
+// });
+
+// // Слежение за изменениями selectedBrand
+// watch(selectedModel, (newModel) => {
+//   console.log("Xlick2",newModel);
+//   formData2.avto = newModel ? formData2.avto + " " + newModel.name : "";
+//   console.log("Xlick2", formData2.avto);
+// });
 
 // Фильтрация брендов
 function filterBrands() {
@@ -2482,9 +2494,9 @@ fetch("https://raw.githubusercontent.com/blanzh/carsBase/master/cars.json")
 // Выбор бренда
 function selectBrand(brand) {
   selectedBrand.value = brand;
-  showBrandDropdown.value = false; 
-  showModelDropdown.value = false; 
-  formData2.value.avto = brand ? brand.name : '';
+  showBrandDropdown.value = false;
+  showModelDropdown.value = false;
+  formData2.value.avto = brand ? brand.name : "";
 }
 
 // Выбор модели
@@ -2550,18 +2562,64 @@ onUnmounted(() => {
   document.removeEventListener("click", handleClickOutside);
 });
 
-// Получение данных
-const tableData2 = ref([]);
+// Данные и состояние
+const tableData2 = ref([]); // Все данные с сервера
+const loadedData = ref([]); // Отображаемые данные (загружаются постепенно)
+const itemsPerPage = 20; // Количество записей для загрузки за раз
+const currentPage = ref(0); // Текущая страница данных
+const totalItems = ref(0); // Общее количество записей
+const isLoading = ref(false); // Состояние загрузки
 
+// Функция загрузки данных
+const loadMoreData = () => {
+  if (isLoading.value || loadedData.value.length >= totalItems.value) return; // Предотвращаем повторные запросы и проверяем, не загружены ли все данные
+
+  isLoading.value = true; // Устанавливаем состояние загрузки в true
+  const offset = currentPage.value * itemsPerPage;
+
+  // Получаем данные для следующей порции
+  fetchClients(offset).finally(() => {
+    isLoading.value = false; // Устанавливаем состояние загрузки в false после завершения
+  });
+};
+
+// Функция обработки события прокрутки
+const handleScroll = (event) => {
+  const { scrollTop, clientHeight, scrollHeight } = event.target;
+
+  // Загружаем больше данных при прокрутке вниз
+  if (scrollTop + clientHeight >= scrollHeight - 10) {
+    loadMoreData();
+  }
+};
+
+// Функция для получения данных клиентов и их обработки
+const fetchClients = async (offset = 0) => {
+  try {
+    const response = await axios.get(`https://crystal-motors.ru/method.getClients?count=${itemsPerPage}&offset=${offset}`);
+    console.log("Получено:", response.data.answer.items.length, "записей");
+    const newData = response.data.answer.items;
+    tableData2.value = [...tableData2.value, ...newData]; // Обновляем все данные
+    totalItems.value = response.data.answer.total; // Обновляем общее количество записей
+
+    // Загружаем следующую порцию данных
+    const start = currentPage.value * itemsPerPage;
+    const end = start + itemsPerPage;
+    const nextPageData = tableData2.value.slice(start, end);
+
+    // Проверяем, есть ли данные для загрузки
+    if (nextPageData.length > 0) {
+      loadedData.value = [...loadedData.value, ...nextPageData];
+      currentPage.value++;
+    }
+  } catch (error) {
+    console.error("Ошибка при получении данных клиентов:", error);
+  }
+};
+
+// Запрос данных при монтировании компонента
 onMounted(() => {
-  axios
-    .get("http://localhost:3000/clients/")
-    .then((response) => {
-      tableData2.value = response.data;
-    })
-    .catch((error) => {
-      console.error("Ошибка получения данных:", error);
-    });
+  loadMoreData(); // Загружаем первую порцию данных при монтировании
 });
 
 // Состояние данных
@@ -2594,18 +2652,27 @@ const formData2 = ref({
 const isEditing = ref(false);
 const currentClientId = ref(null);
 
-// Функция для получения данных клиентов
-const fetchClients = async () => {
-  try {
-    const response = await axios.get(
-      "https://crystal-motors.ru/method.getClients?count=10000&offset=9900"
-    );
-    clients.value = response.data.answer.items;
-    console.log("Данные клиентов:", clients.value);
-  } catch (error) {
-    console.error("Ошибка при получении данных клиентов:", error);
+
+// Объединенное слежение за изменениями selectedBrand и selectedModel
+watchEffect(() => {
+  if (selectedBrand.value) {
+    // Если выбран бренд, добавляем его имя в formData2.avto
+    formData2.value.avto = selectedBrand.value.name;
+
+    // Если также выбрана модель, добавляем ее имя
+    if (selectedModel.value) {
+      formData2.value.avto += " " + selectedModel.value.name;
+    }
+  } else {
+    // Если бренд не выбран, сбрасываем значение
+    formData2.value.avto = "";
   }
-};
+
+  // Обновление filteredModels на основе выбранного бренда
+  filteredModels.value = selectedBrand.value ? selectedBrand.value.models : [];
+
+  console.log("Updated formData2.avto:", formData2.value.avto);
+});
 
 // Функция для отправки данных (добавление или обновление)
 const handleSubmit = async () => {
@@ -2643,7 +2710,6 @@ const addClient = async () => {
     fetchClients(); // Обновляем список клиентов
     showForm.value = !showForm.value;
     showFormEdit.value = !showFormEdit.value;
-
   } catch (error) {
     console.error("Ошибка при добавлении данных клиента:", error);
   }

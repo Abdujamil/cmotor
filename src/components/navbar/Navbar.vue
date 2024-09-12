@@ -1,26 +1,36 @@
 <script setup>
 import { ref } from "vue";
 
-// Ref для управления видимостью подменю
+// Переменные для управления видимостью подменю и отслеживания активных пунктов меню
 const showCallsSubmenu = ref(false);
 const showStatsSubmenu = ref(false);
 const showNPSSubmenu = ref(false);
-const activeItem = ref(""); // Отслеживание активного элемента меню
+const activeMenu = ref(""); // Активное главное меню
+const activeSubmenu = ref(""); // Активное подменю
 
 // Функция переключения видимости подменю
 const toggleSubmenu = (submenu) => {
   if (submenu === "calls") {
     showCallsSubmenu.value = !showCallsSubmenu.value;
+    showStatsSubmenu.value = false;
+    showNPSSubmenu.value = false;
+    activeMenu.value = "calls"; // Устанавливаем активное главное меню
   } else if (submenu === "stats") {
     showStatsSubmenu.value = !showStatsSubmenu.value;
+    showCallsSubmenu.value = false;
+    showNPSSubmenu.value = false;
+    activeMenu.value = "stats";
   } else if (submenu === "nps") {
     showNPSSubmenu.value = !showNPSSubmenu.value;
+    showCallsSubmenu.value = false;
+    showStatsSubmenu.value = false;
+    activeMenu.value = "nps";
   }
 };
 
-// Установка активного элемента
-const setActiveItem = (item) => {
-  activeItem.value = item;
+// Установка активного подменю
+const setActiveSubmenu = (item) => {
+  activeSubmenu.value = item;
 };
 </script>
 
@@ -29,15 +39,8 @@ const setActiveItem = (item) => {
     <div class="nav__title">Меню</div>
 
     <div class="nav__items">
-      <!-- Меню Прослушка звонков -->
-      <div
-        class="nav__item nav__item-btn"
-        :class="{ 'nav__item--active': activeItem === 'calls' }"
-        @click="
-          toggleSubmenu('calls');
-          setActiveItem('calls');
-        "
-      >
+      <!-- Главное меню: Прослушка звонков -->
+      <div class="nav__item nav__item-btn" @click="toggleSubmenu('calls')">
         Прослушка звонков
         <span
           class="nav__arrow"
@@ -62,25 +65,24 @@ const setActiveItem = (item) => {
         </span>
       </div>
       <div v-if="showCallsSubmenu" class="nav__submenu">
-        <div class="nav__item">
+        <div
+          class="nav__item"
+          :class="{ 'nav__item--active': activeSubmenu === 'allCities' }"
+          @click="setActiveSubmenu('allCities')"
+        >
           <RouterLink class="nav__link" to="/">Все города</RouterLink>
         </div>
         <div
           class="nav__item"
+          :class="{ 'nav__item--active': activeSubmenu === 'dataEntry' }"
+          @click="setActiveSubmenu('dataEntry')"
         >
           <RouterLink class="nav__link" to="/dataEntry">Ввод данных</RouterLink>
         </div>
       </div>
 
-      <!-- Меню Статистика -->
-      <div
-        class="nav__item nav__item-btn"
-        :class="{ 'nav__item--active': activeItem === 'stats' }"
-        @click="
-          toggleSubmenu('stats');
-          setActiveItem('stats');
-        "
-      >
+      <!-- Главное меню: Статистика -->
+      <div class="nav__item nav__item-btn" @click="toggleSubmenu('stats')">
         Статистика
         <span
           class="nav__arrow"
@@ -106,25 +108,28 @@ const setActiveItem = (item) => {
       </div>
 
       <div v-if="showStatsSubmenu" class="nav__submenu">
-        <div class="nav__item">
-          <RouterLink class="nav__link" to="/statisticCity">Сводная по городам</RouterLink>
+        <div
+          class="nav__item"
+          :class="{ 'nav__item--active': activeSubmenu === 'statisticCity' }"
+          @click="setActiveSubmenu('statisticCity')"
+        >
+          <RouterLink class="nav__link" to="/statisticCity"
+            >Сводная по городам</RouterLink
+          >
         </div>
-        <div class="nav__item">
+        <div
+          class="nav__item"
+          :class="{ 'nav__item--active': activeSubmenu === 'statisticManager' }"
+          @click="setActiveSubmenu('statisticManager')"
+        >
           <RouterLink class="nav__link" to="/statisticManager"
             >Сводная по менеджерам</RouterLink
           >
         </div>
       </div>
 
-      <!-- Меню NPS рассылка -->
-      <div
-        class="nav__item nav__item-btn"
-        :class="{ 'nav__item--active': activeItem === 'nps' }"
-        @click="
-          toggleSubmenu('nps');
-          setActiveItem('nps');
-        "
-      >
+      <!-- Главное меню: NPS рассылка -->
+      <div class="nav__item nav__item-btn" @click="toggleSubmenu('nps')">
         NPS рассылка
         <span
           class="nav__arrow"
@@ -150,11 +155,23 @@ const setActiveItem = (item) => {
       </div>
 
       <div v-if="showNPSSubmenu" class="nav__submenu">
-        <div class="nav__item">
-          <RouterLink class="nav__link" to="/statisticNPS">Статистика NPS</RouterLink>
+        <div
+          class="nav__item"
+          :class="{ 'nav__item--active': activeSubmenu === 'npsList' }"
+          @click="setActiveSubmenu('npsList')"
+        >
+          <RouterLink class="nav__link" to="/npsList"
+            >Статистика NPS</RouterLink
+          >
         </div>
-        <div class="nav__item">
-          <RouterLink class="nav__link" to="/dataNPS">Данные NPS</RouterLink>
+        <div
+          class="nav__item"
+          :class="{ 'nav__item--active': activeSubmenu === 'npsAdd' }"
+          @click="setActiveSubmenu('npsAdd')"
+        >
+          <RouterLink class="nav__link" to="/npsAdd"
+            >Данные NPS</RouterLink
+          >
         </div>
       </div>
     </div>
@@ -175,17 +192,14 @@ const setActiveItem = (item) => {
 <style lang="scss">
 @import "./navbar.scss";
 
-.nav__submenu {
-  padding-left: 34px;
-}
-
 .nav__arrow {
   display: inline-block;
   margin-left: 8px;
   transition: transform 0.3s ease;
+  transform: rotate(180deg);
 }
 
 .nav__arrow--open {
-  transform: rotate(180deg);
+  transform: rotate(0deg);
 }
 </style>

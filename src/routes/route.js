@@ -7,8 +7,8 @@ const routes = [
   { path: "/dataEntry", component: () => import("../pages/DataEntry.vue") },
   { path: "/statisticCity", component: () => import("../pages/StatisticCity.vue") },
   { path: "/statisticManager", component: () => import("../pages/StatisticManager.vue") },
-  { path: "/dataNPS", component: () => import("../pages/DataNPS.vue") },
-  { path: "/statisticNPS", component: () => import("../pages/StatisticNPS.vue") },
+  { path: "/npsAdd", component: () => import("../pages/DataNPS.vue") },
+  { path: "/npsList", component: () => import("../pages/StatisticNPS.vue") },
 ];
 
 // Создание экземпляра роутера
