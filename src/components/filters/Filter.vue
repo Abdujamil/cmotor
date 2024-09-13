@@ -2,9 +2,9 @@
   <div class="dropdowns">
     <p>Показать статистику:</p>
     <div class="my-calendar">
-      <VDatePicker
+      <!-- <VDatePicker
         v-model="date"
-        mode="date"
+        model="date"
         :popover="{ placement: 'bottom-start' }"
         :columns="2"
         transparent
@@ -24,7 +24,18 @@
             </button>
           </div>
         </template>
-      </VDatePicker>
+      </VDatePicker> -->
+
+      <VueDatePicker
+        v-model="dateRange"
+        :format="format"
+        range
+        dark
+        multi-calendars
+        placeholder="За всё время"
+        @update:model-value="updateFormData"
+      >
+      </VueDatePicker>
     </div>
 
     <!-- Dropdown for selecting region -->
@@ -109,6 +120,25 @@ const showCityDropdown = ref(false);
 const selectedRegion = ref("");
 const selectedCity = ref("");
 
+// Инициализация массива для хранения диапазона дат
+const dateRange = ref([new Date(), new Date()]);
+
+// Функция форматирования для диапазона дат
+const format = (dates) => {
+  if (Array.isArray(dates) && dates.length === 2) {
+    const [startDate, endDate] = dates;
+    const formattedStartDate = startDate.toLocaleDateString("ru-RU");
+    const formattedEndDate = endDate.toLocaleDateString("ru-RU");
+
+    return `${formattedStartDate} - ${formattedEndDate}`;
+  } else if (dates instanceof Date) {
+    // Если диапазон не выбран, обрабатываем как одиночную дату
+    return dates.toLocaleDateString("ru-RU");
+  }
+
+  return "";
+};
+
 const regions = ref(["Север", "Юг"]);
 const cities = ref({
   Север: [
@@ -141,6 +171,12 @@ const toggleDropdown = (type) => {
 };
 
 const emit = defineEmits(["filterChange"]);
+const emitFilterChange = () => {
+  emit("filterChange", {
+    selectedRegion: selectedRegion.value,
+    selectedCity: selectedCity.value
+  });
+};
 
 const selectRegion = (region) => {
   selectedRegion.value = region;
@@ -153,13 +189,6 @@ const selectCity = (city) => {
   selectedCity.value = city;
   showCityDropdown.value = false;
   emitFilterChange();
-};
-
-const emitFilterChange = () => {
-  emit("filterChange", {
-    selectedRegion: selectedRegion.value,
-    selectedCity: selectedCity.value
-  });
 };
 
 const handleClickOutside = (event) => {

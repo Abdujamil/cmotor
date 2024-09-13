@@ -44,11 +44,11 @@
                 <div class="dropdown-menu" v-if="showCityDropdown">
                   <div
                     class="dropdown-item"
-                    v-for="city in cities"
-                    :key="city"
-                    @click="selectCity(city)"
+                    v-for="cityy in cities"
+                    :key="cityy"
+                    @click="selectCity(cityy)"
                   >
-                    {{ city }}
+                    {{ cityy }}
                   </div>
                 </div>
               </div>
@@ -57,8 +57,8 @@
             <div class="form-fields__select form-fields__selects-manager">
               <label for="manager">Дата:</label>
               <div class="my-calendar">
-                <VDatePicker
-                  mode="range"
+                <!-- <VDatePicker
+                  model="range"
                   :popover="{ placement: 'bottom-start' }"
                   :columns="2"
                   transparent
@@ -77,7 +77,28 @@
                       {{ formattedDateRange || "Выбрать" }}
                     </a>
                   </template>
-                </VDatePicker>
+                </VDatePicker> -->
+
+                <!-- <VueDatePicker
+                  v-model="dateRange"
+                  :format="format"
+                  range
+                  dark
+                  multi-calendars
+                  placeholder="За всё время"
+                  @update:model-value="updateFormData"
+                >
+                </VueDatePicker> -->
+
+                <VueDatePicker
+                  v-model="date"
+                  :format="format2"
+                  dark
+                  multi-calendars
+                  placeholder="За всё время"
+                  @update:model-value="updatedataRange"
+                >
+                </VueDatePicker>
               </div>
             </div>
           </div>
@@ -251,9 +272,9 @@
               <label for="manager">Телефон клиента:</label>
 
               <MaskInput
-                v-model="formData2.phone"
                 mask="+7 (###) ###-##-##"
                 placeholder="Телефон"
+                v-model="formData2.phone"
               />
             </div>
 
@@ -463,14 +484,14 @@
         </div>
 
         <div class="checkboxes__container-row">
-          <label for="city">Вы из Тюмени, Перми, Челябинска и т.д.?</label>
+          <label for="city2">Вы из Тюмени, Перми, Челябинска и т.д.?</label>
           <div class="radio-group">
             <p>
               <input
                 type="radio"
                 id="test16"
-                v-model="formData2.city"
-                name="city"
+                v-model="formData2.city2"
+                name="city2"
                 checked
                 value="0"
               />
@@ -480,8 +501,8 @@
               <input
                 type="radio"
                 id="test17"
-                v-model="formData2.city"
-                name="city"
+                v-model="formData2.city2"
+                name="city2"
                 value="0.5"
               />
               <label for="test17">0.5</label>
@@ -490,8 +511,8 @@
               <input
                 type="radio"
                 id="test18"
-                v-model="formData2.city"
-                name="city"
+                v-model="formData2.city2"
+                name="city2"
                 value="1"
               />
               <label for="test18">1</label>
@@ -849,11 +870,11 @@
                 <div class="dropdown-menu" v-if="showCityDropdown">
                   <div
                     class="dropdown-item"
-                    v-for="city in cities"
-                    :key="city"
-                    @click="selectCity(city)"
+                    v-for="cityy in cities"
+                    :key="cityy"
+                    @click="selectCity(cityy)"
                   >
-                    {{ city }}
+                    {{ cityy }}
                   </div>
                 </div>
               </div>
@@ -862,7 +883,7 @@
             <div class="form-fields__select form-fields__selects-manager">
               <label for="manager">Дата:</label>
               <div class="my-calendar">
-                <VDatePicker
+                <!-- <VDatePicker
                   mode="range"
                   :popover="{ placement: 'bottom-start' }"
                   :columns="2"
@@ -870,7 +891,7 @@
                   borderless
                   isDark
                   is-range
-                  @update:modelValue="updateDateRange" 
+                  @update:modelValue="updateDateRange"
                   locale="ru"
                 >
                   <template #default="{ togglePopover }">
@@ -882,7 +903,28 @@
                       {{ formattedDateRange || "Выбрать" }}
                     </a>
                   </template>
-                </VDatePicker>
+                </VDatePicker> -->
+
+                <!-- <VueDatePicker
+                  v-model="dateRange"
+                  range
+                  dark
+                  multi-calendars
+                  placeholder="За всё время"
+                  :format="format"
+                  @update:model-value="updateFormData"
+                >
+                </VueDatePicker> -->
+
+                <VueDatePicker
+                  v-model="date"
+                  :format="format2"
+                  dark
+                  multi-calendars
+                  placeholder="За всё время"
+                  @update:model-value="updatedataRange"
+                >
+                </VueDatePicker>
               </div>
             </div>
           </div>
@@ -1274,7 +1316,7 @@
               <input
                 type="radio"
                 id="test16"
-                v-model="formData2.city"
+                v-model="formData2.city2"
                 name="city"
                 checked
                 value="0"
@@ -1285,7 +1327,7 @@
               <input
                 type="radio"
                 id="test17"
-                v-model="formData2.city"
+                v-model="formData2.city2"
                 name="city"
                 value="0.5"
               />
@@ -1295,7 +1337,7 @@
               <input
                 type="radio"
                 id="test18"
-                v-model="formData2.city"
+                v-model="formData2.city2"
                 name="city"
                 value="1"
               />
@@ -1624,36 +1666,6 @@
       <Filter />
     </div>
 
-    <!-- Edit Form -->
-    <!-- <div>
-      <form @submit.prevent="updateClient">
-        <input v-model="formData2.city" placeholder="City" />
-        <input v-model="formData2.date" placeholder="Date" />
-        <input v-model="formData2.manager" placeholder="Manager" />
-        <input v-model="formData2.phone" placeholder="Phone" />
-        <input v-model="formData2.fio" placeholder="FIO" />
-        <input v-model="formData2.avto" placeholder="Auto" />
-        <input v-model="formData2.fact" placeholder="Fact" />
-        <input v-model="formData2.obrashenie" placeholder="Address" />
-        <input v-model="formData2.salon" placeholder="Salon" />
-        <input v-model="formData2.cred_nal" placeholder="Credit/Cash" />
-        <input v-model="formData2.prodan" placeholder="Sold" />
-        <input v-model="formData2.data_visit" placeholder="Visit Date" />
-        <input v-model="formData2.garantiya" placeholder="Warranty" />
-        <input v-model="formData2.obrash_imeni" placeholder="Name Addressed" />
-        <input v-model="formData2.bodr_son" placeholder="State" />
-        <input v-model="formData2.otpr_viz" placeholder="Sent Invitation" />
-        <input v-model="formData2.vizit" placeholder="Visit" />
-        <input v-model="formData2.prod_company" placeholder="Company Sold" />
-        <input v-model="formData2.zdatok" placeholder="Advance" />
-        <input v-model="formData2.itog" placeholder="Total" />
-        <input v-model="formData2.plan" placeholder="Plan" />
-        <textarea v-model="formData2.comment" placeholder="Comment"></textarea>
-        <button type="submit">Сохранить</button>
-        <button @click="isEditing.value = false">Отмена</button>
-      </form>
-    </div> -->
-
     <div @scroll="handleScroll" class="tablee">
       <table ref="table" class="data-table">
         <!-- Table headers -->
@@ -1687,123 +1699,12 @@
           </tr>
         </thead>
         <tbody>
-          <!-- <tr v-for="row in filteredRows" :key="row.id">
-            <td>{{ row.id }}</td>
-            <td>{{ row.city }}</td>
-            <td>{{ row.date }}</td>
-            <td>{{ row.manager }}</td>
-            <td>{{ row.phone }}</td>
-            <td>{{ row.fio }}</td>
-            <td>{{ row.avto }}</td>
-            <td>{{ row.fact }}</td>
-            <td>{{ row.obrashenie }}</td>
-            <td>{{ row.salon }}</td>
-            <td>{{ row.cred_nal }}</td>
-            <td>{{ row.prodan }}</td>
-            <td>{{ row.city }}</td>
-            <td>{{ row.data_visit }}</td>
-            <td>{{ row.garantiya }}</td>
-            <td>{{ row.obrash_imeni }}</td>
-            <td>{{ row.bodr_son }}</td>
-            <td>{{ row.otpr_viz }}</td>
-            <td>{{ row.vizit }}</td>
-            <td>{{ row.prod_company }}</td>
-            <td>{{ row.zdatok }}</td>
-            <td>{{ row.itog }}</td>
-            <td>{{ row.plan }}</td>
-            <td>{{ row.comment }}</td>
-            <td>{{ row.edit }}</td>
-          </tr>
-
-          <tr v-for="(entry, index) in tableData" :key="index">
-            <td>{{ entry.index }}</td>
-            <td>{{ entry.carMakes }}</td>
-            <td>{{ entry.date }}</td>
-            <td>{{ entry.manager }}</td>
-            <td>{{ entry.phone }}</td>
-            <td>{{ entry.fio }}</td>
-            <td>{{ entry.avto }}</td>
-            <td>{{ entry.fact }}</td>
-            <td>{{ entry.obrashenie }}</td>
-            <td>{{ entry.salon }}</td>
-            <td>{{ entry.cred_nal }}</td>
-            <td>{{ entry.prodan }}</td>
-            <td>{{ entry.city }}</td>
-            <td>{{ entry.data_visit }}</td>
-            <td>{{ entry.garantiya }}</td>
-            <td>{{ entry.obrash_imeni }}</td>
-            <td>{{ entry.bodr_son }}</td>
-            <td>{{ entry.otpr_viz }}</td>
-            <td>{{ entry.vizit }}</td>
-            <td>{{ entry.prod_company }}</td>
-            <td>{{ entry.zdatok }}</td>
-            <td>{{ entry.itog }}</td>
-            <td>{{ entry.plan }}</td>
-            <td>{{ entry.comment }}</td>
-            <td id="edit-form">
-              <svg
-                id="edit"
-                width="48"
-                height="34"
-                viewBox="0 0 48 34"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M31.875 16.4375V22.0625C31.875 23.6132 30.6132 24.875 29.0625 24.875H18.9375C17.3868 24.875 16.125 23.6132 16.125 22.0625V11.9375C16.125 10.3869 17.3868 9.12504 18.9375 9.12504H24.5625C24.8731 9.12504 25.125 9.37689 25.125 9.68754C25.125 9.99818 24.8731 10.25 24.5625 10.25H18.9375C18.007 10.25 17.25 11.007 17.25 11.9375V22.0625C17.25 22.9931 18.007 23.75 18.9375 23.75H29.0625C29.993 23.75 30.75 22.9931 30.75 22.0625V16.4375C30.75 16.1269 31.0019 15.875 31.3125 15.875C31.6231 15.875 31.875 16.1269 31.875 16.4375ZM20.2273 17.1648L28.1023 9.28985C28.3221 9.07005 28.678 9.07005 28.8977 9.28985L31.7102 12.1023C31.93 12.3221 31.93 12.6781 31.7102 12.8977L23.8352 20.7727C23.7297 20.8782 23.5867 20.9375 23.4375 20.9375H20.625C20.3144 20.9375 20.0625 20.6857 20.0625 20.375V17.5625C20.0625 17.4133 20.1218 17.2703 20.2273 17.1648ZM27.6079 11.375L29.625 13.3922L30.5171 12.5L28.5 10.4829L27.6079 11.375ZM21.1875 19.8125H23.2046L28.8296 14.1875L26.8125 12.1704L21.1875 17.7954V19.8125Z"
-                  fill="white"
-                />
-              </svg>
-            </td>
-          </tr> -->
-
-          <!-- <tr v-for="(row, index) in tableData2" :key="index">
-            <td>{{ row.id }}</td>
-            <td>{{ row.city }}</td>
-            <td>{{ row.date }}</td>
-            <td>{{ row.manager }}</td>
-            <td>{{ row.phone }}</td>
-            <td>{{ row.fio }}</td>
-            <td>{{ row.avto }}</td>
-            <td>{{ row.fact }}</td>
-            <td>{{ row.obrashenie }}</td>
-            <td>{{ row.salon }}</td>
-            <td>{{ row.cred_nal }}</td>
-            <td>{{ row.prodan }}</td>
-            <td>{{ row.city }}</td>
-            <td>{{ row.data_visit }}</td>
-            <td>{{ row.garantiya }}</td>
-            <td>{{ row.obrash_imeni }}</td>
-            <td>{{ row.bodr_son }}</td>
-            <td>{{ row.otpr_viz }}</td>
-            <td>{{ row.vizit }}</td>
-            <td>{{ row.prod_company }}</td>
-            <td>{{ row.zdatok }}</td>
-            <td>{{ row.itog }}</td>
-            <td>{{ row.plan }}</td>
-            <td>{{ row.comment }}</td>
-            <td>
-              <svg
-                @click="deleteClient(row.id)"
-                id="edit"
-                width="48"
-                height="34"
-                viewBox="0 0 48 34"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M31.875 16.4375V22.0625C31.875 23.6132 30.6132 24.875 29.0625 24.875H18.9375C17.3868 24.875 16.125 23.6132 16.125 22.0625V11.9375C16.125 10.3869 17.3868 9.12504 18.9375 9.12504H24.5625C24.8731 9.12504 25.125 9.37689 25.125 9.68754C25.125 9.99818 24.8731 10.25 24.5625 10.25H18.9375C18.007 10.25 17.25 11.007 17.25 11.9375V22.0625C17.25 22.9931 18.007 23.75 18.9375 23.75H29.0625C29.993 23.75 30.75 22.9931 30.75 22.0625V16.4375C30.75 16.1269 31.0019 15.875 31.3125 15.875C31.6231 15.875 31.875 16.1269 31.875 16.4375ZM20.2273 17.1648L28.1023 9.28985C28.3221 9.07005 28.678 9.07005 28.8977 9.28985L31.7102 12.1023C31.93 12.3221 31.93 12.6781 31.7102 12.8977L23.8352 20.7727C23.7297 20.8782 23.5867 20.9375 23.4375 20.9375H20.625C20.3144 20.9375 20.0625 20.6857 20.0625 20.375V17.5625C20.0625 17.4133 20.1218 17.2703 20.2273 17.1648ZM27.6079 11.375L29.625 13.3922L30.5171 12.5L28.5 10.4829L27.6079 11.375ZM21.1875 19.8125H23.2046L28.8296 14.1875L26.8125 12.1704L21.1875 17.7954V19.8125Z"
-                  fill="white"
-                />
-              </svg>
-            </td>
-          </tr> -->
-
           <tr v-for="client in loadedData" :key="client.id">
             <td>{{ client.id }}</td>
             <td>{{ client.city }}</td>
-            <td>{{ client.date }}</td>
+            <td>
+              {{ client.date }}
+            </td>
             <!-- <td>{{ formattedDateRange || 'Не выбрано' }}</td> -->
             <td>{{ client.manager }}</td>
             <td>{{ client.phone }}</td>
@@ -1824,17 +1725,9 @@
             <td>{{ client.prod_company }}</td>
             <td>{{ client.zdatok }}</td>
             <td>{{ client.itog }}</td>
-            <td>{{ client.plan }}</td>
+            <td>{{ client.plan }}%</td>
             <td>{{ client.comment }}</td>
             <td style="display: flex">
-              <!-- <button
-                @click="
-                  () => {
-                    console.log('Редактирование клиента:', client);
-                    editClient(client);
-                  }
-                "
-              > -->
               <div @click="editClient(client)" class="edit-icon-block">
                 <svg
                   id="edit-icon"
@@ -1900,6 +1793,8 @@ import "v-calendar/style.css";
 import { MaskInput } from "vue-3-mask";
 import axios from "axios";
 import Filter from "../filters/Filter.vue";
+import VueDatePicker from "@vuepic/vue-datepicker";
+import "@vuepic/vue-datepicker/dist/main.css";
 
 // Table to Excel
 const table = ref(null);
@@ -1916,8 +1811,6 @@ const downloadTable = () => {
     XLSX.writeFile(wb, "table.xlsx");
   }
 };
-
-const date = ref(null);
 
 function formatDate(date) {
   return date ? date.toLocaleDateString("ru-RU") : "";
@@ -2102,323 +1995,6 @@ const cancelForm = () => {
   showFormEdit.value = false;
 };
 
-// Example data for table rows
-const rows = ref([
-  {
-    id: 842,
-    city: "Красноярск",
-    date: "04.09.2024",
-    manager: "Иванов И.И.",
-    phone: "Телефон клиента",
-    fio: "ФИО клиента",
-    avto: "Авто клиента",
-    fact: "Факт звонка",
-    obrashenie: "Как обращаться",
-    salon: "Еду в салон",
-    cred_nal: "Наличка/кредит",
-    prodan: "Продали свой авто",
-    data_visit: "Дата визита",
-    garantiya: "Гарантия",
-    obrash_imeni: "Обращение по имени",
-    bodr_son: "Бодрый/сонный",
-    otpr_viz: "Отправил визитку",
-    vizit: "Визит",
-    prod_company: "Продал компанию?",
-    zdatok: "Задаток",
-    itog: "Итог",
-    plan: "План, %",
-    comment: "Комментарии",
-    edit: "Ред."
-  },
-  {
-    id: 843,
-    city: "Сургут",
-    date: "05.09.2024",
-    manager: "Петров П.П.",
-    phone: "Телефон клиента",
-    fio: "ФИО клиента",
-    avto: "Авто клиента",
-    fact: "Факт звонка",
-    obrashenie: "Как обращаться",
-    salon: "Еду в салон",
-    cred_nal: "Наличка/кредит",
-    prodan: "Продали свой авто",
-    data_visit: "Дата визита",
-    garantiya: "Гарантия",
-    obrash_imeni: "Обращение по имени",
-    bodr_son: "Бодрый/сонный",
-    otpr_viz: "Отправил визитку",
-    vizit: "Визит",
-    prod_company: "Продал компанию?",
-    zdatok: "Задаток",
-    itog: "Итог",
-    plan: "План, %",
-    comment: "Комментарии",
-    edit: "Ред."
-  },
-  {
-    id: 842,
-    city: "Красноярск",
-    date: "04.09.2024",
-    manager: "Иванов И.И.",
-    phone: "Телефон клиента",
-    fio: "ФИО клиента",
-    avto: "Авто клиента",
-    fact: "Факт звонка",
-    obrashenie: "Как обращаться",
-    salon: "Еду в салон",
-    cred_nal: "Наличка/кредит",
-    prodan: "Продали свой авто",
-    data_visit: "Дата визита",
-    garantiya: "Гарантия",
-    obrash_imeni: "Обращение по имени",
-    bodr_son: "Бодрый/сонный",
-    otpr_viz: "Отправил визитку",
-    vizit: "Визит",
-    prod_company: "Продал компанию?",
-    zdatok: "Задаток",
-    itog: "Итог",
-    plan: "План, %",
-    comment: "Комментарии",
-    edit: "Ред."
-  },
-  {
-    id: 843,
-    city: "Сургут",
-    date: "05.09.2024",
-    manager: "Петров П.П.",
-    phone: "Телефон клиента",
-    fio: "ФИО клиента",
-    avto: "Авто клиента",
-    fact: "Факт звонка",
-    obrashenie: "Как обращаться",
-    salon: "Еду в салон",
-    cred_nal: "Наличка/кредит",
-    prodan: "Продали свой авто",
-    data_visit: "Дата визита",
-    garantiya: "Гарантия",
-    obrash_imeni: "Обращение по имени",
-    bodr_son: "Бодрый/сонный",
-    otpr_viz: "Отправил визитку",
-    vizit: "Визит",
-    prod_company: "Продал компанию?",
-    zdatok: "Задаток",
-    itog: "Итог",
-    plan: "План, %",
-    comment: "Комментарии",
-    edit: "Ред."
-  },
-  {
-    id: 842,
-    city: "Красноярск",
-    date: "04.09.2024",
-    manager: "Иванов И.И.",
-    phone: "Телефон клиента",
-    fio: "ФИО клиента",
-    avto: "Авто клиента",
-    fact: "Факт звонка",
-    obrashenie: "Как обращаться",
-    salon: "Еду в салон",
-    cred_nal: "Наличка/кредит",
-    prodan: "Продали свой авто",
-    data_visit: "Дата визита",
-    garantiya: "Гарантия",
-    obrash_imeni: "Обращение по имени",
-    bodr_son: "Бодрый/сонный",
-    otpr_viz: "Отправил визитку",
-    vizit: "Визит",
-    prod_company: "Продал компанию?",
-    zdatok: "Задаток",
-    itog: "Итог",
-    plan: "План, %",
-    comment: "Комментарии",
-    edit: "Ред."
-  },
-  {
-    id: 843,
-    city: "Сургут",
-    date: "05.09.2024",
-    manager: "Петров П.П.",
-    phone: "Телефон клиента",
-    fio: "ФИО клиента",
-    avto: "Авто клиента",
-    fact: "Факт звонка",
-    obrashenie: "Как обращаться",
-    salon: "Еду в салон",
-    cred_nal: "Наличка/кредит",
-    prodan: "Продали свой авто",
-    data_visit: "Дата визита",
-    garantiya: "Гарантия",
-    obrash_imeni: "Обращение по имени",
-    bodr_son: "Бодрый/сонный",
-    otpr_viz: "Отправил визитку",
-    vizit: "Визит",
-    prod_company: "Продал компанию?",
-    zdatok: "Задаток",
-    itog: "Итог",
-    plan: "План, %",
-    comment: "Комментарии",
-    edit: "Ред."
-  },
-  {
-    id: 842,
-    city: "Красноярск",
-    date: "04.09.2024",
-    manager: "Иванов И.И.",
-    phone: "Телефон клиента",
-    fio: "ФИО клиента",
-    avto: "Авто клиента",
-    fact: "Факт звонка",
-    obrashenie: "Как обращаться",
-    salon: "Еду в салон",
-    cred_nal: "Наличка/кредит",
-    prodan: "Продали свой авто",
-    data_visit: "Дата визита",
-    garantiya: "Гарантия",
-    obrash_imeni: "Обращение по имени",
-    bodr_son: "Бодрый/сонный",
-    otpr_viz: "Отправил визитку",
-    vizit: "Визит",
-    prod_company: "Продал компанию?",
-    zdatok: "Задаток",
-    itog: "Итог",
-    plan: "План, %",
-    comment: "Комментарии",
-    edit: "Ред."
-  },
-  {
-    id: 843,
-    city: "Сургут",
-    date: "05.09.2024",
-    manager: "Петров П.П.",
-    phone: "Телефон клиента",
-    fio: "ФИО клиента",
-    avto: "Авто клиента",
-    fact: "Факт звонка",
-    obrashenie: "Как обращаться",
-    salon: "Еду в салон",
-    cred_nal: "Наличка/кредит",
-    prodan: "Продали свой авто",
-    data_visit: "Дата визита",
-    garantiya: "Гарантия",
-    obrash_imeni: "Обращение по имени",
-    bodr_son: "Бодрый/сонный",
-    otpr_viz: "Отправил визитку",
-    vizit: "Визит",
-    prod_company: "Продал компанию?",
-    zdatok: "Задаток",
-    itog: "Итог",
-    plan: "План, %",
-    comment: "Комментарии",
-    edit: "Ред."
-  },
-  {
-    id: 842,
-    city: "Красноярск",
-    date: "04.09.2024",
-    manager: "Иванов И.И.",
-    phone: "Телефон клиента",
-    fio: "ФИО клиента",
-    avto: "Авто клиента",
-    fact: "Факт звонка",
-    obrashenie: "Как обращаться",
-    salon: "Еду в салон",
-    cred_nal: "Наличка/кредит",
-    prodan: "Продали свой авто",
-    data_visit: "Дата визита",
-    garantiya: "Гарантия",
-    obrash_imeni: "Обращение по имени",
-    bodr_son: "Бодрый/сонный",
-    otpr_viz: "Отправил визитку",
-    vizit: "Визит",
-    prod_company: "Продал компанию?",
-    zdatok: "Задаток",
-    itog: "Итог",
-    plan: "План, %",
-    comment: "Комментарии",
-    edit: "Ред."
-  },
-  {
-    id: 843,
-    city: "Сургут",
-    date: "05.09.2024",
-    manager: "Петров П.П.",
-    phone: "Телефон клиента",
-    fio: "ФИО клиента",
-    avto: "Авто клиента",
-    fact: "Факт звонка",
-    obrashenie: "Как обращаться",
-    salon: "Еду в салон",
-    cred_nal: "Наличка/кредит",
-    prodan: "Продали свой авто",
-    data_visit: "Дата визита",
-    garantiya: "Гарантия",
-    obrash_imeni: "Обращение по имени",
-    bodr_son: "Бодрый/сонный",
-    otpr_viz: "Отправил визитку",
-    vizit: "Визит",
-    prod_company: "Продал компанию?",
-    zdatok: "Задаток",
-    itog: "Итог",
-    plan: "План, %",
-    comment: "Комментарии",
-    edit: "Ред."
-  },
-  {
-    id: 842,
-    city: "Красноярск",
-    date: "04.09.2024",
-    manager: "Иванов И.И.",
-    phone: "Телефон клиента",
-    fio: "ФИО клиента",
-    avto: "Авто клиента",
-    fact: "Факт звонка",
-    obrashenie: "Как обращаться",
-    salon: "Еду в салон",
-    cred_nal: "Наличка/кредит",
-    prodan: "Продали свой авто",
-    data_visit: "Дата визита",
-    garantiya: "Гарантия",
-    obrash_imeni: "Обращение по имени",
-    bodr_son: "Бодрый/сонный",
-    otpr_viz: "Отправил визитку",
-    vizit: "Визит",
-    prod_company: "Продал компанию?",
-    zdatok: "Задаток",
-    itog: "Итог",
-    plan: "План, %",
-    comment: "Комментарии",
-    edit: "Ред."
-  },
-  {
-    id: 843,
-    city: "Сургут",
-    date: "05.09.2024",
-    manager: "Петров П.П.",
-    phone: "Телефон клиента",
-    fio: "ФИО клиента",
-    avto: "Авто клиента",
-    fact: "Факт звонка",
-    obrashenie: "Как обращаться",
-    salon: "Еду в салон",
-    cred_nal: "Наличка/кредит",
-    prodan: "Продали свой авто",
-    data_visit: "Дата визита",
-    garantiya: "Гарантия",
-    obrash_imeni: "Обращение по имени",
-    bodr_son: "Бодрый/сонный",
-    otpr_viz: "Отправил визитку",
-    vizit: "Визит",
-    prod_company: "Продал компанию?",
-    zdatok: "Задаток",
-    itog: "Итог",
-    plan: "План, %",
-    comment: "Комментарии",
-    edit: "Ред."
-  }
-  // Add more rows as needed
-]);
-
 // Handler for when the region changes
 const onRegionChange = () => {
   selectedCity.value = ""; // Reset city selection when the region changes
@@ -2436,13 +2012,13 @@ const formattedDateRange = computed(() => {
 
   console.log("Выбранный диапазон дат:", start, end);
 
-  if (!start || !end) return null; // Если дата не выбрана, возвращаем null
+  if (!start || !end) return "Выбрать"; // Если дата не выбрана, возвращаем текст по умолчанию
 
   // Функция для форматирования даты в нужный вид (dd.mm.yyyy)
   const formatDate = (dateString) => {
     const date = new Date(dateString); // Преобразуем строку в объект даты
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Месяцы начинаются с 0
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Месяцы начинаются с 0
     const year = date.getFullYear();
     return `${day}.${month}.${year}`;
   };
@@ -2451,17 +2027,17 @@ const formattedDateRange = computed(() => {
   return `${formatDate(start)} до ${formatDate(end)}`;
 });
 
-// Computed property to filter rows based on selected date range
+// Компьютед для фильтрации строк на основе выбранного диапазона дат
 const filteredRows = computed(() => {
   if (!selectedDateRange.value.start || !selectedDateRange.value.end) {
-    return rows.value; // Return all rows if no date range is selected
+    return rows.value; // Возвращаем все строки, если диапазон дат не выбран
   }
 
-  // Convert selected date range to timestamps for easy comparison
+  // Конвертируем выбранный диапазон дат в временные метки для легкого сравнения
   const start = new Date(selectedDateRange.value.start).getTime();
   const end = new Date(selectedDateRange.value.end).getTime();
 
-  // Filter rows based on the date range
+  // Фильтруем строки на основе диапазона дат
   return rows.value.filter((row) => {
     const rowDate = new Date(row.date.split(".").reverse().join("-")).getTime();
     return rowDate >= start && rowDate <= end;
@@ -2548,10 +2124,10 @@ function toggleDropdown(type) {
 }
 
 // Обработчик выбора города
-const selectCity = (city) => {
-  selectedCity.value = city;
+const selectCity = (cityy) => {
+  selectedCity.value = cityy;
   showCityDropdown.value = false;
-  formData2.value.city = city ? city : "";
+  formData2.value.city = cityy ? cityy : "";
 };
 
 // Обработчик кликов вне области дропдауна
@@ -2572,7 +2148,7 @@ onUnmounted(() => {
 
 // Данные и состояние
 const tableData2 = ref([]); // Все данные с сервера
-const tableData3 = ref([]); // Все данные с сервера
+const tableData3 = ref([]);
 const loadedData = ref([]); // Отображаемые данные (загружаются постепенно)
 const itemsPerPage = 20; // Количество записей для загрузки за раз
 const currentPage = ref(0); // Текущая страница данных
@@ -2627,10 +2203,8 @@ const fetchTotalItems = async () => {
     const response = await axios.get(
       `https://crystal-motors.ru/method.getClients?count=100000`
     );
-    console.log("Общее количество записей:", response);
     totalItems2.value = response.data.answer.count;
     tableData3.value = response.data.answer.items;
-    console.log("Общее количество записей:", totalItems2.value);
   } catch (error) {
     console.error(
       "Ошибка при получении общего количества записей:",
@@ -2641,13 +2215,14 @@ const fetchTotalItems = async () => {
   }
 };
 
-// Функция для получения данных клиентов и их обработки
+// Функция для получения данных клиентов
 const fetchClients = async (offset = 0) => {
   try {
     const response = await axios.get(
       `https://crystal-motors.ru/method.getClients?count=${itemsPerPage}&offset=${offset}&order=id_desc`
     );
     const newData = response.data.answer.items;
+
     tableData2.value = [...tableData2.value, ...newData]; // Обновляем все данные
     totalItems.value = response.data.answer.total; // Обновляем общее количество записей
 
@@ -2702,7 +2277,59 @@ const formData2 = ref({
 const isEditing = ref(false);
 const currentClientId = ref(null);
 
+// Инициализация массива для хранения диапазона дат
+const dateRange = ref([new Date(), new Date()]);
+const date = ref(new Date());
+
+// Функция форматирования диапазона дат
+const format = (dates) => {
+  if (Array.isArray(dates) && dates.length === 2) {
+    const [startDate, endDate] = dates;
+    return `${startDate.toLocaleDateString(
+      "ru-RU"
+    )} - ${endDate.toLocaleDateString("ru-RU")}`;
+  } else if (dates instanceof Date) {
+    return dates.toLocaleDateString("ru-RU");
+  }
+  return "";
+};
+
+const format2 = (date) => {
+  const day = String(date.getDate()).padStart(2, '0'); // Добавляем ведущий ноль для дня
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Добавляем ведущий ноль для месяца
+  const year = date.getFullYear();
+
+  return `${day}.${month}.${year}`;
+};
+
+const updatedataRange = (dates) => {
+  if (dates instanceof Date) {
+    formData2.value.date = format2(dates); // Форматируем дату перед сохранением
+  } else {
+    formData2.value.date = ''; // Если это не дата, обнуляем
+  }
+  console.log("Updated formData2.date:", formData2.value.date);
+};
+
+// Обновление данных формы при изменении даты
+// const updateFormData = (dates) => {
+//   if (Array.isArray(dates) && dates.length === 2) {
+//     // formData2.value.date = JSON.stringify(
+//     //   {
+//     //     start: dates[0].toISOString(),
+//     //     end: dates[1].toISOString(),
+//     //   }
+//     // );
+//     formData2.value.date = `${dates[0].toISOString()}|${dates[1].toISOString()}`;
+
+//     console.log("Updated formData2.date:", formData2.value.date);
+//   } else {
+//     formData2.value.date = JSON.stringify(dates.toISOString() || "");
+//   }
+// };
+
 // Объединенное слежение за изменениями selectedBrand и selectedModel
+
 watchEffect(() => {
   if (selectedBrand.value) {
     // Если выбран бренд, добавляем его имя в formData2.avto
@@ -2748,8 +2375,30 @@ const addClient = async () => {
   try {
     console.log("Добавление нового клиента:", formData2.value);
 
+    // Преобразуем значения в числа и вычисляем сумму
+    const itogg =
+      Number(formData2.value.obrashenie) +
+      Number(formData2.value.salon) +
+      Number(formData2.value.cred_nal) +
+      Number(formData2.value.prodan) +
+      Number(formData2.value.city2) +
+      Number(formData2.value.data_visit) +
+      Number(formData2.value.garantiya) +
+      Number(formData2.value.obrash_imeni) +
+      Number(formData2.value.bodr_son) +
+      Number(formData2.value.otpr_viz) +
+      Number(formData2.value.vizit) * 3 +
+      Number(formData2.value.prod_company) +
+      Number(formData2.value.zdatok);
+
+    // Обновляем значение "itog" в formData2
+    formData2.value.itog = itogg;
+    formData2.value.plan = Math.floor((itogg / 14) * 100);
+
     // Создаем строку параметров из данных формы
     const params = new URLSearchParams(formData2.value).toString();
+
+    console.log("Параметры запроса:", params);
 
     // Отправляем запрос на сервер
     await axios.get(`https://crystal-motors.ru/method.addClient?${params}`);
@@ -2788,6 +2437,87 @@ const editClient = (client) => {
   }
 };
 
+const updateClient = async () => {
+  try {
+    console.log("Обновление клиента с ID:", currentClientId.value);
+    console.log("Обновление клиента с ID:", formData2.value);
+
+    // Преобразуем значения в числа и вычисляем сумму
+    const itogg =
+      Number(formData2.value.obrashenie) +
+      Number(formData2.value.salon) +
+      Number(formData2.value.cred_nal) +
+      Number(formData2.value.prodan) +
+      Number(formData2.value.city2) +
+      Number(formData2.value.data_visit) +
+      Number(formData2.value.garantiya) +
+      Number(formData2.value.obrash_imeni) +
+      Number(formData2.value.bodr_son) +
+      Number(formData2.value.otpr_viz) +
+      Number(formData2.value.vizit) * 3 +
+      Number(formData2.value.prod_company) +
+      Number(formData2.value.zdatok);
+
+    // Обновляем значение "itog" в formData2
+    formData2.value.itog = itogg;
+    formData2.value.plan = Math.floor((itogg / 14) * 100);
+
+    // Убедитесь, что URL и метод правильно настроены на сервере
+    await axios.get(
+      `https://crystal-motors.ru/method.editClient?id=${
+        currentClientId.value
+      }&${new URLSearchParams(formData2.value).toString()}`
+    );
+
+    console.log(
+      "Измененные данные клиента:",
+      new URLSearchParams(formData2.value).toString()
+    );
+    alert("Данные успешно обновлены!");
+
+    // Очищение текущие данные таблицы перед обновлением
+    tableData2.value = [];
+    loadedData.value = [];
+    currentPage.value = 0; // Сброс страницы на первую
+
+    // Вызовите функцию для обновления списка клиентов
+    await fetchClients();
+
+    showFormEdit.value = false;
+    isEditing.value = false; // Закрыть форму редактирования
+  } catch (error) {
+    console.error("Ошибка при обновлении данных клиента:", error);
+  }
+};
+
+// const updateClient = async () => {
+//   try {
+//     const formData = new URLSearchParams();
+//     formData.append('id', currentClientId.value);
+//     console.log('Данные для отправки на сервер:', JSON.stringify(formData2.value));
+//     Object.keys(formData2.value).forEach((key) => {
+//       formData.append(key, formData2.value[key]);
+//     });
+
+//     const response = await axios.get('https://crystal-motors.ru/method.editClient', formData, {
+//       headers: {
+//         'Content-Type': 'application/x-www-form-urlencoded',
+//       },
+//     });
+
+//     if (response.status === 200) {
+//       alert('Данные успешно обновлены!');
+//       await fetchClients();
+//       showFormEdit.value = false;
+//       isEditing.value = false;
+//     } else {
+//       console.error('Ошибка при обновлении данных клиента:', response.data);
+//     }
+//   } catch (error) {
+//     console.error('Ошибка при обновлении данных клиента:', error);
+//   }
+// };
+
 const formatPhoneNumber = (phone) => {
   // Приводим номер к формату +7 (###) ###-##-##
   if (!phone) return "";
@@ -2805,34 +2535,6 @@ const formatPhoneNumber = (phone) => {
     4,
     7
   )}-${phone.slice(7, 9)}-${phone.slice(9, 11)}`;
-};
-
-const updateClient = async () => {
-  try {
-    console.log("Обновление клиента с ID:", currentClientId.value);
-    console.log("Обновление клиента с ID:", formData2.value);
-
-    // Убедитесь, что URL и метод правильно настроены на сервере
-    await axios.get(
-      `https://crystal-motors.ru/method.editClient?id=${
-        currentClientId.value
-      }&${new URLSearchParams(formData2.value).toString()}`
-    );
-    console.log(new URLSearchParams(formData2.value).toString());
-    alert("Данные успешно обновлены!");
-    // Очищение текущие данные таблицы перед обновлением
-    tableData2.value = [];
-    loadedData.value = [];
-    currentPage.value = 0; // Сброс страницы на первую
-
-    // Вызовите функцию для обновления списка клиентов
-    await fetchClients();
-
-    showFormEdit.value = false;
-    isEditing.value = false; // Закрыть форму редактирования
-  } catch (error) {
-    console.error("Ошибка при обновлении данных клиента:", error);
-  }
 };
 
 // Функция для удаления клиента
