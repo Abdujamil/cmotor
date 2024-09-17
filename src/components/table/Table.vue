@@ -2260,7 +2260,6 @@ const filteredData = computed(() => {
 });
 
 
-
 // Функция для загрузки данных при скролле
 const loadMoreData = () => {
   if (isLoading.value || loadedData.value.length >= totalItems.value) return; // Проверяем, не загружены ли все данные

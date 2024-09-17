@@ -12,8 +12,8 @@
       <!-- Table Header -->
       <div class="table-row header">
         <div class="table-cell">ФИО менеджера</div>
-        <div class="table-cell">Процент обработки звонка</div>
-        <div class="table-cell">Количество звонков</div>
+        <div class="table-cell">Процент обработки звонка</div>  <!-- Процент плана (План, % из Table.vue) -->
+        <div class="table-cell">Количество звонков</div> <!-- Количество звонков  ( из Table.vue) -->
       </div>
       <!-- Filtered Table Rows -->
       <div class="table-row" v-for="(name, index) in filteredManagers" :key="index">
