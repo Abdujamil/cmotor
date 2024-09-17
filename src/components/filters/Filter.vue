@@ -2,30 +2,6 @@
   <div class="dropdowns">
     <p>Показать статистику:</p>
     <div class="my-calendar">
-      <!-- <VDatePicker
-        v-model="date"
-        model="date"
-        :popover="{ placement: 'bottom-start' }"
-        :columns="2"
-        transparent
-        borderless
-        isDark
-        is-range
-      >
-        <template
-          locale="ru"
-          #default="{ togglePopover, inputValue, inputEvents }"
-        >
-          <div
-            class="flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden"
-          >
-            <button class="data-btn" @click="togglePopover()">
-              За всё время
-            </button>
-          </div>
-        </template>
-      </VDatePicker> -->
-
       <VueDatePicker
         v-model="dateRange"
         :format="format"
@@ -33,7 +9,7 @@
         dark
         multi-calendars
         placeholder="За всё время"
-        @update:model-value="updateFormData"
+        @update:model-value="handleDateChange"
       >
       </VueDatePicker>
     </div>
@@ -107,6 +83,25 @@
         </div>
       </div>
     </div>
+
+    <div
+      title="Очистить фильтры"
+      v-if="showClearButton"
+      @click="clearFilters"
+      class="clear-filters"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        width="18px"
+        height="18px"
+      >
+        <path
+          fill="#FFFFFF"
+          d="M 4.7070312 3.2929688 L 3.2929688 4.7070312 L 10.585938 12 L 3.2929688 19.292969 L 4.7070312 20.707031 L 12 13.414062 L 19.292969 20.707031 L 20.707031 19.292969 L 13.414062 12 L 20.707031 4.7070312 L 19.292969 3.2929688 L 12 10.585938 L 4.7070312 3.2929688 z"
+        />
+      </svg>
+    </div>
   </div>
 </template>
 
@@ -120,8 +115,18 @@ const showCityDropdown = ref(false);
 const selectedRegion = ref("");
 const selectedCity = ref("");
 
-// Инициализация массива для хранения диапазона дат
-const dateRange = ref([new Date(), new Date()]);
+const dateRange = ref([null, null]); // [startDate, endDate]
+
+const formatDate = (date) => {
+  return date ? date.toLocaleDateString("ru-RU") : null;
+};
+
+const handleDateChange = (dates) => {
+  const startDate = formatDate(dates ? dates[0] : null);  // Преобразуем в формат dd.MM.yyyy
+  const endDate = formatDate(dates ? dates[1] : null);    // Преобразуем в формат dd.MM.yyyy
+  console.log('Дата выбор:', startDate, endDate);         // Лог для проверки
+  emit("filterChange", { startDate, endDate });           // Эмитим событие с отформатированными датами
+};
 
 // Функция форматирования для диапазона дат
 const format = (dates) => {
@@ -145,13 +150,33 @@ const cities = ref({
     "Кемерово",
     "Новокузнецк",
     "Барнаул",
-    "Красноярск ПЖ",
-    "Красноярск Брянка",
+    "Красноярск (Брянка)",
     "Омск",
     "Томск",
     "Сургут_ГИ"
   ],
   Юг: ["Тюмень", "Сургут", "Пермь", "Самара", "Челябинск", "Тюмень_Республики"]
+});
+
+// Функция для обновления фильтров
+const updateFilters = () => {
+  // Отправляем событие родителю с текущими фильтрами
+  emit("filterChange", {
+    region: selectedRegion.value,
+    city: selectedCity.value
+  });
+};
+
+// Функция для очистки фильтров
+const clearFilters = () => {
+  selectedRegion.value = "";
+  selectedCity.value = "";
+  updateFilters(); // Обновляем фильтры и отправляем событие
+};
+
+// Вычисляемое свойство для показа/скрытия кнопки очистки
+const showClearButton = computed(() => {
+  return selectedRegion.value || selectedCity.value;
 });
 
 const filteredCities = computed(() => {
@@ -256,6 +281,15 @@ onUnmounted(() => {
   background-color: white;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   border-radius: 4px;
+}
+
+.clear-filters {
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+
+  &:hover svg path {
+    fill: #cccaca;
+  }
 }
 
 @import url("../table/table.scss");

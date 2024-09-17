@@ -669,6 +669,16 @@ tfoot tr {
 
 .delete-icon-block{
   margin-left: 8px;
+  width: 23px;
+  height: 23px;
+  color: rgb(255, 255, 255);
+  transition: color .3s ease-in-out;
+  cursor: pointer;
+
+  &:hover {
+    color: #d8d7d7;
+    filter: brightness(0.8);
+  }
 }
 
 h2 {

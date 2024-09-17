@@ -22,7 +22,7 @@
       <!-- Filtered Table Rows -->
 
       <div
-        v-for="(name, index) in displayedData"
+        v-for="(name, index) in filteredData"
         :key="index"
         class="table-row"
       >
@@ -72,20 +72,6 @@ import * as XLSX from "xlsx";
 import { ref, computed } from "vue";
 import Filter from "../components/filters/Filter.vue";
 import IButton from "../components/installButton/IButton.vue";
-
-const downloadTable = () => {
-  if (table.value) {
-    // Преобразуем HTML таблицу в формат рабочего листа Excel
-    const ws = XLSX.utils.table_to_sheet(table.value);
-
-    // Создаем книгу Excel и добавляем рабочий лист
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-
-    // Генерируем и сохраняем файл Excel
-    XLSX.writeFile(wb, "table.xlsx");
-  }
-};
 
 const managers = {
   managerName: [
@@ -388,6 +374,46 @@ const managers = {
   ]
 };
 
+const regions = Object.keys(managers);
+const selectedRegion = ref("");
+const selectedCity = ref("");
+
+const downloadTable = () => {
+  if (table.value) {
+    // Преобразуем HTML таблицу в формат рабочего листа Excel
+    const ws = XLSX.utils.table_to_sheet(table.value);
+
+    // Создаем книгу Excel и добавляем рабочий лист
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+
+    // Генерируем и сохраняем файл Excel
+    XLSX.writeFile(wb, "table.xlsx");
+  }
+};
+
+
+const filteredData = computed(() => {
+  // Проверяем, какой тип данных выбран
+  let dataToFilter = [];
+  if (currentDataSet.value === "nps") {
+    dataToFilter = cities; // NPS данные
+  } else if (currentDataSet.value === "buyers") {
+    dataToFilter = citiesP; // Покупатели данные
+  } else if (currentDataSet.value === "commission") {
+    dataToFilter = citiesK; // Комиссия данные
+  }
+
+  // Фильтруем данные по выбранному городу
+  if (selectedCity.value) {
+    return dataToFilter.filter(city => city.includes(selectedCity.value));
+  }
+
+  // Если город не выбран, возвращаем все данные для текущего типа
+  return dataToFilter;
+});
+
+
 // Общий NPS
 const cities = [
   "Барнаул",
@@ -437,6 +463,15 @@ const citiesK = [
 ];
 
 
+const handleFilterChange = ({
+  selectedRegion: newRegion,
+  selectedCity: newCity
+}) => {
+  selectedRegion.value = newRegion;
+  selectedCity.value = newCity;
+};
+
+
 // Состояние текущих данных
 const currentDataSet = ref('nps'); // По умолчанию отображаем NPS
 const displayedData = ref(cities);
@@ -444,13 +479,6 @@ const displayedData = ref(cities);
 // Обработчик переключения данных
 const switchData = (type) => {
   currentDataSet.value = type; // Устанавливаем активный тип данных
-  if (type === 'nps') {
-    displayedData.value = cities;
-  } else if (type === 'buyers') {
-    displayedData.value = citiesP;
-  } else if (type === 'commission') {
-    displayedData.value = citiesK;
-  }
 };
 </script>
 

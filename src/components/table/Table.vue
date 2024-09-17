@@ -57,39 +57,6 @@
             <div class="form-fields__select form-fields__selects-manager">
               <label for="manager">Дата:</label>
               <div class="my-calendar">
-                <!-- <VDatePicker
-                  model="range"
-                  :popover="{ placement: 'bottom-start' }"
-                  :columns="2"
-                  transparent
-                  borderless
-                  isDark
-                  is-range
-                  v-model="selectedDateRange"
-                  locale="ru"
-                >
-                  <template #default="{ togglePopover }">
-                    <a
-                      style="display: block; width: auto"
-                      class="data-btn data-btn-date"
-                      @click="togglePopover()"
-                    >
-                      {{ formattedDateRange || "Выбрать" }}
-                    </a>
-                  </template>
-                </VDatePicker> -->
-
-                <!-- <VueDatePicker
-                  v-model="dateRange"
-                  :format="format"
-                  range
-                  dark
-                  multi-calendars
-                  placeholder="За всё время"
-                  @update:model-value="updateFormData"
-                >
-                </VueDatePicker> -->
-
                 <VueDatePicker
                   v-model="date"
                   :format="format2"
@@ -883,39 +850,6 @@
             <div class="form-fields__select form-fields__selects-manager">
               <label for="manager">Дата:</label>
               <div class="my-calendar">
-                <!-- <VDatePicker
-                  mode="range"
-                  :popover="{ placement: 'bottom-start' }"
-                  :columns="2"
-                  transparent
-                  borderless
-                  isDark
-                  is-range
-                  @update:modelValue="updateDateRange"
-                  locale="ru"
-                >
-                  <template #default="{ togglePopover }">
-                    <a
-                      style="display: block; width: auto"
-                      class="data-btn data-btn-date"
-                      @click="togglePopover()"
-                    >
-                      {{ formattedDateRange || "Выбрать" }}
-                    </a>
-                  </template>
-                </VDatePicker> -->
-
-                <!-- <VueDatePicker
-                  v-model="dateRange"
-                  range
-                  dark
-                  multi-calendars
-                  placeholder="За всё время"
-                  :format="format"
-                  @update:model-value="updateFormData"
-                >
-                </VueDatePicker> -->
-
                 <VueDatePicker
                   v-model="date"
                   :format="format2"
@@ -1663,7 +1597,7 @@
           <img src="/add-iconn.svg" alt="icon" /> Скачать таблицу
         </button>
       </div>
-      <Filter />
+      <Filter @filterChange="handleDateChange" />
     </div>
 
     <div @scroll="handleScroll" class="tablee">
@@ -1699,13 +1633,10 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="client in loadedData" :key="client.id">
+          <tr v-for="client in filteredData" :key="client.id">
             <td>{{ client.id }}</td>
             <td>{{ client.city }}</td>
-            <td>
-              {{ client.date }}
-            </td>
-            <!-- <td>{{ formattedDateRange || 'Не выбрано' }}</td> -->
+            <td>{{ client.date }}</td>
             <td>{{ client.manager }}</td>
             <td>{{ client.phone }}</td>
             <td>{{ client.fio }}</td>
@@ -1727,9 +1658,10 @@
             <td>{{ client.itog }}</td>
             <td>{{ client.plan }}%</td>
             <td>{{ client.comment }}</td>
-            <td style="display: flex">
+            <td style="display: flex; align-items: center">
               <div @click="editClient(client)" class="edit-icon-block">
                 <svg
+                  title="Редактирование"
                   id="edit-icon"
                   xmlns="http://www.w3.org/2000/svg"
                   width="18"
@@ -1743,17 +1675,19 @@
                   />
                 </svg>
               </div>
-              <button
+
+              <img
                 class="delete-icon-block"
+                title="Удалить"
                 @click="() => deleteClient(client.id)"
-              >
-                Удалить
-              </button>
+                src="../../assets/icons8-delete.svg"
+                alt="delete"
+              />
             </td>
           </tr>
 
-          <tr v-if="loadedData.length === 0">
-            <td colspan="2">Данных нет</td>
+          <tr v-if="filteredData.length === 0">
+            <td colspan="100">Данных нет</td>
           </tr>
         </tbody>
         <!-- Table footer -->
@@ -2156,21 +2090,30 @@ const totalItems = ref(0); // Общее количество записей
 const totalItems2 = ref(0);
 const totalItems3 = ref(0);
 const isLoading = ref(false); // Состояние загрузки
+const filteredClients = ref([]); // Отфильтрованные данные
+
+const filters = ref({
+  selectedRegion: "",
+  selectedCity: "",
+  startDate: null, // Начальная дата
+  endDate: null // Конечная дата
+}); // Дефолтные значения фильтров
 
 // Функция загрузки данных
-const loadMoreData = () => {
-  if (isLoading.value || loadedData.value.length >= totalItems.value) return; // Предотвращаем повторные запросы и проверяем, не загружены ли все данные
+// const loadMoreData = () => {
+//   if (isLoading.value || loadedData.value.length >= totalItems.value) return; // Предотвращаем повторные запросы и проверяем, не загружены ли все данные
 
-  isLoading.value = true; // Устанавливаем состояние загрузки в true
-  const offset = currentPage.value * itemsPerPage;
+//   isLoading.value = true; // Устанавливаем состояние загрузки в true
+//   const offset = currentPage.value * itemsPerPage;
 
-  // Получаем данные для следующей порции
-  fetchClients(offset).finally(() => {
-    isLoading.value = false; // Устанавливаем состояние загрузки в false после завершения
-  });
-};
+//   // Получаем данные для следующей порции
+//   fetchClients(offset).finally(() => {
+//     isLoading.value = false; // Устанавливаем состояние загрузки в false после завершения
+//   });
+// };
 
 // Функция обработки события прокрутки
+
 const handleScroll = (event) => {
   const { scrollTop, clientHeight, scrollHeight } = event.target;
 
@@ -2197,6 +2140,76 @@ const calculateAveragePlan = () => {
   totalItems3.value = (totalPlan / tableData3.value.length).toFixed(2); // Средний процент, округленный до двух знаков после запятой
 };
 
+
+const handleDateChange = (newFilters) => {
+  const { startDate, endDate } = newFilters;
+
+  filters.value = {
+    ...newFilters,
+    startDate: startDate ? new Date(startDate).toISOString() : null, // Преобразуем строку или null в дату
+    endDate: endDate ? new Date(endDate).toISOString() : null // Преобразуем строку или null в дату
+  };
+
+  console.log("Новые фильтры:", filters.value);
+
+  fetchClients(0, true); // Сброс данных и запрос с фильтрами
+};
+
+
+// Функция для получения данных с фильтрами
+const fetchClients = async (offset = 0, resetData = false) => {
+  try {
+    const filterParams = {
+      count: itemsPerPage,
+      offset,
+      order: "id_desc",
+      region: filters.value.selectedRegion || "", // Добавляем регион
+      city: filters.value.selectedCity || "", // Добавляем город
+
+      startDate:
+        filters.value.startDate instanceof Date
+          ? filters.value.startDate.toISOString()
+          : filters.value.startDate || "",
+
+      endDate:
+        filters.value.endDate instanceof Date
+          ? filters.value.endDate.toISOString()
+          : filters.value.endDate || ""
+    };
+
+    const response = await axios.get(
+      "https://crystal-motors.ru/method.getClients",
+      {
+        params: filterParams
+      }
+    );
+    console.log("Запрос с фильтрами:", filterParams);
+
+    const newData = response.data.answer.items;
+
+    if (resetData) {
+      tableData2.value = newData;
+      loadedData.value = newData.slice(0, itemsPerPage); // Загружаем первую порцию данных
+      currentPage.value = 1; // Сбрасываем счетчик страницы
+    } else {
+      tableData2.value = [...tableData2.value, ...newData];
+      const start = currentPage.value * itemsPerPage;
+      const end = start + itemsPerPage;
+      const nextPageData = tableData2.value.slice(start, end);
+
+      if (nextPageData.length > 0) {
+        loadedData.value = [...loadedData.value, ...nextPageData];
+        currentPage.value++;
+      }
+    }
+
+    totalItems.value = response.data.answer.total;
+  } catch (error) {
+    console.error("Ошибка при получении данных клиентов:", error);
+  }
+};
+
+
 // Функция для получения общего количества записей
 const fetchTotalItems = async () => {
   try {
@@ -2204,7 +2217,9 @@ const fetchTotalItems = async () => {
       `https://crystal-motors.ru/method.getClients?count=100000`
     );
     totalItems2.value = response.data.answer.count;
+
     tableData3.value = response.data.answer.items;
+
   } catch (error) {
     console.error(
       "Ошибка при получении общего количества записей:",
@@ -2215,42 +2230,73 @@ const fetchTotalItems = async () => {
   }
 };
 
-// Функция для получения данных клиентов
-const fetchClients = async (offset = 0) => {
-  try {
-    const response = await axios.get(
-      `https://crystal-motors.ru/method.getClients?count=${itemsPerPage}&offset=${offset}&order=id_desc`
-    );
-    const newData = response.data.answer.items;
 
-    tableData2.value = [...tableData2.value, ...newData]; // Обновляем все данные
-    totalItems.value = response.data.answer.total; // Обновляем общее количество записей
+const filteredData = computed(() => {
+  return loadedData.value.filter((client) => {
+    // Преобразуем строку даты клиента в объект Date
+    const clientDate = new Date(client.date);
+    clientDate.setHours(0, 0, 0, 0); // Сбрасываем время до полуночи, чтобы сравнивать только дату
 
-    // Загружаем следующую порцию данных
-    const start = currentPage.value * itemsPerPage;
-    const end = start + itemsPerPage;
-    const nextPageData = tableData2.value.slice(start, end);
+    // Преобразуем начальную и конечную даты фильтра
+    const startDate = filters.value.startDate ? new Date(filters.value.startDate) : null;
+    const endDate = filters.value.endDate ? new Date(filters.value.endDate) : null;
 
-    // Проверяем, есть ли данные для загрузки
-    if (nextPageData.length > 0) {
-      loadedData.value = [...loadedData.value, ...nextPageData];
-      currentPage.value++;
-    }
-  } catch (error) {
-    console.error("Ошибка при получении данных клиентов:", error);
-  }
+    if (startDate) startDate.setHours(0, 0, 0, 0); // Сброс времени для начальной даты
+    if (endDate) endDate.setHours(23, 59, 59, 999); // Сброс времени для конечной даты, чтобы включить последний день
+
+    // Логика фильтрации по городам и регионам
+    const cityMatch =
+      !filters.value.selectedCity || client.city === filters.value.selectedCity;
+    const regionMatch =
+      !filters.value.selectedRegion || client.region === filters.value.selectedRegion;
+
+    // Фильтрация по диапазону дат
+    const dateMatch =
+      (!startDate || clientDate >= startDate) &&
+      (!endDate || clientDate <= endDate);
+
+    return cityMatch && regionMatch && dateMatch;
+  });
+});
+
+
+
+// Функция для загрузки данных при скролле
+const loadMoreData = () => {
+  if (isLoading.value || loadedData.value.length >= totalItems.value) return; // Проверяем, не загружены ли все данные
+
+  isLoading.value = true; // Устанавливаем состояние загрузки в true
+  const offset = currentPage.value * itemsPerPage;
+
+  // Получаем данные для следующей порции
+  fetchClients(offset).finally(() => {
+    isLoading.value = false; // Сбрасываем состояние загрузки после завершения
+  });
 };
+
+// Отслеживание изменений фильтров и автоматическая перезагрузка данных
+watch(
+  filters,
+  () => {
+    currentPage.value = 0; // Сбрасываем страницу
+    loadedData.value = []; // Очищаем загруженные данные
+    fetchClients(0, true); // Загружаем данные с фильтрами с нуля
+  },
+  { deep: true }
+); // Глубокое отслеживание для вложенных объектов
 
 // Запрос данных при монтировании компонента
 onMounted(async () => {
   await fetchTotalItems(); // Получаем общее количество записей при монтировании
   calculateAveragePlan(); // Рассчитываем средний процент после обновления данных
   loadMoreData(); // Загружаем первую порцию данных при монтировании
+  fetchClients();
 });
 
 // Состояние данных
 const formData2 = ref({
   city: "",
+  region: "",
   date: "",
   manager: "",
   phone: "",
@@ -2295,8 +2341,8 @@ const format = (dates) => {
 };
 
 const format2 = (date) => {
-  const day = String(date.getDate()).padStart(2, '0'); // Добавляем ведущий ноль для дня
-  const month = String(date.getMonth() + 1).padStart(2, '0'); // Добавляем ведущий ноль для месяца
+  const day = String(date.getDate()).padStart(2, "0"); // Добавляем ведущий ноль для дня
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Добавляем ведущий ноль для месяца
   const year = date.getFullYear();
 
   return `${day}.${month}.${year}`;
@@ -2306,7 +2352,7 @@ const updatedataRange = (dates) => {
   if (dates instanceof Date) {
     formData2.value.date = format2(dates); // Форматируем дату перед сохранением
   } else {
-    formData2.value.date = ''; // Если это не дата, обнуляем
+    formData2.value.date = ""; // Если это не дата, обнуляем
   }
   console.log("Updated formData2.date:", formData2.value.date);
 };
