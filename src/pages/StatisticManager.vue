@@ -12,28 +12,37 @@
       <!-- Table Header -->
       <div class="table-row header">
         <div class="table-cell">ФИО менеджера</div>
-        <div class="table-cell">Процент обработки звонка</div>  <!-- Процент плана (План, % из Table.vue) -->
-        <div class="table-cell">Количество звонков</div> <!-- Количество звонков  ( из Table.vue) -->
+        <div class="table-cell">Процент обработки звонка</div>
+        <div class="table-cell">Количество звонков</div>
       </div>
       <!-- Filtered Table Rows -->
-      <div class="table-row" v-for="(name, index) in filteredManagers" :key="index">
-        <div class="table-cell">{{ name }}</div>
-        <div class="table-cell">{{ name }}</div>
-        <div class="table-cell">{{ name }}</div>
+      <div
+        class="table-row"
+        v-for="(manager, index) in filteredManagers"
+        :key="index"
+      >
+        <div class="table-cell">{{ manager.name }}</div>
+        <div class="table-cell">
+          {{ manager.totalProcessingPercentage }}%
+        </div>
+        <div class="table-cell">{{ manager.totalCalls }}</div>
       </div>
     </div>
   </div>
 </template>
 
-
 <script setup>
 import Filter from "../components/filters/Filter.vue";
 import IButton from "../components/installButton/IButton.vue";
-import { ref, computed } from 'vue';
+import { onMounted, ref } from "vue";
+import axios from "axios";
 
+const managers = ref([]);
+const tableData3 = ref([]); // Табличные данные и общее количество записей
+const filteredManagers = ref([]); // Данные для отображения в таблице
 
-const managersData  = {
-  "Сургут": [
+const managersData = {
+  Сургут: [
     "Эдуард Мукин",
     "Турал Мамедли",
     "Алексей Шевчук",
@@ -42,14 +51,14 @@ const managersData  = {
     "Вадим Гусейнов",
     "Роман Мкртчян"
   ],
-  "Тюмень": [
+  Тюмень: [
     "Алексей Краюхин",
     "Павел Дацюк",
     "Данил Проценко",
     "Алексей Гостев",
     "Станислав Питулин"
   ],
-  "Пермь": [
+  Пермь: [
     "Антон Терлецкий",
     "Радик Салахов",
     "Егор Марчук",
@@ -61,7 +70,7 @@ const managersData  = {
     "Сергей Казымов",
     "Антон Тупицын"
   ],
-  "Самара": [
+  Самара: [
     "Антон Швалев",
     "Не представился",
     "Роман Шералиев",
@@ -70,7 +79,7 @@ const managersData  = {
     "Никита Гришихин",
     "Андрей Григорьев"
   ],
-  "Челябинск": [
+  Челябинск: [
     "Ринат Юсупов",
     "Илья Пятыгин",
     "Данил Тагиев",
@@ -79,14 +88,14 @@ const managersData  = {
     "Илья Васкевич",
     "Кирилл Кривцов"
   ],
-  "Кемерово": [
+  Кемерово: [
     "Денис Илюхин",
     "Кирилл Келлер",
     "Федор Асадов",
     "Дмитрий Маник",
     "Владимир РОП"
   ],
-  "Барнаул": [
+  Барнаул: [
     "Василий Дианов",
     "Илья Кошман",
     "Леонид Фотин",
@@ -97,7 +106,7 @@ const managersData  = {
     "Не представился",
     "Оскар Курмакаев"
   ],
-  "Новокузнецк": [
+  Новокузнецк: [
     "Никита Аксёнов",
     "Владислав Петров",
     "Иван Манцеленко",
@@ -126,7 +135,7 @@ const managersData  = {
     "Павел Мымрин",
     "Вадим Олексенко"
   ],
-  "Омск": [
+  Омск: [
     "Дмитрий Гаврилюк",
     "Вадим Николаев",
     "Дмитрий Вебер",
@@ -142,7 +151,7 @@ const managersData  = {
     "Данил Арнаутов",
     "Илья Катков"
   ],
-  "Томск": [
+  Томск: [
     "Владимир Полещук",
     "Илья Бушмелев",
     "Леонид Шушарин",
@@ -159,17 +168,86 @@ const regions = Object.keys(managersData);
 const selectedRegion = ref("");
 const selectedCity = ref("");
 
+// Функция для получения данных с API
+const fetchTotalItems = async () => {
+  try {
+    const response = await axios.get(
+      "https://crystal-motors.ru/method.getClients?count=100000"
+    );
+    tableData3.value = response.data.answer.items;
+    processData(); // Вызываем обработку данных после получения
+  } catch (error) {
+    console.error("Ошибка при получении данных:", error.message);
+  }
+};
+
+const processData = () => {
+  const managerData = {}; // Хранит уникальных менеджеров
+
+  tableData3.value.forEach((item) => {
+    const managerName = item.manager;
+
+    if (!managerData[managerName]) {
+      // Если менеджер еще не добавлен, создаем запись
+      managerData[managerName] = {
+        name: managerName,
+        totalCalls: 0,
+        totalPlan: 0,
+        totalProcessingPercentage: 0,
+        count: 0
+      };
+    }
+
+    // Суммируем количество звонков и план для каждого менеджера
+    managerData[managerName].totalCalls += parseInt(item.fact, 10);
+    managerData[managerName].totalPlan += parseInt(item.plan, 10);
+
+    // Суммируем процент обработки звонков
+    const processingPercentage =
+      Number(item.obrashenie) +
+      Number(item.salon) +
+      Number(item.cred_nal) +
+      Number(item.prodan) +
+      Number(item.city2) +
+      Number(item.data_visit) +
+      Number(item.garantiya) +
+      Number(item.obrash_imeni) +
+      Number(item.bodr_son) * 1.5 +
+      Number(item.otpr_viz) +
+      Number(item.vizit) * 3 +
+      Number(item.prod_company) +
+      Number(item.zdatok) * 0.5;
+
+    managerData[managerName].totalProcessingPercentage += processingPercentage;
+    managerData[managerName].count += 1;
+  });
+
+  // Преобразуем объект в массив для рендера и вычисляем средний процент
+  filteredManagers.value = Object.values(managerData).map(manager => {
+    return {
+      ...manager,
+      totalProcessingPercentage: (manager.totalProcessingPercentage / manager.count).toFixed(2)
+    };
+  });
+
+  console.log("Таблица с данными:", filteredManagers.value);
+};
+
+// Вызов функции при монтировании компонента
+onMounted(() => {
+  fetchTotalItems();
+});
 
 // Реактивная функция для фильтрации менеджеров по выбранному городу или региону
-const filteredManagers = computed(() => {
-  if (selectedCity.value) {
-    return managersData[selectedCity.value];
-  } else if (selectedRegion.value) {
-    return Object.values(managersData).flat();
-  } else {
-    return Object.values(managersData).flat();
-  }
-});
+// const filteredManagers = computed(() => {
+//   if (selectedCity.value) {
+//     return managersData[selectedCity.value];
+//   } else if (selectedRegion.value) {
+//     return Object.values(managersData).flat();
+//   } else {
+//     return Object.values(managersData).flat();
+//   }
+// });
 
 // Функция обработки изменения региона
 const onRegionChange = () => {
@@ -183,7 +261,6 @@ const handleFilterChange = ({
   selectedRegion.value = newRegion;
   selectedCity.value = newCity;
 };
-
 </script>
 
 <style lang="scss" scoped>
