@@ -1,45 +1,56 @@
 <template>
   <div>
     <h2>Сводная по менеджерам</h2>
-  </div>
-  <div class="filters filters-statis-city">
-    <Filter @filterChange="handleFilterChange" />
-    <IButton @click="downloadTable" />
-  </div>
+    <div class="filters filters-statis-city">
+      <Filter
+        @filterChange="handleFilterChange"
+        :regions="Object.keys(regions)"
+        :cities="selectedRegion ? getCitiesForRegion(selectedRegion) : []"
+        :selectedRegion="selectedRegion"
+        :selectedCity="selectedCity"
+        @regionChange="onRegionChange"
+      />
+      <IButton @click="downloadTable" />
+    </div>
 
-  <div class="table-container">
-    <div ref="table" class="table">
-      <!-- Table Header -->
-      <div class="table-row header">
-        <div class="table-cell">ФИО менеджера</div>
-        <div class="table-cell">Процент обработки звонка</div>
-        <div class="table-cell">Количество звонков</div>
-      </div>
-      <!-- Filtered Table Rows -->
-      <div
-        class="table-row"
-        v-for="(manager, index) in filteredManagers"
-        :key="index"
-      >
-        <div class="table-cell">{{ manager.name }}</div>
-        <div class="table-cell">
-          {{ manager.totalProcessingPercentage }}%
+    <div class="table-container">
+      <div ref="table" class="table">
+        <!-- Table Header -->
+        <div class="table-row header">
+          <div class="table-cell">ФИО менеджера</div>
+          <div class="table-cell">Процент обработки звонка</div>
+          <div class="table-cell">Количество звонков</div>
         </div>
-        <div class="table-cell">{{ manager.totalCalls }}</div>
+        <!-- Filtered Table Rows -->
+        <div
+          class="table-row"
+          v-for="(manager, index) in filteredManagers"
+          :key="index"
+        >
+          <div class="table-cell">{{ manager.name }}</div>
+          <div class="table-cell">
+            {{
+              manager.averagePercentage
+                ? manager.averagePercentage.toFixed(2)
+                : "0.00"
+            }}%
+          </div>
+          <div class="table-cell">{{ manager.totalCalls }}</div>
+        </div>
       </div>
     </div>
   </div>
 </template>
-
 <script setup>
 import Filter from "../components/filters/Filter.vue";
 import IButton from "../components/installButton/IButton.vue";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import axios from "axios";
 
 const managers = ref([]);
 const tableData3 = ref([]); // Табличные данные и общее количество записей
 const filteredManagers = ref([]); // Данные для отображения в таблице
+const dateFilter = ref({ startDate: null, endDate: null });
 
 const managersData = {
   Сургут: [
@@ -168,99 +179,119 @@ const regions = Object.keys(managersData);
 const selectedRegion = ref("");
 const selectedCity = ref("");
 
-// Функция для получения данных с API
+const getCitiesForRegion = (region) => {
+  return regions[region] || [];
+};
+
 const fetchTotalItems = async () => {
   try {
     const response = await axios.get(
       "https://crystal-motors.ru/method.getClients?count=100000"
     );
     tableData3.value = response.data.answer.items;
-    processData(); // Вызываем обработку данных после получения
+    processData();
   } catch (error) {
     console.error("Ошибка при получении данных:", error.message);
   }
 };
 
-const processData = () => {
-  const managerData = {}; // Хранит уникальных менеджеров
+const filterByDate = (items) => {
+  if (!dateFilter.value.startDate || !dateFilter.value.endDate) {
+    return items;
+  }
 
-  tableData3.value.forEach((item) => {
-    const managerName = item.manager;
+  const start = new Date(dateFilter.value.startDate);
+  const end = new Date(dateFilter.value.endDate);
 
-    if (!managerData[managerName]) {
-      // Если менеджер еще не добавлен, создаем запись
-      managerData[managerName] = {
-        name: managerName,
-        totalCalls: 0,
-        totalPlan: 0,
-        totalProcessingPercentage: 0,
-        count: 0
-      };
-    }
-
-    // Суммируем количество звонков и план для каждого менеджера
-    managerData[managerName].totalCalls += parseInt(item.fact, 10);
-    managerData[managerName].totalPlan += parseInt(item.plan, 10);
-
-    // Суммируем процент обработки звонков
-    const processingPercentage =
-      Number(item.obrashenie) +
-      Number(item.salon) +
-      Number(item.cred_nal) +
-      Number(item.prodan) +
-      Number(item.city2) +
-      Number(item.data_visit) +
-      Number(item.garantiya) +
-      Number(item.obrash_imeni) +
-      Number(item.bodr_son) * 1.5 +
-      Number(item.otpr_viz) +
-      Number(item.vizit) * 3 +
-      Number(item.prod_company) +
-      Number(item.zdatok) * 0.5;
-
-    managerData[managerName].totalProcessingPercentage += processingPercentage;
-    managerData[managerName].count += 1;
+  return items.filter((item) => {
+    const itemDate = new Date(item.date);
+    return itemDate >= start && itemDate <= end;
   });
-
-  // Преобразуем объект в массив для рендера и вычисляем средний процент
-  filteredManagers.value = Object.values(managerData).map(manager => {
-    return {
-      ...manager,
-      totalProcessingPercentage: (manager.totalProcessingPercentage / manager.count).toFixed(2)
-    };
-  });
-
-  console.log("Таблица с данными:", filteredManagers.value);
 };
 
-// Вызов функции при монтировании компонента
-onMounted(() => {
-  fetchTotalItems();
-});
+const processData = () => {
+  const managerData = {};
 
-// Реактивная функция для фильтрации менеджеров по выбранному городу или региону
-// const filteredManagers = computed(() => {
-//   if (selectedCity.value) {
-//     return managersData[selectedCity.value];
-//   } else if (selectedRegion.value) {
-//     return Object.values(managersData).flat();
-//   } else {
-//     return Object.values(managersData).flat();
-//   }
-// });
+  const filteredItems = filterByDate(tableData3.value);
 
-// Функция обработки изменения региона
-const onRegionChange = () => {
-  selectedCity.value = ""; // Сбрасываем выбранный город при смене региона
+  filteredItems.forEach((item) => {
+    const managerName = item.manager;
+    const city = item.city;
+
+    // Проверка, соответствует ли выбранный город или регион
+    const cityMatch = !selectedCity.value || city === selectedCity.value;
+    const regionMatch =
+      !selectedRegion.value ||
+      (regions[selectedRegion.value] &&
+        regions[selectedRegion.value].includes(city));
+
+    // Если город или регион совпадает, добавляем менеджера в результаты
+    if (cityMatch || regionMatch) {
+      if (!managerData[managerName]) {
+        managerData[managerName] = {
+          name: managerName,
+          totalCalls: 0,
+          totalPlan: 0,
+          totalPercentage: 0,
+          count: 0
+        };
+      }
+
+      // Логика вычисления для менеджера
+      const total =
+        Number(item.obrashenie) +
+        Number(item.salon) +
+        Number(item.cred_nal) +
+        Number(item.prodan) +
+        Number(item.city2) +
+        Number(item.data_visit) +
+        Number(item.garantiya) +
+        Number(item.obrash_imeni) +
+        Number(item.bodr_son) * 1.5 +
+        Number(item.otpr_viz) +
+        Number(item.vizit) * 3 +
+        Number(item.prod_company) +
+        Number(item.zdatok) * 0.5;
+
+      managerData[managerName].totalCalls += parseInt(item.fact, 10);
+      managerData[managerName].totalPlan += parseInt(item.plan, 10);
+      managerData[managerName].totalPercentage += total;
+      managerData[managerName].count += 1;
+    }
+  });
+
+  filteredManagers.value = Object.values(managerData).map((manager) => {
+    const averagePercentage =
+      manager.count === 0 ? 0 : manager.totalPercentage / manager.count;
+    return {
+      ...manager,
+      averagePercentage: parseFloat(averagePercentage.toFixed(2))
+    };
+  });
 };
 
 const handleFilterChange = ({
   selectedRegion: newRegion,
-  selectedCity: newCity
+  selectedCity: newCity,
+  startDate,
+  endDate
 }) => {
   selectedRegion.value = newRegion;
   selectedCity.value = newCity;
+  dateFilter.value = { startDate, endDate };
+
+  processData();
 };
+
+const onRegionChange = () => {
+  selectedCity.value = "";
+};
+
+watch(dateFilter, processData, { immediate: true });
+
+onMounted(() => {
+  fetchTotalItems();
+});
 </script>
 
 <style lang="scss" scoped>

@@ -1788,7 +1788,22 @@ const toggleForm = () => {
   showFormEdit.value = !showFormEdit.value;
 };
 
-const cities = ["Тюмень", "Пермь", "Челябинск", "Санкт-Петербург"];
+const cities = [
+  "Тюмень",
+  "Сургут",
+  "Пермь",
+  "Самара",
+  "Челябинск",
+  "Кемерово",
+  "Новокузнецк",
+  "Барнаул",
+  "Красноярск ПЖ",
+  "Красноярск Брянка",
+  "Омск",
+  "Томск",
+  "Сургут_ГИ",
+  "Тюмень_Республики"
+];
 const managers = [
   "Эдуард Мукин",
   "Турал Мамедли",
@@ -1886,6 +1901,11 @@ const managers = [
   "Александр Тюрин",
   "Вячеслав Глазунов"
 ];
+
+const regions = {
+  Юг: ["Тюмень", "Сургут", "Пермь", "Самара", "Челябинск", "Сургут_ГИ", "Тюмень_Республики"],
+  Север: ["Кемерово", "Новокузнецк", "Барнаул", "Красноярск ПЖ", "Красноярск Брянка", "Омск", "Томск"]
+};
 
 const saveForm = () => {
   // Add the form data to the table
@@ -2140,7 +2160,6 @@ const calculateAveragePlan = () => {
   totalItems3.value = (totalPlan / tableData3.value.length).toFixed(2); // Средний процент, округленный до двух знаков после запятой
 };
 
-
 const handleDateChange = (newFilters) => {
   const { startDate, endDate } = newFilters;
 
@@ -2154,7 +2173,6 @@ const handleDateChange = (newFilters) => {
 
   fetchClients(0, true); // Сброс данных и запрос с фильтрами
 };
-
 
 // Функция для получения данных с фильтрами
 const fetchClients = async (offset = 0, resetData = false) => {
@@ -2183,7 +2201,7 @@ const fetchClients = async (offset = 0, resetData = false) => {
         params: filterParams
       }
     );
-    console.log("Запрос с фильтрами:", filterParams);
+    // console.log("Запрос с фильтрами:", filterParams);
 
     const newData = response.data.answer.items;
 
@@ -2209,7 +2227,6 @@ const fetchClients = async (offset = 0, resetData = false) => {
   }
 };
 
-
 // Функция для получения общего количества записей
 const fetchTotalItems = async () => {
   try {
@@ -2219,7 +2236,6 @@ const fetchTotalItems = async () => {
     totalItems2.value = response.data.answer.count;
 
     tableData3.value = response.data.answer.items;
-
   } catch (error) {
     console.error(
       "Ошибка при получении общего количества записей:",
@@ -2230,7 +2246,6 @@ const fetchTotalItems = async () => {
   }
 };
 
-
 const filteredData = computed(() => {
   return loadedData.value.filter((client) => {
     // Преобразуем строку даты клиента в объект Date
@@ -2238,8 +2253,12 @@ const filteredData = computed(() => {
     clientDate.setHours(0, 0, 0, 0); // Сбрасываем время до полуночи, чтобы сравнивать только дату
 
     // Преобразуем начальную и конечную даты фильтра
-    const startDate = filters.value.startDate ? new Date(filters.value.startDate) : null;
-    const endDate = filters.value.endDate ? new Date(filters.value.endDate) : null;
+    const startDate = filters.value.startDate
+      ? new Date(filters.value.startDate)
+      : null;
+    const endDate = filters.value.endDate
+      ? new Date(filters.value.endDate)
+      : null;
 
     if (startDate) startDate.setHours(0, 0, 0, 0); // Сброс времени для начальной даты
     if (endDate) endDate.setHours(23, 59, 59, 999); // Сброс времени для конечной даты, чтобы включить последний день
@@ -2247,8 +2266,11 @@ const filteredData = computed(() => {
     // Логика фильтрации по городам и регионам
     const cityMatch =
       !filters.value.selectedCity || client.city === filters.value.selectedCity;
+
+    // Фильтрация по выбранному региону
     const regionMatch =
-      !filters.value.selectedRegion || client.region === filters.value.selectedRegion;
+      !filters.value.selectedRegion ||
+      regions[filters.value.selectedRegion]?.includes(client.city);
 
     // Фильтрация по диапазону дат
     const dateMatch =
@@ -2258,7 +2280,6 @@ const filteredData = computed(() => {
     return cityMatch && regionMatch && dateMatch;
   });
 });
-
 
 // Функция для загрузки данных при скролле
 const loadMoreData = () => {
@@ -2468,12 +2489,34 @@ const addClient = async () => {
 
 const editClient = (client) => {
   if (client) {
+    console.log("Клиент для редактирования:", client);
+    console.log("Клиент для редактирования:", formData2);
+
     showFormEdit.value = !showFormEdit.value;
     formData2.value = { ...client }; // Клонируем данные клиента в formData2
-    console.log("Редактирование клиента:", formData2.value);
+
+    const getNumber = (string) =>
+      (String(string || "").match(/\.?\d+/g) || [0]).join("") || 0;
 
     // Форматируем номер телефона
-    formData2.value.phone = formatPhoneNumber(client.phone);
+    formData2.value.phone = getNumber(client.phone);
+    console.log("Форматированный номер телефона:", formData2.value.phone);
+
+    // Устанавливаем выбранный город из данных клиента
+    selectedCity.value = client.city || "";
+
+    selectedManager.value = client.manager || "";
+
+    // Устанавливаем выбранную марку автомобиля
+    const brand = carsData.value.find((b) => b.name === client.avto);
+    selectedBrand.value = brand || null;
+    console.log("Selected brand:", selectedBrand.value);
+
+    // Устанавливаем выбранную модель автомобиля (если есть модель)
+    const model = brand?.models.find((m) => m.name === client.model);
+    selectedModel.value = model || null;
+
+    selectManager.value = client.manager || "";
 
     isEditing.value = true; // Открываем форму редактирования
     currentClientId.value = client.id; // Устанавливаем текущий ID клиента
@@ -2564,7 +2607,6 @@ const updateClient = async () => {
 // };
 
 const formatPhoneNumber = (phone) => {
-  // Приводим номер к формату +7 (###) ###-##-##
   if (!phone) return "";
 
   // Удаляем все символы, кроме цифр
@@ -2573,6 +2615,12 @@ const formatPhoneNumber = (phone) => {
   // Добавляем "+7" если нет кода страны
   if (!phone.startsWith("7")) {
     phone = "7" + phone;
+  }
+
+  // Проверяем длину номера
+  if (phone.length < 11) {
+    console.warn("Номер телефона слишком короткий:", phone);
+    return phone; // Возвращаем как есть, если номер короткий
   }
 
   // Форматируем номер в виде +7 (###) ###-##-##
@@ -2654,5 +2702,6 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   border-radius: 4px;
 }
+
 @import url("./table.scss");
 </style>

@@ -249,11 +249,12 @@
           <div class="table-cell table-cell-comment">
             <div
               class="comment-edit"
-              v-if="editingIndex !== index"
-              @click="startEditing(index)"
+              v-if="!isEditing"
+              @click="isEditing = true"
             >
               <svg
                 title="Редактирование"
+                @click.stop="startEditingg"
                 id="edit-icon"
                 xmlns="http://www.w3.org/2000/svg"
                 width="18"
@@ -266,30 +267,59 @@
                   fill="currentColor"
                 />
               </svg>
-              
+              <p>{{ comment }}</p>
+
               <!-- Добавлена проверка существования cities.commentRPO и индекса -->
-              <span v-if="cities.commentRPO && cities.commentRPO[index]">
+              <!-- <span v-if="cities.commentRPO && cities.commentRPO[index]">
                 {{ cities.commentRPO[index] }}
-              </span>
-
-              <span v-else>Комментарий отсутствует</span>
-
+              </span> -->
             </div>
             <div v-else>
               <!-- Проверка на существование editedComments -->
               <input
                 class="comment-input"
                 type="text"
-                v-model="editedComments[index]"
-                @blur="saveComment(index)"
-                @keydown.enter="saveComment(index)"
-                ref="editInput"
+                v-model="updatedComment"
+                @blur="saveCommentt"
+                @keyup.enter="saveCommentt"
               />
             </div>
           </div>
 
           <div class="table-cell">
             {{ city.status }}
+
+            <div class="dropdown" @click.stop="toggleDropdown('status')">
+              <div class="dropdown-toggle">
+                <span id="dropdown-selected">{{ selectedStatus }}</span>
+                <span class="dropdown-arrow">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M16.0299 7.42016C16.3234 7.71345 16.3234 8.18897 16.0299 8.48226L10.5283 13.9802C10.3873 14.1211 10.1962 14.2002 9.99685 14.2002C9.79754 14.2002 9.60638 14.1211 9.46545 13.9802L3.97011 8.48856C3.67663 8.19526 3.67663 7.71975 3.97012 7.42645C4.2636 7.13316 4.73944 7.13316 5.03292 7.42645L9.99685 12.3871L14.9671 7.42016C15.2606 7.12687 15.7364 7.12687 16.0299 7.42016Z"
+                      fill="white"
+                    />
+                  </svg>
+                </span>
+              </div>
+              <div v-if="isDropdownOpen" class="dropdown-menu">
+                <div
+                  class="dropdown-item"
+                  v-for="(option, index) in statusOptions"
+                  :key="index"
+                  @click="selectStatus(option)"
+                >
+                  {{ option }}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -306,9 +336,50 @@ import * as XLSX from "xlsx";
 
 const table = ref();
 
-const editingIndex = ref(null); // Хранит индекс редактируемого комментария
-const editedComments = ref(""); // Хранит текущий текст редактируемого комментария
-const editInput = ref(null);
+// Ключи для localStorage
+const COMMENT_KEY = "savedComment";
+const STATUS_KEY = "savedStatus";
+
+// Комментарий и статус
+const comment = ref("");
+const updatedComment = ref("");
+// Режим редактирования
+const isEditing = ref(false);
+
+// Загрузка данных из localStorage при монтировании компонента
+onMounted(() => {
+  const savedComment = localStorage.getItem(COMMENT_KEY);
+  const savedStatus = localStorage.getItem(STATUS_KEY);
+
+  if (savedComment) {
+    comment.value = savedComment;
+    updatedComment.value = savedComment;
+  }
+  if (savedStatus) {
+    selectedStatus.value = savedStatus;
+  }
+});
+
+// Функция начала редактирования
+const startEditingg = () => {
+  isEditing.value = true;
+};
+
+// Функция сохранения комментария
+const saveCommentt = () => {
+  comment.value = updatedComment.value;
+  localStorage.setItem(COMMENT_KEY, updatedComment.value); // Сохранение в localStorage
+  isEditing.value = false;
+};
+
+const selectedStatus = ref("Не отработан"); // По умолчанию "Не отработан"
+const statusOptions = ["Не отработан", "В работе", "Отработан"];
+const showStatusDropdown = ref(false);
+
+const editingIndex = ref(false); // Хранит индекс редактируемого комментария
+const editedComments = ref([]); // Изменяем на массив для каждого комментария
+const editInput = ref([]); // Массив для каждого поля ввода
+
 const showForm = ref(false);
 const showCityDropdown = ref(false);
 const showQualSlaonDropdown = ref(false);
@@ -388,6 +459,12 @@ const formData = ref({
   status: ""
 });
 
+// Функция выбора статуса
+const selectStatus = (option) => {
+  selectedStatus.value = option;
+  localStorage.setItem(STATUS_KEY, option); // Сохранение статуса в localStorage
+};
+
 // Обработчик выбора города
 const selectCity = (cityy) => {
   selectedCity.value = cityy;
@@ -434,6 +511,9 @@ function toggleDropdown(type) {
     showDealsTypeDropdown.value = false;
   } else if (type === "dealsType") {
     showDealsTypeDropdown.value = !showDealsTypeDropdown.value;
+    showManagerWorkDropdown.value = false;
+  } else if (type === "status") {
+    showStatusDropdown.value = !showStatusDropdown.value;
     showManagerWorkDropdown.value = false;
   }
 }
@@ -514,22 +594,35 @@ const citiess = [
 const ratingsSalon = ["1", "2", "3", "4", "5"];
 const ratingsManagerWork = ["1", "2", "3", "4", "5"];
 const typeDeal = ["Комиссия", "Покупка"];
+
+const ensureCommentIndex = (index) => {
+  if (!editedComments.value[index]) {
+    editedComments.value[index] = ""; // Инициализируем пустую строку, если комментарий отсутствует
+  }
+  if (!editInput.value[index]) {
+    editInput.value[index] = null; // Инициализируем ссылку для поля ввода
+  }
+};
+
 // Старт редактирования
 const startEditing = (index) => {
+  ensureCommentIndex(index); // Проверка инициализации
   editingIndex.value = index;
-  // Проверяем, есть ли уже комментарий для этой строки, иначе используем текущий из cities
   editedComments.value[index] = cities.commentRPO[index] || "";
   nextTick(() => {
-    editInput.value?.focus();
+    if (editInput.value[index]) {
+      editInput.value[index].focus(); // Используем индекс для доступа к полю ввода
+    }
   });
 };
 
 // Сохранение комментария
 const saveComment = (index) => {
+  ensureCommentIndex(index); // Убедимся, что индекс существует
   if (cities.commentRPO[index] !== undefined) {
-    cities.commentRPO[index] = editedComments.value[index]; // Сохраняем комментарий в cities
+    cities.commentRPO[index] = editedComments.value[index] || ""; // Сохраняем комментарий
   }
-  editingIndex.value = null; // Заканчиваем редактирование
+  editingIndex.value = null; // Завершаем редактирование
 };
 
 // Обработка клика вне комментария
@@ -538,7 +631,9 @@ const handleOutsideClick = (event) => {
     editingIndex.value !== null &&
     !event.target.closest(".table-cell-comment")
   ) {
-    saveComment(editingIndex.value); // Сохраняем текущий комментарий при клике вне
+    if (editedComments.value[editingIndex.value] !== undefined) {
+      saveComment(editingIndex.value); // Сохраняем текущий комментарий при клике вне
+    }
   }
 };
 
@@ -597,6 +692,7 @@ label {
     .dropdown {
       width: 100%;
       max-width: inherit;
+      cursor: pointer;
     }
   }
 
@@ -623,6 +719,22 @@ label {
       }
     }
   }
+}
+
+.dropdown-toggle{
+  border: none;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.dropdown-arrow{
+  width: 16px;
+  height: 16px;
+}
+
+#dropdown-selected{
+  font-size: 12px;
+  color: #fff;
 }
 
 .filters {

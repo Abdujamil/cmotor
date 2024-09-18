@@ -72,13 +72,13 @@ const setActiveSubmenu = (item) => {
         >
           <RouterLink class="nav__link" to="/">Все города</RouterLink>
         </div>
-        <div
+        <!-- <div
           class="nav__item"
           :class="{ 'nav__item--active': activeSubmenu === 'dataEntry' }"
           @click="setActiveSubmenu('dataEntry')"
         >
           <RouterLink class="nav__link" to="/dataEntry">Ввод данных</RouterLink>
-        </div>
+        </div> -->
       </div>
 
       <!-- Главное меню: Статистика -->

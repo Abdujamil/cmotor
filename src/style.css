@@ -160,6 +160,7 @@ body {
 
 .dp__input{
   background: transparent !important;
+  font-size: 14px;
 }
 
 .dp__input::placeholder{
