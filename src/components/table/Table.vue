@@ -2460,6 +2460,7 @@ const addClient = async () => {
     // Обновляем значение "itog" в formData2
     formData2.value.itog = itogg;
     formData2.value.plan = Math.floor((itogg / 14) * 100);
+    console.log(formData2.value.plan);
 
     // Создаем строку параметров из данных формы
     const params = new URLSearchParams(formData2.value).toString();

@@ -246,30 +246,34 @@
           <div class="table-cell">{{ city.survey_date }}</div>
           <div class="table-cell">{{ city.transaction_type }}</div>
           <div class="table-cell table-cell-comment">
-            {{ city.comment }}
+            <p class="comment-text">
+              {{ city.comment }}
+            </p>
           </div>
           <div class="table-cell table-cell-comment">
+            <svg
+              title="Редактирование"
+              @click.stop="startEditingg"
+              id="edit-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 18 18"
+              fill="none"
+            >
+              <path
+                d="M16.875 8.43754V14.0625C16.875 15.6132 15.6132 16.875 14.0625 16.875H3.9375C2.38683 16.875 1.125 15.6132 1.125 14.0625V3.93754C1.125 2.38686 2.38683 1.12504 3.9375 1.12504H9.5625C9.87314 1.12504 10.125 1.37689 10.125 1.68754C10.125 1.99818 9.87314 2.25004 9.5625 2.25004H3.9375C3.00698 2.25004 2.25 3.00702 2.25 3.93754V14.0625C2.25 14.9931 3.00698 15.75 3.9375 15.75H14.0625C14.993 15.75 15.75 14.9931 15.75 14.0625V8.43754C15.75 8.12689 16.0019 7.87504 16.3125 7.87504C16.6231 7.87504 16.875 8.12689 16.875 8.43754ZM5.22731 9.16485L13.1023 1.28985C13.3221 1.07005 13.678 1.07005 13.8977 1.28985L16.7102 4.10235C16.93 4.32214 16.93 4.67807 16.7102 4.89772L8.83519 12.7727C8.72972 12.8782 8.5867 12.9375 8.4375 12.9375H5.625C5.31436 12.9375 5.0625 12.6857 5.0625 12.375V9.56254C5.0625 9.41333 5.12184 9.27032 5.22731 9.16485ZM12.6079 3.37504L14.625 5.39216L15.5171 4.50004L13.5 2.48291L12.6079 3.37504ZM6.1875 11.8125H8.20463L13.8296 6.18754L11.8125 4.17041L6.1875 9.79541V11.8125Z"
+                fill="currentColor"
+              />
+            </svg>
             <div
               class="comment-edit"
               v-if="!isEditing"
               @click="isEditing = true"
             >
-              <svg
-                title="Редактирование"
-                @click.stop="startEditingg"
-                id="edit-icon"
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 18 18"
-                fill="none"
-              >
-                <path
-                  d="M16.875 8.43754V14.0625C16.875 15.6132 15.6132 16.875 14.0625 16.875H3.9375C2.38683 16.875 1.125 15.6132 1.125 14.0625V3.93754C1.125 2.38686 2.38683 1.12504 3.9375 1.12504H9.5625C9.87314 1.12504 10.125 1.37689 10.125 1.68754C10.125 1.99818 9.87314 2.25004 9.5625 2.25004H3.9375C3.00698 2.25004 2.25 3.00702 2.25 3.93754V14.0625C2.25 14.9931 3.00698 15.75 3.9375 15.75H14.0625C14.993 15.75 15.75 14.9931 15.75 14.0625V8.43754C15.75 8.12689 16.0019 7.87504 16.3125 7.87504C16.6231 7.87504 16.875 8.12689 16.875 8.43754ZM5.22731 9.16485L13.1023 1.28985C13.3221 1.07005 13.678 1.07005 13.8977 1.28985L16.7102 4.10235C16.93 4.32214 16.93 4.67807 16.7102 4.89772L8.83519 12.7727C8.72972 12.8782 8.5867 12.9375 8.4375 12.9375H5.625C5.31436 12.9375 5.0625 12.6857 5.0625 12.375V9.56254C5.0625 9.41333 5.12184 9.27032 5.22731 9.16485ZM12.6079 3.37504L14.625 5.39216L15.5171 4.50004L13.5 2.48291L12.6079 3.37504ZM6.1875 11.8125H8.20463L13.8296 6.18754L11.8125 4.17041L6.1875 9.79541V11.8125Z"
-                  fill="currentColor"
-                />
-              </svg>
-              <p>{{ comment }}</p>
+            <p class="comment-text">
+              {{ comment }}
+            </p>
 
               <!-- Добавлена проверка существования cities.commentRPO и индекса -->
               <!-- <span v-if="cities.commentRPO && cities.commentRPO[index]">
@@ -278,7 +282,7 @@
             </div>
             <div v-else>
               <!-- Проверка на существование editedComments -->
-              <input
+              <textarea
                 class="comment-input"
                 type="text"
                 v-model="updatedComment"
@@ -288,7 +292,7 @@
             </div>
           </div>
 
-          <div class="table-cell">
+          <div class="table-cell" style="max-width: 122px">
             {{ city.status }}
 
             <div class="dropdown" @click.stop="toggleDropdown('status')">
@@ -723,18 +727,18 @@ label {
   }
 }
 
-.dropdown-toggle{
+.dropdown-toggle {
   border: none;
   gap: 6px;
   cursor: pointer;
 }
 
-.dropdown-arrow{
+.dropdown-arrow {
   width: 16px;
   height: 16px;
 }
 
-#dropdown-selected{
+#dropdown-selected {
   font-size: 12px;
   color: #fff;
 }
@@ -808,6 +812,7 @@ label {
 .table-container {
   overflow: auto;
   max-height: 550px;
+  padding-right: 10px;
 }
 
 .filters-statis-city {
@@ -886,13 +891,27 @@ label {
 }
 
 .table-cell-comment {
-  width: 340px;
+  display: flex;
+  align-items:  center;
+  gap: 6px;
   overflow: hidden;
-  -o-text-overflow: ellipsis;
   text-overflow: ellipsis;
-  display: -webkit-box;
-  white-space: nowrap;
+  white-space: nowrap; /* Запрет переноса строк */
+  
+  svg{
+    width: 18px;
+    height: 18px;
+  }
+
+  .comment-text{
+    max-width: 72px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  
 }
+
 
 .table-row:nth-child(odd) {
   background: linear-gradient(0deg, #7181ae 0%, #7181ae 100%),
@@ -911,12 +930,15 @@ label {
 }
 
 .comment-input {
+  width: 100%;
+  height: 50px;
   background: transparent;
-  border: 1px solid #8e9ec9;
+  border: none;
   border-radius: 4px;
   color: #fff;
   font-size: 12px;
   padding: 4px;
+  resize: none;
 
   &:focus {
     outline: none;
