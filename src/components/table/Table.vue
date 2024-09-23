@@ -60,6 +60,7 @@
                 <VueDatePicker
                   v-model="date"
                   :format="format2"
+                  locale="ru-RU"
                   dark
                   multi-calendars
                   placeholder="За всё время"
@@ -239,7 +240,7 @@
               <label for="manager">Телефон клиента:</label>
 
               <MaskInput
-                mask="+7 (###) ###-##-##"
+                mask="7##########"
                 placeholder="Телефон"
                 v-model="formData2.phone"
               />
@@ -853,6 +854,7 @@
                 <VueDatePicker
                   v-model="date"
                   :format="format2"
+                  locale="ru-RU"
                   dark
                   multi-calendars
                   placeholder="За всё время"
@@ -1033,7 +1035,7 @@
 
               <MaskInput
                 v-model="formData2.phone"
-                mask="+7 (###) ###-##-##"
+                mask="7##########"
                 placeholder="Телефон"
               />
             </div>
@@ -1693,13 +1695,13 @@
         <!-- Table footer -->
         <tfoot>
           <tr>
-            <td colspan="10">
+            <td colspan="7">
               <p style="text-transform: uppercase">Итоговые значения</p>
             </td>
-            <td colspan="10">
+            <td colspan="8">
               <p>Сумма звонков: {{ totalItems2 }}</p>
             </td>
-            <td colspan="25">
+            <td colspan="15">
               <p>Средний процент по выполнению плана: {{ totalItems3 }}</p>
             </td>
           </tr>
@@ -2460,7 +2462,6 @@ const addClient = async () => {
     // Обновляем значение "itog" в formData2
     formData2.value.itog = itogg;
     formData2.value.plan = Math.floor((itogg / 14) * 100);
-    console.log(formData2.value.plan);
 
     // Создаем строку параметров из данных формы
     const params = new URLSearchParams(formData2.value).toString();
@@ -2706,3 +2707,10 @@ body {
 
 @import url("./table.scss");
 </style>
+
+
+<!-- TODO -->
+<!-- 1. Номер телефона удалить маску DONEE --> 
+<!-- 2. Календарь на русском  & Дата сегодняшная по умолчанию на всех страницах DONE -->
+<!-- 3. ФИО запятую надо удалить -->
+<!-- 4. Средний процент по выполнению плана: 60.80 выровнять по плану %  и Сумма звонков: 9933 - факт звонка  DONE -->

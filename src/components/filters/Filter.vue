@@ -5,6 +5,7 @@
       <VueDatePicker
         v-model="dateRange"
         :format="format"
+        locale="ru-RU"
         range
         dark
         multi-calendars
@@ -115,7 +116,7 @@ const showCityDropdown = ref(false);
 const selectedRegion = ref("");
 const selectedCity = ref("");
 
-const dateRange = ref([null, null]); // [startDate, endDate]
+const dateRange = ref([new Date(), null]); // [startDate, endDate]
 
 const formatDate = (date) => {
   return date ? date.toLocaleDateString("ru-RU") : null;
