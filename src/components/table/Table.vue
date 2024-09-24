@@ -258,7 +258,12 @@
 
           <div class="form-fields__select form-fields__selects-callComment">
             <label for="call-comment">Комментарий по звонку:</label>
-            <textarea v-model="formData2.comment" placeholder="Комментарий" />
+            <textarea
+              id="call-comment"
+              :title="formData2.comment || ''"
+              v-model="formData2.comment"
+              placeholder="Комментарий"
+            ></textarea>
           </div>
         </div>
       </div>
@@ -1659,7 +1664,9 @@
             <td>{{ client.zdatok }}</td>
             <td>{{ client.itog }}</td>
             <td>{{ client.plan }}%</td>
-            <td>{{ client.comment }}</td>
+            <td :title="client.comment || 'нет коммента'" >
+              {{ client.comment }}
+            </td>
             <td style="display: flex; align-items: center">
               <div @click="editClient(client)" class="edit-icon-block">
                 <svg
@@ -1748,42 +1755,8 @@ const downloadTable = () => {
   }
 };
 
-function formatDate(date) {
-  return date ? date.toLocaleDateString("ru-RU") : "";
-}
-
 const showForm = ref(false);
 const showFormEdit = ref(false);
-
-const formData = ref({
-  id: "",
-  city: "",
-  date: "",
-  manager: "",
-  phone: "",
-  fio: "",
-  avto: "",
-  fact: "",
-  obrashenie: "",
-  salon: "",
-  cred_nal: "",
-  prodan: "",
-  city2: "",
-  all_city: "",
-  data_visit: "",
-  garantiya: "",
-  obrash_imeni: "",
-  bodr_son: "",
-  otpr_viz: "",
-  vizit: "",
-  prod_company: "",
-  zdatok: "",
-  itog: "",
-  plan: "",
-  comment: ""
-});
-
-const tableData = ref([]);
 
 const toggleForm = () => {
   showForm.value = !showForm.value;
@@ -1806,199 +1779,32 @@ const cities = [
   "Сургут_ГИ",
   "Тюмень_Республики"
 ];
-const managers = [
-  "Эдуард Мукин",
-  "Турал Мамедли",
-  "Алексей Шевчук",
-  "Армен Мкртчян",
-  "Не представился",
-  "Вадим Гусейнов",
-  "Роман Мкртчян",
-  "Алексей Краюхин",
-  "Павел Дацюк",
-  "Данил Проценко",
-  "Алексей Гостев",
-  "Станислав Питулин",
-  "Антон Терлецкий",
-  "Радик Салахов",
-  "Егор Марчук",
-  "Арсений Камерер",
-  "Владислав Бубнов",
-  "Павел Зрячиков",
-  "Артемий Ефимов",
-  "Константин управляющий",
-  "Сергей Казымов",
-  "Антон Тупицын",
-  "Антон Швалев",
-  "Не представился",
-  "Роман Шералиев",
-  "Артем Чигарьков",
-  "Дамир Шаймерденов",
-  "Никита Гришихин",
-  "Андрей Григорьев",
-  "Ринат Юсупов",
-  "Илья Пятыгин",
-  "Данил Тагиев",
-  "Данил Кучин",
-  "Диннур Фасхутдинов",
-  "Илья Васкевич",
-  "Кирилл Кривцов",
-  "Денис Илюхин",
-  "Кирилл Келлер",
-  "Федор Асадов",
-  "Дмитрий Маник",
-  "Владимир РОП",
-  "Василий Дианов",
-  "Илья Кошман",
-  "Леонид Фотин",
-  "Николай Васильев",
-  "Алексей Ощепков",
-  "Михаил РОП",
-  "Сергей Карпенко",
-  "Не представился",
-  "Оскар Курмакаев",
-  "Никита Аксёнов",
-  "Владислав Петров",
-  "Иван Манцеленко",
-  "Денис Лисин",
-  "Филипп Козырев",
-  "Александр Кузнецов",
-  "Михаил Вахонин",
-  "Данил Королев",
-  "Алексей Бухтияров",
-  "Данил Гриневич",
-  "Алексей Лихачев",
-  "Алексей Ямщиков",
-  "Георгий Сироткин",
-  "Артем Васюков",
-  "Глеб Каменский",
-  "Ярослав Дорошенко",
-  "Турдали Эрназаров",
-  "Кирил Макеев",
-  "Илья Гологузов",
-  "Ян Лалетин",
-  "Захар Русанов",
-  "Павел Мымрин",
-  "Вадим Олексенко",
-  "Дмитрий Гаврилюк",
-  "Вадим Николаев",
-  "Дмитрий Вебер",
-  "Савелий Власов",
-  "Владимир Камагоров",
-  "Юрий Капустинский",
-  "Александр Аносов",
-  "Антон РОП",
-  "Виктор Баханский",
-  "Илья Долженок",
-  "Никита Карепов",
-  "Михаил Гусейнов",
-  "Данил Арнаутов",
-  "Илья Катков",
-  "Владимир Полещук",
-  "Илья Бушмелев",
-  "Леонид Шушарин",
-  "Алексей Фроликов",
-  "Роман Касымов",
-  "Анатолий Саранцев",
-  "Александр Тюрин",
-  "Вячеслав Глазунов"
-];
 
 const regions = {
-  Юг: ["Тюмень", "Сургут", "Пермь", "Самара", "Челябинск", "Сургут_ГИ", "Тюмень_Республики"],
-  Север: ["Кемерово", "Новокузнецк", "Барнаул", "Красноярск ПЖ", "Красноярск Брянка", "Омск", "Томск"]
-};
-
-const saveForm = () => {
-  // Add the form data to the table
-  tableData.value.push({ ...formData.value });
-  console.log(tableData.value);
-
-  // Clear the form data
-  formData.value = {
-    id: "",
-    city: "",
-    date: "",
-    manager: "",
-    phone: "",
-    fio: "",
-    avto: "",
-    fact: "",
-    obrashenie: "",
-    salon: "",
-    cred_nal: "",
-    prodan: "",
-    city2: "",
-    all_city: "",
-    data_visit: "",
-    garantiya: "",
-    obrash_imeni: "",
-    bodr_son: "",
-    otpr_viz: "",
-    vizit: "",
-    prod_company: "",
-    zdatok: "",
-    itog: "",
-    plan: "",
-    comment: ""
-  };
-
-  showForm.value = false;
+  Юг: [
+    "Тюмень",
+    "Сургут",
+    "Пермь",
+    "Самара",
+    "Челябинск",
+    "Сургут_ГИ",
+    "Тюмень_Республики"
+  ],
+  Север: [
+    "Кемерово",
+    "Новокузнецк",
+    "Барнаул",
+    "Красноярск ПЖ",
+    "Красноярск Брянка",
+    "Омск",
+    "Томск"
+  ]
 };
 
 const cancelForm = () => {
   showForm.value = false;
   showFormEdit.value = false;
 };
-
-// Handler for when the region changes
-const onRegionChange = () => {
-  selectedCity.value = ""; // Reset city selection when the region changes
-};
-
-// Реактивное состояние для выбранного диапазона дат
-const selectedDateRange = ref({
-  start: null, // Начальная дата
-  end: null // Конечная дата
-});
-
-// Компьютед для форматирования диапазона дат
-const formattedDateRange = computed(() => {
-  const { start, end } = selectedDateRange.value;
-
-  console.log("Выбранный диапазон дат:", start, end);
-
-  if (!start || !end) return "Выбрать"; // Если дата не выбрана, возвращаем текст по умолчанию
-
-  // Функция для форматирования даты в нужный вид (dd.mm.yyyy)
-  const formatDate = (dateString) => {
-    const date = new Date(dateString); // Преобразуем строку в объект даты
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // Месяцы начинаются с 0
-    const year = date.getFullYear();
-    return `${day}.${month}.${year}`;
-  };
-
-  // Возвращаем диапазон дат в нужном формате
-  return `${formatDate(start)} до ${formatDate(end)}`;
-});
-
-// Компьютед для фильтрации строк на основе выбранного диапазона дат
-const filteredRows = computed(() => {
-  if (!selectedDateRange.value.start || !selectedDateRange.value.end) {
-    return rows.value; // Возвращаем все строки, если диапазон дат не выбран
-  }
-
-  // Конвертируем выбранный диапазон дат в временные метки для легкого сравнения
-  const start = new Date(selectedDateRange.value.start).getTime();
-  const end = new Date(selectedDateRange.value.end).getTime();
-
-  // Фильтруем строки на основе диапазона дат
-  return rows.value.filter((row) => {
-    const rowDate = new Date(row.date.split(".").reverse().join("-")).getTime();
-    return rowDate >= start && rowDate <= end;
-  });
-});
 
 // Состояние дропдаунов
 const showBrandDropdown = ref(false);
@@ -2112,7 +1918,6 @@ const totalItems = ref(0); // Общее количество записей
 const totalItems2 = ref(0);
 const totalItems3 = ref(0);
 const isLoading = ref(false); // Состояние загрузки
-const filteredClients = ref([]); // Отфильтрованные данные
 
 const filters = ref({
   selectedRegion: "",
@@ -2120,21 +1925,6 @@ const filters = ref({
   startDate: null, // Начальная дата
   endDate: null // Конечная дата
 }); // Дефолтные значения фильтров
-
-// Функция загрузки данных
-// const loadMoreData = () => {
-//   if (isLoading.value || loadedData.value.length >= totalItems.value) return; // Предотвращаем повторные запросы и проверяем, не загружены ли все данные
-
-//   isLoading.value = true; // Устанавливаем состояние загрузки в true
-//   const offset = currentPage.value * itemsPerPage;
-
-//   // Получаем данные для следующей порции
-//   fetchClients(offset).finally(() => {
-//     isLoading.value = false; // Устанавливаем состояние загрузки в false после завершения
-//   });
-// };
-
-// Функция обработки события прокрутки
 
 const handleScroll = (event) => {
   const { scrollTop, clientHeight, scrollHeight } = event.target;
@@ -2349,19 +2139,6 @@ const currentClientId = ref(null);
 const dateRange = ref([new Date(), new Date()]);
 const date = ref(new Date());
 
-// Функция форматирования диапазона дат
-const format = (dates) => {
-  if (Array.isArray(dates) && dates.length === 2) {
-    const [startDate, endDate] = dates;
-    return `${startDate.toLocaleDateString(
-      "ru-RU"
-    )} - ${endDate.toLocaleDateString("ru-RU")}`;
-  } else if (dates instanceof Date) {
-    return dates.toLocaleDateString("ru-RU");
-  }
-  return "";
-};
-
 const format2 = (date) => {
   const day = String(date.getDate()).padStart(2, "0"); // Добавляем ведущий ноль для дня
   const month = String(date.getMonth() + 1).padStart(2, "0"); // Добавляем ведущий ноль для месяца
@@ -2378,25 +2155,6 @@ const updatedataRange = (dates) => {
   }
   console.log("Updated formData2.date:", formData2.value.date);
 };
-
-// Обновление данных формы при изменении даты
-// const updateFormData = (dates) => {
-//   if (Array.isArray(dates) && dates.length === 2) {
-//     // formData2.value.date = JSON.stringify(
-//     //   {
-//     //     start: dates[0].toISOString(),
-//     //     end: dates[1].toISOString(),
-//     //   }
-//     // );
-//     formData2.value.date = `${dates[0].toISOString()}|${dates[1].toISOString()}`;
-
-//     console.log("Updated formData2.date:", formData2.value.date);
-//   } else {
-//     formData2.value.date = JSON.stringify(dates.toISOString() || "");
-//   }
-// };
-
-// Объединенное слежение за изменениями selectedBrand и selectedModel
 
 watchEffect(() => {
   if (selectedBrand.value) {
@@ -2580,58 +2338,6 @@ const updateClient = async () => {
   }
 };
 
-// const updateClient = async () => {
-//   try {
-//     const formData = new URLSearchParams();
-//     formData.append('id', currentClientId.value);
-//     console.log('Данные для отправки на сервер:', JSON.stringify(formData2.value));
-//     Object.keys(formData2.value).forEach((key) => {
-//       formData.append(key, formData2.value[key]);
-//     });
-
-//     const response = await axios.get('https://crystal-motors.ru/method.editClient', formData, {
-//       headers: {
-//         'Content-Type': 'application/x-www-form-urlencoded',
-//       },
-//     });
-
-//     if (response.status === 200) {
-//       alert('Данные успешно обновлены!');
-//       await fetchClients();
-//       showFormEdit.value = false;
-//       isEditing.value = false;
-//     } else {
-//       console.error('Ошибка при обновлении данных клиента:', response.data);
-//     }
-//   } catch (error) {
-//     console.error('Ошибка при обновлении данных клиента:', error);
-//   }
-// };
-
-const formatPhoneNumber = (phone) => {
-  if (!phone) return "";
-
-  // Удаляем все символы, кроме цифр
-  phone = phone.replace(/[^\d]/g, "");
-
-  // Добавляем "+7" если нет кода страны
-  if (!phone.startsWith("7")) {
-    phone = "7" + phone;
-  }
-
-  // Проверяем длину номера
-  if (phone.length < 11) {
-    console.warn("Номер телефона слишком короткий:", phone);
-    return phone; // Возвращаем как есть, если номер короткий
-  }
-
-  // Форматируем номер в виде +7 (###) ###-##-##
-  return `+${phone[0]} (${phone.slice(1, 4)}) ${phone.slice(
-    4,
-    7
-  )}-${phone.slice(7, 9)}-${phone.slice(9, 11)}`;
-};
-
 // Функция для удаления клиента
 const deleteClient = async (id) => {
   try {
@@ -2708,9 +2414,8 @@ body {
 @import url("./table.scss");
 </style>
 
-
 <!-- TODO -->
-<!-- 1. Номер телефона удалить маску DONEE --> 
+<!-- 1. Номер телефона удалить маску DONEE -->
 <!-- 2. Календарь на русском  & Дата сегодняшная по умолчанию на всех страницах DONE -->
 <!-- 3. ФИО запятую надо удалить -->
 <!-- 4. Средний процент по выполнению плана: 60.80 выровнять по плану %  и Сумма звонков: 9933 - факт звонка  DONE -->

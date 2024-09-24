@@ -10,8 +10,6 @@
         </div>
       </div>
 
-      <!-- TODO comment and status -->
-
       <div class="dataNps-selects form-fields__selects">
         <div class="dataNps-selects-head">
           <div
@@ -144,7 +142,7 @@
             <label for="manager">Дата опроса</label>
             <div class="my-calendar">
               <VueDatePicker
-                v-model="survey_date"
+                v-model="formData.survey_date"
                 :format="format2"
                 dark
                 placeholder="За всё время"
@@ -231,6 +229,7 @@
           <div class="table-cell">Комментарий</div>
           <div class="table-cell">Комментарий РОПа</div>
           <div class="table-cell">Статус</div>
+          <div class="table-cell">Удалить</div>
         </div>
         <!-- Filtered Table Rows -->
         <div
@@ -246,15 +245,18 @@
           <div class="table-cell">{{ city.survey_date }}</div>
           <div class="table-cell">{{ city.transaction_type }}</div>
           <div class="table-cell table-cell-comment">
-            <p class="comment-text">
+            <p class="comment-text" :title="city.comment || ''">
               {{ city.comment }}
             </p>
           </div>
-          <div class="table-cell table-cell-comment">
+
+          <div
+            @click.stop="startEditing(index)"
+            class="table-cell table-cell-comment comment-rop"
+          >
             <svg
               title="Редактирование"
-              @click.stop="startEditingg"
-              id="edit-icon"
+              v-if="editingIndex !== index"
               xmlns="http://www.w3.org/2000/svg"
               width="18"
               height="18"
@@ -262,70 +264,67 @@
               fill="none"
             >
               <path
+                data-v-85d29e85=""
                 d="M16.875 8.43754V14.0625C16.875 15.6132 15.6132 16.875 14.0625 16.875H3.9375C2.38683 16.875 1.125 15.6132 1.125 14.0625V3.93754C1.125 2.38686 2.38683 1.12504 3.9375 1.12504H9.5625C9.87314 1.12504 10.125 1.37689 10.125 1.68754C10.125 1.99818 9.87314 2.25004 9.5625 2.25004H3.9375C3.00698 2.25004 2.25 3.00702 2.25 3.93754V14.0625C2.25 14.9931 3.00698 15.75 3.9375 15.75H14.0625C14.993 15.75 15.75 14.9931 15.75 14.0625V8.43754C15.75 8.12689 16.0019 7.87504 16.3125 7.87504C16.6231 7.87504 16.875 8.12689 16.875 8.43754ZM5.22731 9.16485L13.1023 1.28985C13.3221 1.07005 13.678 1.07005 13.8977 1.28985L16.7102 4.10235C16.93 4.32214 16.93 4.67807 16.7102 4.89772L8.83519 12.7727C8.72972 12.8782 8.5867 12.9375 8.4375 12.9375H5.625C5.31436 12.9375 5.0625 12.6857 5.0625 12.375V9.56254C5.0625 9.41333 5.12184 9.27032 5.22731 9.16485ZM12.6079 3.37504L14.625 5.39216L15.5171 4.50004L13.5 2.48291L12.6079 3.37504ZM6.1875 11.8125H8.20463L13.8296 6.18754L11.8125 4.17041L6.1875 9.79541V11.8125Z"
                 fill="currentColor"
-              />
+              ></path>
             </svg>
-            <div
-              class="comment-edit"
-              v-if="!isEditing"
-              @click="isEditing = true"
-            >
-            <p class="comment-text">
-              {{ comment }}
-            </p>
-
-              <!-- Добавлена проверка существования cities.commentRPO и индекса -->
-              <!-- <span v-if="cities.commentRPO && cities.commentRPO[index]">
-                {{ cities.commentRPO[index] }}
-              </span> -->
+            <div v-if="editingIndex === index">
+              <textarea
+                id="edit-input-{{ index }}"
+                class="comment-input"
+                v-model="editedComments[index]"
+                @blur="saveComment(index)"
+                @keyup.enter="saveComment(index)"
+              />
             </div>
             <div v-else>
-              <!-- Проверка на существование editedComments -->
-              <textarea
-                class="comment-input"
-                type="text"
-                v-model="updatedComment"
-                @blur="saveCommentt"
-                @keyup.enter="saveCommentt"
-              />
+              <p
+                class="comment-text"
+                :title="city.editedRopComment || 'Нет комментария'"
+              >
+                {{ city.editedRopComment || "Нет комментария" }}
+              </p>
             </div>
           </div>
 
           <div class="table-cell" style="max-width: 122px">
-            {{ city.status }}
-
-            <div class="dropdown" @click.stop="toggleDropdown('status')">
+            <div @click.stop="toggleDropdown('status', index)" class="dropdown">
               <div class="dropdown-toggle">
-                <span id="dropdown-selected">{{ selectedStatus }}</span>
+                <span id="dropdown-selected">{{ cities[index].editedStatus }}</span>
+
                 <span class="dropdown-arrow">
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                     <path
-                      fill-rule="evenodd"
-                      clip-rule="evenodd"
                       d="M16.0299 7.42016C16.3234 7.71345 16.3234 8.18897 16.0299 8.48226L10.5283 13.9802C10.3873 14.1211 10.1962 14.2002 9.99685 14.2002C9.79754 14.2002 9.60638 14.1211 9.46545 13.9802L3.97011 8.48856C3.67663 8.19526 3.67663 7.71975 3.97012 7.42645C4.2636 7.13316 4.73944 7.13316 5.03292 7.42645L9.99685 12.3871L14.9671 7.42016C15.2606 7.12687 15.7364 7.12687 16.0299 7.42016Z"
                       fill="white"
                     />
                   </svg>
                 </span>
               </div>
-              <div v-if="isDropdownOpen" class="dropdown-menu">
+              <div v-if="showStatusDropdowns[index]" class="dropdown-menu">
                 <div
                   class="dropdown-item"
-                  v-for="(option, index) in statusOptions"
-                  :key="index"
-                  @click="selectStatus(option)"
+                  v-for="(option, idx) in statusOptions"
+                  :key="idx"
+                  @click="selectStatus(option, index)"
                 >
                   {{ option }}
                 </div>
               </div>
             </div>
+          </div>
+
+          <div class="table-cell">
+            <td style="display: flex; align-items: center">
+              <img
+                class="delete-icon-block"
+                title="Удалить"
+                @click="() => deleteCity(city.id)"
+                src="../../src/assets/icons8-delete.svg"
+                alt="delete"
+              />
+            </td>
           </div>
         </div>
       </div>
@@ -341,42 +340,6 @@ import axios from "axios";
 import * as XLSX from "xlsx";
 
 const table = ref();
-
-// Ключи для localStorage
-const COMMENT_KEY = "savedComment";
-const STATUS_KEY = "savedStatus";
-
-// Комментарий и статус
-const comment = ref("");
-const updatedComment = ref("");
-// Режим редактирования
-const isEditing = ref(false);
-
-// Загрузка данных из localStorage при монтировании компонента
-onMounted(() => {
-  const savedComment = localStorage.getItem(COMMENT_KEY);
-  const savedStatus = localStorage.getItem(STATUS_KEY);
-
-  if (savedComment) {
-    comment.value = savedComment;
-    updatedComment.value = savedComment;
-  }
-  if (savedStatus) {
-    selectedStatus.value = savedStatus;
-  }
-});
-
-// Функция начала редактирования
-const startEditingg = () => {
-  isEditing.value = true;
-};
-
-// Функция сохранения комментария
-const saveCommentt = () => {
-  comment.value = updatedComment.value;
-  localStorage.setItem(COMMENT_KEY, updatedComment.value); // Сохранение в localStorage
-  isEditing.value = false;
-};
 
 const selectedStatus = ref("Не отработан"); // По умолчанию "Не отработан"
 const statusOptions = ["Не отработан", "В работе", "Отработан"];
@@ -397,61 +360,22 @@ const selectedManagerWork = ref("");
 const selectedDealsType = ref("");
 const date = ref();
 
-const format2 = (date) => {
-  const day = String(date.getDate()).padStart(2, "0"); // Добавляем ведущий ноль для дня
-  const month = String(date.getMonth() + 1).padStart(2, "0"); // Добавляем ведущий ноль для месяца
-  const year = date.getFullYear();
+const cities = ref([]); // Массив для хранения данных
 
-  return `${day}.${month}.${year}`;
-};
-
-const updatedataRange = (dates) => {
-  if (dates instanceof Date) {
-    formData2.value.survey_date = format2(dates); // Форматируем дату перед сохранением
-  } else {
-    formData2.value.survey_date = ""; // Если это не дата, обнуляем
-  }
-  console.log("Updated formData2.date:", formData2.value.survey_date);
-};
-
-const toggleForm = () => {
-  showForm.value = !showForm.value;
-};
-
-const cancelForm = () => {
-  showForm.value = false;
-};
-
-// Состояние данных
-const formData2 = ref({
-  city: "",
-  ratingSl: "",
-  salon_quality: "",
-  manager_quality: "",
-  phone_number_number: "",
-  survey_date: "",
-  transaction_type: "",
-  comment: "",
-  rop_comment: "",
-  status: "",
-
-  workManager: "",
-  DealsType: "",
-  date: "",
-  phone_number: "",
-  fio: "",
-  avto: ""
-});
-
-const formData1 = ref({
-  city: "",
-  salon_quality: "",
-  manager_quality: "",
-  phone_number: "",
-  date: "",
-  transaction_type: "",
-  comment: ""
-});
+const citiess = [
+  "Барнаул",
+  "Кемерово",
+  "Красноярск",
+  "Не указан",
+  "Новокузнецк",
+  "Омск",
+  "Пермь",
+  "Самара",
+  "Сургут",
+  "Томск",
+  "Тюмень",
+  "Челябинск"
+];
 
 const formData = ref({
   city: "",
@@ -465,10 +389,56 @@ const formData = ref({
   status: ""
 });
 
+const ratingsSalon = ["1", "2", "3", "4", "5"];
+const ratingsManagerWork = ["1", "2", "3", "4", "5"];
+const typeDeal = ["Комиссия", "Покупка", "Продажа", "Покупка/Обмен"];
+
+const handleDateChange = (newFilters) => {
+  const { startDate, endDate } = newFilters;
+
+  filters.value = {
+    ...newFilters,
+    startDate: startDate ? new Date(startDate).toISOString() : null, // Преобразуем строку или null в дату
+    endDate: endDate ? new Date(endDate).toISOString() : null // Преобразуем строку или null в дату
+  };
+
+  console.log("Новые фильтры:", filters.value);
+
+  fetchClients(0, true); // Сброс данных и запрос с фильтрами
+};
+
+const format2 = (date) => {
+  const day = String(date.getDate()).padStart(2, "0"); // Добавляем ведущий ноль для дня
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Добавляем ведущий ноль для месяца
+  const year = date.getFullYear();
+
+  console.log("Форматированная дата:", `${day}.${month}.${year}`);
+
+  return `${day}.${month}.${year}`;
+};
+
+const updatedataRange = (dates) => {
+  if (dates instanceof Date) {
+    formData.value.survey_date = format2(dates); // Форматируем дату перед сохранением
+  } else {
+    formData.value.survey_date = ""; // Если это не дата, обнуляем
+  }
+  console.log("Updated formData2.date:", formData.value.survey_date);
+};
+
+const toggleForm = () => {
+  showForm.value = !showForm.value;
+};
+
+const cancelForm = () => {
+  showForm.value = false;
+};
+
 // Функция выбора статуса
-const selectStatus = (option) => {
-  selectedStatus.value = option;
-  localStorage.setItem(STATUS_KEY, option); // Сохранение статуса в localStorage
+const selectStatus = (option, index) => {
+  cities.value[index].editedStatus = option; // Обновляем статус в редактируемом состоянии
+  saveStatus(index); // Сохраняем статус на сервере
+  showStatusDropdowns.value[index] = false; // Закрываем дропдаун
 };
 
 // Обработчик выбора города
@@ -499,8 +469,12 @@ const selectDealsType = (DealsType) => {
   formData.value.transaction_type = DealsType ? DealsType : "";
 };
 
+const showStatusDropdowns = ref(cities.value.map(() => false));
+console.log("showStatusDropdowns:", showStatusDropdowns.value);
+
+
 // Переключение видимости дропдаунов
-function toggleDropdown(type) {
+function toggleDropdown(type, index) {
   if (type === "brand") {
     showDealsTypeDropdown.value = false;
   } else if (type === "model") {
@@ -519,11 +493,13 @@ function toggleDropdown(type) {
     showDealsTypeDropdown.value = !showDealsTypeDropdown.value;
     showManagerWorkDropdown.value = false;
   } else if (type === "status") {
-    showStatusDropdown.value = !showStatusDropdown.value;
-    showManagerWorkDropdown.value = false;
+    showStatusDropdowns.value = showStatusDropdowns.value.map((_, i) =>
+      i === index ? !showStatusDropdowns.value[i] : false
+    );
   }
 }
 
+// Функция для получения данных из БД
 const fetchCities = async () => {
   try {
     const filterParams = {
@@ -537,11 +513,88 @@ const fetchCities = async () => {
       }
     );
 
-    cities.value = response.data.answer.items;
+    // cities.value = response.data.answer.items;
 
-    console.log("Данные успешно получены:", cities.value);
+    cities.value = response.data.answer.items.map((item) => ({
+      ...item,
+      editedRopComment: item.rop_comment || "", // Сохраняем rop_comment для редактирования
+      editedStatus: item.status || "Не отработан"
+    }));
+
+    showStatusDropdowns.value = cities.value.map(() => false); // Инициализация после загрузки
+
   } catch (error) {
     console.error("Ошибка при получении данных:", error);
+  }
+};
+
+// Функция для сохранения rop_comment
+const saveComment = async (index) => {
+  const comment = editedComments.value[index];
+
+  // Отправка данных на сервер
+  try {
+    await axios.get("https://crystal-motors.ru/method.editSending", {
+      id: cities.value[index].id,
+      rop_comment: comment
+    });
+    // Обновляем комментарий в локальном состоянии
+    cities.value[index].editedRopComment = comment;
+
+    console.log("Комментарий успешно обновлены:", comment);
+
+    editingIndex.value = null; // Завершаем редактирование
+  } catch (error) {
+    console.error("Ошибка при обновлении комментария:", error);
+  }
+};
+
+// Функция для сохранения статуса
+const saveStatus = async (index) => {
+  const status = cities.value[index].editedStatus;
+  console.log("Статус:", status);
+
+  try {
+    await axios.get(
+      "https://crystal-motors.ru/method.editSending?count=10000",
+      {
+        params: {
+          id: cities.value[index].id,
+          status: status
+        }
+      }
+    );
+
+    // Обновляем статус в локальном состоянии
+    cities.value[index].status = status;
+
+    console.log("Статус успешно обновлен:", status);
+
+    // Закрываем редактирование
+    editingIndex.value = null;
+    await fetchCities(); // Обновляем данные
+  } catch (error) {
+    console.error("Ошибка при обновлении статуса:", error);
+  }
+};
+
+// Функция для начала редактирования rop_comment
+const startEditing = (index) => {
+  editingIndex.value = index;
+  editedComments.value[index] = cities.value[index].editedRopComment;
+  nextTick(() => {
+    const input = document.querySelector(`#edit-input-${index}`);
+    if (input) input.focus();
+  });
+};
+
+// Обработка клика вне поля редактирования
+const handleOutsideClick = (event) => {
+  if (
+    editingIndex.value !== null &&
+    !event.target.closest(".table-cell-comment")
+  ) {
+    saveComment(editingIndex.value);
   }
 };
 
@@ -576,72 +629,26 @@ const addCity = async () => {
   }
 };
 
+// Функция для удаления клиента
+const deleteCity = async (id) => {
+  try {
+    console.log("Удаление клиента с ID:", id);
+    await axios.get(`https://crystal-motors.ru/method.deleteSending?id=${id}`);
+    alert("Данные успешно удалены!");
+
+    // Очищение текущие данные таблицы перед обновлением
+    cities.value = [];
+
+    // Вызовим функцию для обновления списка клиентов
+    await fetchCities();
+  } catch (error) {
+    console.error("Ошибка при удалении данных:", error);
+  }
+};
+
 onMounted(() => {
   fetchCities();
 });
-
-const cities = ref([]); // Массив для хранения данных
-
-const citiess = [
-  "Барнаул",
-  "Кемерово",
-  "Красноярск",
-  "Не указан",
-  "Новокузнецк",
-  "Омск",
-  "Пермь",
-  "Самара",
-  "Сургут",
-  "Томск",
-  "Тюмень",
-  "Челябинск"
-];
-
-const ratingsSalon = ["1", "2", "3", "4", "5"];
-const ratingsManagerWork = ["1", "2", "3", "4", "5"];
-const typeDeal = ["Комиссия", "Покупка"];
-
-const ensureCommentIndex = (index) => {
-  if (!editedComments.value[index]) {
-    editedComments.value[index] = ""; // Инициализируем пустую строку, если комментарий отсутствует
-  }
-  if (!editInput.value[index]) {
-    editInput.value[index] = null; // Инициализируем ссылку для поля ввода
-  }
-};
-
-// Старт редактирования
-const startEditing = (index) => {
-  ensureCommentIndex(index); // Проверка инициализации
-  editingIndex.value = index;
-  editedComments.value[index] = cities.commentRPO[index] || "";
-  nextTick(() => {
-    if (editInput.value[index]) {
-      editInput.value[index].focus(); // Используем индекс для доступа к полю ввода
-    }
-  });
-};
-
-// Сохранение комментария
-const saveComment = (index) => {
-  ensureCommentIndex(index); // Убедимся, что индекс существует
-  if (cities.commentRPO[index] !== undefined) {
-    cities.commentRPO[index] = editedComments.value[index] || ""; // Сохраняем комментарий
-  }
-  editingIndex.value = null; // Завершаем редактирование
-};
-
-// Обработка клика вне комментария
-const handleOutsideClick = (event) => {
-  if (
-    editingIndex.value !== null &&
-    !event.target.closest(".table-cell-comment")
-  ) {
-    if (editedComments.value[editingIndex.value] !== undefined) {
-      saveComment(editingIndex.value); // Сохраняем текущий комментарий при клике вне
-    }
-  }
-};
 
 onMounted(() => {
   document.addEventListener("click", handleOutsideClick);
@@ -728,7 +735,6 @@ label {
 }
 
 .dropdown-toggle {
-  border: none;
   gap: 6px;
   cursor: pointer;
 }
@@ -813,6 +819,10 @@ label {
   overflow: auto;
   max-height: 550px;
   padding-right: 10px;
+
+  .dropdown-toggle {
+    border: none;
+  }
 }
 
 .filters-statis-city {
@@ -864,6 +874,10 @@ label {
   text-align: center;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
+
+  position: sticky;
+  top: 0;
+  z-index: 9;
 }
 
 .table-row.header-2 {
@@ -892,26 +906,24 @@ label {
 
 .table-cell-comment {
   display: flex;
-  align-items:  center;
+  align-items: center;
   gap: 6px;
-  overflow: hidden;
+  // overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap; /* Запрет переноса строк */
-  
-  svg{
+  white-space: nowrap;
+
+  svg {
     width: 18px;
     height: 18px;
   }
 
-  .comment-text{
+  .comment-text {
     max-width: 72px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
   }
-  
 }
-
 
 .table-row:nth-child(odd) {
   background: linear-gradient(0deg, #7181ae 0%, #7181ae 100%),
@@ -933,7 +945,7 @@ label {
   width: 100%;
   height: 50px;
   background: transparent;
-  border: none;
+  border-color: #dddddd30;
   border-radius: 4px;
   color: #fff;
   font-size: 12px;
