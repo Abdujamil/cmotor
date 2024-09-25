@@ -36,13 +36,13 @@
         <div class="table-cell">{{ name.managerComparison }}</div>
         <div class="table-cell">{{ name.nps.toFixed(2) }}</div>
         <div class="table-cell">
-          {{ name.averageNPSPrevious? name.averageNPSPrevious : "Нет данных" }}
+          {{ name.averageNPSPrevious ? name.averageNPSPrevious : "Нет данных" }}
         </div>
       </div>
       <div class="table-row" v-else>
         <div class="table-cell">Ничего не найдено</div>
       </div>
-
+      
       <!-- Table Footer -->
       <div class="table-row footer">
         <div class="table-cell">Общие значения:</div>
@@ -76,20 +76,23 @@
 
       <div class="table-nav__btns">
         <button
-          :class="{ active: currentDataSet === 'nps' }"
-          @click="switchData('nps')"
+          :class="{ active: currentDataSet === '' }"
+          @click="switchData('')"
+          class="table-nav__btn table-nav__btn"
         >
           Общий NPS
         </button>
         <button
-          :class="{ active: currentDataSet === 'buyers' }"
-          @click="switchData('buyers')"
+          :class="{ active: currentDataSet === 'покупка' }"
+          @click="switchData('покупка')"
+          class="table-nav__btn"
         >
           Покупатели
         </button>
         <button
-          :class="{ active: currentDataSet === 'commission' }"
-          @click="switchData('commission')"
+          :class="{ active: currentDataSet === 'комиссия' }"
+          @click="switchData('комиссия')"
+          class="table-nav__btn"
         >
           Комиссия
         </button>
@@ -515,13 +518,8 @@ const handleFilterChange = ({
 };
 
 // Состояние текущих данных
-const currentDataSet = ref("nps"); // По умолчанию отображаем NPS
+const currentDataSet = ref(""); // По умолчанию отображаем NPS
 const displayedData = ref(cities);
-
-// Обработчик переключения данных
-const switchData = (type) => {
-  currentDataSet.value = type; // Устанавливаем активный тип данных
-};
 
 const fetchData = async () => {
   try {
@@ -548,6 +546,14 @@ const fetchData = async () => {
     const previousPeriodMap = {};
 
     data.forEach((item) => {
+      if (
+        currentDataSet !== "" &&
+        item.transaction_type.toLowerCase() !== currentDataSet.value
+      ) {
+        console.log("Пропускаем элемент:", item);
+        return;
+      }
+
       const cityName = item.city;
       const salonQuality = parseFloat(item.salon_quality);
       const managerQuality = parseFloat(item.manager_quality);
@@ -555,6 +561,7 @@ const fetchData = async () => {
         item.survey_date.split(".").reverse().join("-")
       );
 
+      // Обработка данных по городу
       if (!cityMap[cityName]) {
         cityMap[cityName] = {
           name: cityName,
@@ -615,10 +622,12 @@ const fetchData = async () => {
           : "Нет данных";
 
       const averageNPSPrevious = previousPeriodMap[city.name]
-        ? (previousPeriodMap[city.name].totalSalonQuality /
-            previousPeriodMap[city.name].managerCount +
+        ? (
+            previousPeriodMap[city.name].totalSalonQuality /
+              previousPeriodMap[city.name].managerCount +
             previousPeriodMap[city.name].totalManagerQuality /
-              previousPeriodMap[city.name].managerCount).toFixed(2) / 2
+              previousPeriodMap[city.name].managerCount
+          ).toFixed(2) / 2
         : null;
 
       return {
@@ -659,8 +668,6 @@ const fetchData = async () => {
     const averageNPSPrevious =
       totalCountPrevious > 0 ? totalNPSPrevious / totalCountPrevious : null;
 
-    console.log("averageNPSPrevious", averageNPSPrevious);
-
     overallNPSComparison.value =
       averageNPSPrevious !== null
         ? (overallNPS.value - averageNPSPrevious).toFixed(2)
@@ -668,6 +675,12 @@ const fetchData = async () => {
   } catch (error) {
     console.error("Ошибка при получении данных:", error.message);
   }
+};
+
+const switchData = (type) => {
+  console.log("Сменить тип данных на:", type);
+  currentDataSet.value = type;
+  fetchData();
 };
 
 onMounted(() => {
@@ -678,6 +691,7 @@ onMounted(() => {
 <style lang="scss" scoped>
 .table-container {
   overflow: auto;
+  height: 570px;
   max-height: 570px;
   border-radius: 8px;
   display: flex;
@@ -799,52 +813,3 @@ onMounted(() => {
   }
 }
 </style>
-
-<!-- 
-
-так, еще у меня есть вот эти три переключатели данных 
-
-<div class="table-nav">
-      <div class="table-nav__header">
-        <p>Выберите статистику:</p>
-      </div>
-
-      <div class="table-nav__btns">
-        <button
-          :class="{ active: currentDataSet === 'nps' }"
-          @click="switchData('nps')"
-        >
-          Общий NPS
-        </button>
-        <button
-          :class="{ active: currentDataSet === 'buyers' }"
-          @click="switchData('buyers')"
-        >
-          Покупатели
-        </button>
-        <button
-          :class="{ active: currentDataSet === 'commission' }"
-          @click="switchData('commission')"
-        >
-          Комиссия
-        </button>
-      </div>
-    </div>
-
-// Состояние текущих данных
-const currentDataSet = ref("nps"); // По умолчанию отображаем NPS
-// Обработчик переключения данных
-const switchData = (type) => {
-  currentDataSet.value = type; // Устанавливаем активный тип данных
-};
-
-по умолчанию nps(то есть все данные независимо от типа. То что  сейчас уже есть) 
-
-надо сделать так чтоб допустим я нажал на покупатели все данные показывались у городов(имею ввиду все расчёты - Среднее качество работы салона
-Сравнение с прошлым периодом
-Среднее качество работы менеджера
-Сравнение с прошлым периодом) только тех у кого поле "transaction_type": "покупка", нажал на комиссия показывает данные расчета только  с "transaction_type": "Комиссия",
-
-если что-то не понятно спроси  и уточни)
-
--->
