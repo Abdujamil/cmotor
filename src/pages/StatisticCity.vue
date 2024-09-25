@@ -49,9 +49,7 @@
           :key="'city-' + index"
         >
           <div class="table-cell">{{ city.city }}</div>
-          <div class="table-cell">
-            {{ city.cityAverageCallQuality }}
-          </div>
+          <div class="table-cell">{{ city.cityAverageCallQuality }}</div>
           <div class="table-cell">{{ city.cityPreviousPeriodDynamic }}</div>
           <div class="table-cell">{{ city.cityTotalCalls }}</div>
           <div class="table-cell">{{ city.cityCallsDynamic }}</div>

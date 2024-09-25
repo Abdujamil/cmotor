@@ -11,6 +11,8 @@
         multi-calendars
         placeholder="За всё время"
         @update:model-value="handleDateChange"
+        select-text="Выбрать"
+        cancel-text="Отменить"
       >
       </VueDatePicker>
     </div>
@@ -123,10 +125,22 @@ const formatDate = (date) => {
 };
 
 const handleDateChange = (dates) => {
-  const startDate = formatDate(dates ? dates[0] : null);  // Преобразуем в формат dd.MM.yyyy
-  const endDate = formatDate(dates ? dates[1] : null);    // Преобразуем в формат dd.MM.yyyy
-  console.log('Дата выбор:', startDate, endDate);         // Лог для проверки
-  emit("filterChange", { startDate, endDate });           // Эмитим событие с отформатированными датами
+  const startDate = dates && dates[0] ? new Date(dates[0]) : null;
+  const endDate = dates && dates[1] ? new Date(dates[1]) : null;
+
+  // Проверка на валидность дат
+  if ((startDate && isNaN(startDate.getTime())) || (endDate && isNaN(endDate.getTime()))) {
+    console.error("Ошибка: некорректные значения дат");
+    return; // Прерываем выполнение функции при некорректных датах
+  }
+
+  if (startDate && endDate && startDate > endDate) {
+    console.error("Ошибка: endDate не может предшествовать startDate");
+    return; // Прерываем выполнение функции при некорректных датах
+  }
+
+  console.log('Дата выбор:', startDate, endDate); // Лог для проверки
+  emit("filterChange", { startDate, endDate }); // Эмитим событие с объектами дат
 };
 
 // Функция форматирования для диапазона дат

@@ -1696,7 +1696,7 @@
           </tr>
 
           <tr v-if="filteredData.length === 0">
-            <td colspan="100">Данных нет</td>
+            <td colspan="100" style="text-align: center; padding: 10px;" >Ничего не найдено :(</td>
           </tr>
         </tbody>
         <!-- Table footer -->
@@ -1966,10 +1966,31 @@ const handleDateChange = (newFilters) => {
   fetchClients(0, true); // Сброс данных и запрос с фильтрами
 };
 
+
+// Функция для получения общего количества записей
+const fetchTotalItems = async () => {
+  try {
+    const response = await axios.get(
+      `https://crystal-motors.ru/method.getClients?count=100000`
+    );
+    totalItems2.value = response.data.answer.count;
+
+    tableData3.value = response.data.answer.items;
+  } catch (error) {
+    console.error(
+      "Ошибка при получении общего количества записей:",
+      error.message
+    );
+    // Выводим дополнительную информацию об ошибке
+    console.error("Детали ошибки:", error.response?.data || error.message);
+  }
+};
+
 // Функция для получения данных с фильтрами
 const fetchClients = async (offset = 0, resetData = false) => {
   try {
     const filterParams = {
+      count: 100000, // Максимальное количество записей
       count: itemsPerPage,
       offset,
       order: "id_desc",
@@ -1988,18 +2009,18 @@ const fetchClients = async (offset = 0, resetData = false) => {
     };
 
     const response = await axios.get(
-      "https://crystal-motors.ru/method.getClients",
+      "https://crystal-motors.ru/method.getClients?count=100000",
       {
         params: filterParams
       }
     );
-    // console.log("Запрос с фильтрами:", filterParams);
+    console.log("Запрос с фильтрами:", filterParams);
 
-    const newData = response.data.answer.items;
+    const newData = response.data.answer.items;    
 
     if (resetData) {
       tableData2.value = newData;
-      loadedData.value = newData.slice(0, itemsPerPage); // Загружаем первую порцию данных
+      loadedData.value = newData;  // Загружаем все данные без пагинации
       currentPage.value = 1; // Сбрасываем счетчик страницы
     } else {
       tableData2.value = [...tableData2.value, ...newData];
@@ -2016,25 +2037,6 @@ const fetchClients = async (offset = 0, resetData = false) => {
     totalItems.value = response.data.answer.total;
   } catch (error) {
     console.error("Ошибка при получении данных клиентов:", error);
-  }
-};
-
-// Функция для получения общего количества записей
-const fetchTotalItems = async () => {
-  try {
-    const response = await axios.get(
-      `https://crystal-motors.ru/method.getClients?count=100000`
-    );
-    totalItems2.value = response.data.answer.count;
-
-    tableData3.value = response.data.answer.items;
-  } catch (error) {
-    console.error(
-      "Ошибка при получении общего количества записей:",
-      error.message
-    );
-    // Выводим дополнительную информацию об ошибке
-    console.error("Детали ошибки:", error.response?.data || error.message);
   }
 };
 
@@ -2413,9 +2415,3 @@ body {
 
 @import url("./table.scss");
 </style>
-
-<!-- TODO -->
-<!-- 1. Номер телефона удалить маску DONEE -->
-<!-- 2. Календарь на русском  & Дата сегодняшная по умолчанию на всех страницах DONE -->
-<!-- 3. ФИО запятую надо удалить -->
-<!-- 4. Средний процент по выполнению плана: 60.80 выровнять по плану %  и Сумма звонков: 9933 - факт звонка  DONE -->

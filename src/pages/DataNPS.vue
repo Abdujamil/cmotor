@@ -133,7 +133,7 @@
             <label for="manager">Номер телефона</label>
 
             <MaskInput
-              mask="+7 (###) ###-##-##"
+              mask="+7##########"
               placeholder="Телефон"
               v-model="formData.phone_number"
             />
@@ -237,7 +237,7 @@
           v-for="(city, index) in cities"
           :key="index"
         >
-          <div class="table-cell">{{ index }}</div>
+          <div class="table-cell">{{ index + 1 }}</div>
           <div class="table-cell">{{ city.city }}</div>
           <div class="table-cell">{{ city.salon_quality }}</div>
           <div class="table-cell">{{ city.manager_quality }}</div>
@@ -252,8 +252,7 @@
 
           <div
             @click.stop="startEditing(index)"
-            class="table-cell table-cell-comment comment-rop"
-          >
+            class="table-cell table-cell-comment comment-rop" >
             <svg
               title="Редактирование"
               v-if="editingIndex !== index"
@@ -288,9 +287,9 @@
             </div>
           </div>
 
-          <div class="table-cell" style="max-width: 122px">
+          <div class="table-cell" style="min-width: 95px">
             <div @click.stop="toggleDropdown('status', index)" class="dropdown">
-              <div class="dropdown-toggle">
+              <div class="dropdown-toggle" style="padding-left: 0;">
                 <span id="dropdown-selected">{{ cities[index].editedStatus }}</span>
 
                 <span class="dropdown-arrow">
@@ -302,7 +301,7 @@
                   </svg>
                 </span>
               </div>
-              <div v-if="showStatusDropdowns[index]" class="dropdown-menu">
+              <div v-if="showStatusDropdowns[index]" class="dropdown-menu" style="width: 110px;">
                 <div
                   class="dropdown-item"
                   v-for="(option, idx) in statusOptions"
@@ -315,14 +314,15 @@
             </div>
           </div>
 
-          <div class="table-cell">
-            <td style="display: flex; align-items: center">
+          <div class="table-cell" style="max-width: 90px;">
+            <td style="display: flex; align-items: center; justify-content: center">
               <img
                 class="delete-icon-block"
                 title="Удалить"
                 @click="() => deleteCity(city.id)"
                 src="../../src/assets/icons8-delete.svg"
                 alt="delete"
+                style="margin: 0;"
               />
             </td>
           </div>
@@ -396,10 +396,27 @@ const typeDeal = ["Комиссия", "Покупка", "Продажа", "По�
 const handleDateChange = (newFilters) => {
   const { startDate, endDate } = newFilters;
 
+  // Проверка на корректность дат
+  if (startDate && endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Проверка на валидность дат
+    if (isNaN(start) || isNaN(end)) {
+      console.error("Ошибка: некорректные значения дат");
+      return; // Прерываем выполнение функции при некорректных датах
+    }
+
+    if (start > end) {
+      console.error("Ошибка: endDate не может предшествовать startDate");
+      return; // Прерываем выполнение функции при некорректных датах
+    }
+  }
+
   filters.value = {
     ...newFilters,
-    startDate: startDate ? new Date(startDate).toISOString() : null, // Преобразуем строку или null в дату
-    endDate: endDate ? new Date(endDate).toISOString() : null // Преобразуем строку или null в дату
+    startDate: startDate ? new Date(startDate).toISOString() : null,
+    endDate: endDate ? new Date(endDate).toISOString() : null
   };
 
   console.log("Новые фильтры:", filters.value);
@@ -507,7 +524,7 @@ const fetchCities = async () => {
     };
 
     const response = await axios.get(
-      "https://crystal-motors.ru/method.getSendings",
+      "https://crystal-motors.ru/method.getSendings?count=all",
       {
         params: filterParams
       }
