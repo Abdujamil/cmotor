@@ -17,7 +17,7 @@
         <div class="table-cell">Среднее качество работы менеджера</div>
         <div class="table-cell">Сравнение с прошлым периодом</div>
         <div class="table-cell">Среднее значение NPS</div>
-        <div class="table-cell">Среднее значение NPS</div>
+        <div class="table-cell">Сравнение с прошлым периодом</div>
       </div>
       <!-- Filtered Table Rows -->
 
@@ -34,8 +34,10 @@
           {{ name.averageManagerQuality.toFixed(2) }}
         </div>
         <div class="table-cell">{{ name.managerComparison }}</div>
-        <div class="table-cell">- -</div>
-        <div class="table-cell">-</div>
+        <div class="table-cell">{{ name.nps.toFixed(2) }}</div>
+        <div class="table-cell">
+          {{ name.averageNPSPrevious? name.averageNPSPrevious : "Нет данных" }}
+        </div>
       </div>
       <div class="table-row" v-else>
         <div class="table-cell">Ничего не найдено</div>
@@ -48,11 +50,7 @@
           {{ overallAverageSalonQuality.toFixed(2) }}
         </div>
         <div class="table-cell">
-          {{
-            overallComparison !== null
-              ? overallComparison
-              : "Нет данных"
-          }}
+          {{ overallComparison !== null ? overallComparison : "Нет данных" }}
         </div>
         <div class="table-cell">
           {{ overallAverageManagerQuality.toFixed(2) }}
@@ -64,8 +62,10 @@
               : "Нет данных"
           }}
         </div>
-        <div class="table-cell">3,5</div>
-        <div class="table-cell">–</div>
+        <div class="table-cell">
+          {{ overallNPS !== null ? overallNPS.toFixed(2) : "Нет данных" }}
+        </div>
+        <div class="table-cell">{{ overallNPSComparison }}</div>
       </div>
     </div>
 
@@ -424,17 +424,19 @@ const downloadTable = () => {
   }
 };
 
-const filteredData = ref([]);
 const managers = ref({
   numberCall: [],
   percentCall: []
 });
 
+const filteredData = ref([]);
 const overallAverageSalonQuality = ref(0);
 const overallComparison = ref(null); // Для общего сравнения
 
 const overallAverageManagerQuality = ref(0);
 const overallManagerComparison = ref(0);
+const overallNPS = ref(0);
+const overallNPSComparison = ref(null);
 
 // const filteredData = computed(() => {
 //   // Проверяем, какой тип данных выбран
@@ -521,101 +523,6 @@ const switchData = (type) => {
   currentDataSet.value = type; // Устанавливаем активный тип данных
 };
 
-// const fetchData = async () => {
-//   try {
-//     const response = await axios.get(
-//       "https://crystal-motors.ru/method.getSendings?count=all"
-//     );
-//     const data = response.data.answer.items;
-
-//     const cityMap = {};
-//     let totalQuality = 0;
-//     let totalCount = 0;
-//     let totalQualityPrevious = 0; // Для общего качества за прошлый месяц
-//     let totalCountPrevious = 0; // Для общего количества за прошлый месяц
-
-//     // Даты для фильтрации
-//     const currentDate = new Date();
-//     const oneMonthAgo = new Date(
-//       currentDate.setMonth(currentDate.getMonth() - 1)
-//     );
-
-//     const previousPeriodMap = {}; // Для хранения данных за предыдущий месяц
-
-//     // Обрабатываем данные
-//     data.forEach((item) => {
-//       const cityName = item.city;
-//       const salonQuality = parseFloat(item.salon_quality); // Преобразуем в число
-//       const surveyDate = new Date(
-//         item.survey_date.split(".").reverse().join("-")
-//       ); // Преобразуем дату
-
-//       // Считаем текущее качество
-//       if (!cityMap[cityName]) {
-//         cityMap[cityName] = {
-//           name: cityName,
-//           totalQuality: salonQuality,
-//           count: 1
-//         };
-//       } else {
-//         cityMap[cityName].totalQuality += salonQuality;
-//         cityMap[cityName].count += 1;
-//       }
-
-//       // Суммируем для общего качества
-//       totalQuality += salonQuality;
-//       totalCount += 1;
-
-//       // Сохраняем данные для прошлого месяца
-//       if (surveyDate < oneMonthAgo) {
-//         if (!previousPeriodMap[cityName]) {
-//           previousPeriodMap[cityName] = {
-//             totalQuality: salonQuality,
-//             count: 1
-//           };
-//         } else {
-//           previousPeriodMap[cityName].totalQuality += salonQuality;
-//           previousPeriodMap[cityName].count += 1;
-//         }
-//         totalQualityPrevious += salonQuality; // Суммируем для общего качества прошлого месяца
-//         totalCountPrevious += 1; // Увеличиваем общее количество для прошлого месяца
-//       }
-//     });
-
-//     // Формируем массив для отображения
-//     filteredData.value = Object.values(cityMap).map((city) => {
-//       const averageSalonQuality = city.totalQuality / city.count;
-
-//       // Сравнение с прошлым периодом
-//       const previousAverage = previousPeriodMap[city.name]
-//         ? previousPeriodMap[city.name].totalQuality /
-//           previousPeriodMap[city.name].count
-//         : null;
-
-//       const comparison =
-//         previousAverage !== null
-//           ? (averageSalonQuality - previousAverage).toFixed(2)
-//           : "Нет данных";
-
-//       return {
-//         name: city.name,
-//         averageSalonQuality,
-//         comparison
-//       };
-//     });
-
-//     // Рассчитываем общее среднее качество
-//     overallAverageSalonQuality.value = totalQuality / totalCount;
-//     overallComparison.value =
-//       totalCountPrevious > 0
-//         ? totalQuality / totalCount - totalQualityPrevious / totalCountPrevious
-//         : null; // Сравнение общего среднего с прошлым периодом, если данных нет, ставим null
-//   } catch (error) {
-//     console.error("Ошибка при получении данных:", error.message);
-//     console.error("Детали ошибки:", error.response?.data || error.message);
-//   }
-// };
-
 const fetchData = async () => {
   try {
     const response = await axios.get(
@@ -624,12 +531,13 @@ const fetchData = async () => {
     const data = response.data.answer.items;
 
     const cityMap = {};
-    let totalQuality = 0; // Для общего качества салонов
-    let totalQualityPrevious = 0; // Для общего качества салонов за прошлый месяц
-    let totalManagerQuality = 0; // Для общего качества менеджеров
-    let totalManagerQualityPrevious = 0; // Для общего качества менеджеров за прошлый месяц
+    let totalQuality = 0;
+    let totalQualityPrevious = 0;
+    let totalManagerQuality = 0;
+    let totalManagerQualityPrevious = 0;
     let totalCount = 0;
-    let totalCountPrevious = 0; // Для общего количества за прошлый месяц
+    let totalCountPrevious = 0;
+    let totalNPSPrevious = 0; // Для хранения NPS за прошлый месяц
 
     // Даты для фильтрации
     const currentDate = new Date();
@@ -637,52 +545,54 @@ const fetchData = async () => {
       currentDate.setMonth(currentDate.getMonth() - 1)
     );
 
-    const previousPeriodMap = {}; // Для хранения данных за предыдущий месяц
+    const previousPeriodMap = {};
 
-    // Обрабатываем данные
     data.forEach((item) => {
       const cityName = item.city;
-      const salonQuality = parseFloat(item.salon_quality); // Преобразуем в число
-      const managerQuality = parseFloat(item.manager_quality); // Преобразуем в число
+      const salonQuality = parseFloat(item.salon_quality);
+      const managerQuality = parseFloat(item.manager_quality);
       const surveyDate = new Date(
         item.survey_date.split(".").reverse().join("-")
-      ); // Преобразуем дату
+      );
 
-      // Считаем текущее качество салона
       if (!cityMap[cityName]) {
         cityMap[cityName] = {
           name: cityName,
           totalQuality: salonQuality,
           count: 1,
-          totalManagerQuality: managerQuality, // Добавляем общее качество менеджера
-          managerCount: 1 // Счетчик для менеджеров
+          totalManagerQuality: managerQuality,
+          managerCount: 1
         };
       } else {
         cityMap[cityName].totalQuality += salonQuality;
         cityMap[cityName].count += 1;
-        cityMap[cityName].totalManagerQuality += managerQuality; // Суммируем качество менеджера
-        cityMap[cityName].managerCount += 1; // Увеличиваем счетчик
+        cityMap[cityName].totalManagerQuality += managerQuality;
+        cityMap[cityName].managerCount += 1;
       }
 
-      // Суммируем для общего качества
       totalQuality += salonQuality;
       totalManagerQuality += managerQuality;
       totalCount += 1;
 
-      // Сохраняем данные для прошлого месяца
       if (surveyDate < oneMonthAgo) {
-        totalQualityPrevious += salonQuality; // Суммируем общее качество за прошлый месяц
+        totalQualityPrevious += salonQuality;
         if (!previousPeriodMap[cityName]) {
           previousPeriodMap[cityName] = {
             totalManagerQuality: managerQuality,
-            managerCount: 1
+            managerCount: 1,
+            totalSalonQuality: salonQuality
           };
         } else {
           previousPeriodMap[cityName].totalManagerQuality += managerQuality;
           previousPeriodMap[cityName].managerCount += 1;
+          previousPeriodMap[cityName].totalSalonQuality += salonQuality;
         }
-        totalManagerQualityPrevious += managerQuality; // Суммируем для общего качества менеджеров прошлого месяца
-        totalCountPrevious += 1; // Увеличиваем общее количество для прошлого месяца
+        totalManagerQualityPrevious += managerQuality;
+        totalCountPrevious += 1;
+
+        // Рассчитываем NPS для прошлого месяца
+        const previousNPS = (salonQuality + managerQuality) / 2;
+        totalNPSPrevious += previousNPS; // Суммируем NPS для предыдущего месяца
       }
     });
 
@@ -690,7 +600,8 @@ const fetchData = async () => {
     filteredData.value = Object.values(cityMap).map((city) => {
       const averageSalonQuality = city.totalQuality / city.count;
       const averageManagerQuality =
-        city.totalManagerQuality / city.managerCount; // Среднее качество менеджера
+        city.totalManagerQuality / city.managerCount;
+      const nps = (averageSalonQuality + averageManagerQuality) / 2;
 
       // Сравнение с прошлым периодом
       const previousManagerAverage = previousPeriodMap[city.name]
@@ -703,34 +614,59 @@ const fetchData = async () => {
           ? (averageManagerQuality - previousManagerAverage).toFixed(2)
           : "Нет данных";
 
+      const averageNPSPrevious = previousPeriodMap[city.name]
+        ? (previousPeriodMap[city.name].totalSalonQuality /
+            previousPeriodMap[city.name].managerCount +
+            previousPeriodMap[city.name].totalManagerQuality /
+              previousPeriodMap[city.name].managerCount).toFixed(2) / 2
+        : null;
+
       return {
         name: city.name,
         averageSalonQuality,
-        averageManagerQuality, // Добавляем среднее качество менеджера
-        managerComparison // Добавляем сравнение для менеджера
+        averageManagerQuality,
+        nps,
+        managerComparison,
+        averageNPSPrevious
       };
     });
 
-    // Рассчитываем общее среднее качество менеджера
+    // Рассчитываем общее среднее качества
     overallAverageSalonQuality.value = totalQuality / totalCount;
-    overallAverageManagerQuality.value = totalManagerQuality / totalCount; // Общее среднее качество менеджера
+    overallAverageManagerQuality.value = totalManagerQuality / totalCount;
     overallManagerComparison.value =
       totalCountPrevious > 0
         ? (
             totalManagerQuality / totalCount -
             totalManagerQualityPrevious / totalCountPrevious
           ).toFixed(2)
-        : null; // Сравнение общего среднего менеджеров с прошлым периодом
+        : null;
     overallComparison.value =
       totalCount > 0
         ? (
             totalQuality / totalCount -
             totalQualityPrevious / totalCountPrevious
           ).toFixed(2)
-        : null; // Сравнение общего качества с прошлым периодом
+        : null;
+
+    // Рассчитываем общее NPS
+    const totalNPS = filteredData.value.reduce((sum, city) => {
+      return sum + city.nps;
+    }, 0);
+    overallNPS.value = totalNPS / filteredData.value.length;
+
+    // Рассчитываем сравнение NPS с прошлым периодом
+    const averageNPSPrevious =
+      totalCountPrevious > 0 ? totalNPSPrevious / totalCountPrevious : null;
+
+    console.log("averageNPSPrevious", averageNPSPrevious);
+
+    overallNPSComparison.value =
+      averageNPSPrevious !== null
+        ? (overallNPS.value - averageNPSPrevious).toFixed(2)
+        : "Нет данных";
   } catch (error) {
     console.error("Ошибка при получении данных:", error.message);
-    console.error("Детали ошибки:", error.response?.data || error.message);
   }
 };
 
@@ -863,3 +799,52 @@ onMounted(() => {
   }
 }
 </style>
+
+<!-- 
+
+так, еще у меня есть вот эти три переключатели данных 
+
+<div class="table-nav">
+      <div class="table-nav__header">
+        <p>Выберите статистику:</p>
+      </div>
+
+      <div class="table-nav__btns">
+        <button
+          :class="{ active: currentDataSet === 'nps' }"
+          @click="switchData('nps')"
+        >
+          Общий NPS
+        </button>
+        <button
+          :class="{ active: currentDataSet === 'buyers' }"
+          @click="switchData('buyers')"
+        >
+          Покупатели
+        </button>
+        <button
+          :class="{ active: currentDataSet === 'commission' }"
+          @click="switchData('commission')"
+        >
+          Комиссия
+        </button>
+      </div>
+    </div>
+
+// Состояние текущих данных
+const currentDataSet = ref("nps"); // По умолчанию отображаем NPS
+// Обработчик переключения данных
+const switchData = (type) => {
+  currentDataSet.value = type; // Устанавливаем активный тип данных
+};
+
+по умолчанию nps(то есть все данные независимо от типа. То что  сейчас уже есть) 
+
+надо сделать так чтоб допустим я нажал на покупатели все данные показывались у городов(имею ввиду все расчёты - Среднее качество работы салона
+Сравнение с прошлым периодом
+Среднее качество работы менеджера
+Сравнение с прошлым периодом) только тех у кого поле "transaction_type": "покупка", нажал на комиссия показывает данные расчета только  с "transaction_type": "Комиссия",
+
+если что-то не понятно спроси  и уточни)
+
+-->
