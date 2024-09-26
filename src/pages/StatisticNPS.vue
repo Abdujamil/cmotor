@@ -36,7 +36,7 @@
         <div class="table-cell">{{ name.managerComparison }}</div>
         <div class="table-cell">{{ name.nps.toFixed(2) }}</div>
         <div class="table-cell">
-          {{ name.averageNPSPrevious ? name.averageNPSPrevious : "" }}
+          {{ name.averageNPSPrevious ? name.averageNPSPrevious.toFixed(2) : "" }}
         </div>
       </div>
       <div class="table-row" v-else>
@@ -354,6 +354,7 @@ const fetchData = async () => {
       averageNPSPrevious !== null
         ? (overallNPS.value - averageNPSPrevious).toFixed(2)
         : "";
+        
   } catch (error) {
     console.error("Ошибка при получении данных:", error.message);
   }

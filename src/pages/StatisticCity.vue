@@ -638,7 +638,7 @@ const calculateRegionAverages = async () => {
             ((totalTradeInCallsCurrentMonth - totalTradeInCallsPreviousMonth) /
               totalTradeInCallsPreviousMonth) *
             100
-          ).toFixed(0) + " %"
+          ).toFixed(2) + " %"
         : totalTradeInCallsCurrentMonth > 0
         ? "0.0 %"
         : "0 %";
@@ -647,6 +647,10 @@ const calculateRegionAverages = async () => {
       "Динамика количества звонков в трейд-ин: ",
       tradeInCallsDynamic
     );
+
+    console.log("totalTradeInCallsPreviousMonth: ", totalTradeInCallsPreviousMonth);
+    console.log("totalTradeInCallsCurrentMonth: ", totalTradeInCallsCurrentMonth);
+    
 
     return {
       region,
