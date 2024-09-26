@@ -147,6 +147,10 @@
                 dark
                 placeholder="За всё время"
                 @update:model-value="updatedataRange"
+                locale="ru-RU"
+                select-text="Выбрать"
+                cancel-text="Отменить"
+                :enable-time-picker="false"
               >
               </VueDatePicker>
             </div>
@@ -232,10 +236,12 @@
           <div class="table-cell">Удалить</div>
         </div>
         <!-- Filtered Table Rows -->
-        <div class="table-row body" 
-        v-for="(city, index) in filteredCities" 
-        :key="index" 
-        v-if="filteredCities.length > 0">
+        <div
+          class="table-row body"
+          v-for="(city, index) in filteredCities"
+          :key="index"
+          v-if="filteredCities.length > 0"
+        >
           <div class="table-cell">{{ index + 1 }}</div>
           <div class="table-cell">{{ city.city }}</div>
           <div class="table-cell">{{ city.salon_quality }}</div>
@@ -248,7 +254,10 @@
               {{ city.comment }}
             </p>
           </div>
-          <div @click.stop="startEditing(index)" class="table-cell table-cell-comment comment-rop" >
+          <div
+            @click.stop="startEditing(index)"
+            class="table-cell table-cell-comment comment-rop"
+          >
             <svg
               title="Редактирование"
               v-if="editingIndex !== index"
@@ -334,8 +343,8 @@
           </div>
         </div>
         <div class="table-row" v-else>
-        <div class="table-cell">Ничего не найдено</div>
-      </div>
+          <div class="table-cell">Ничего не найдено</div>
+        </div>
       </div>
     </div>
   </div>
@@ -436,7 +445,7 @@ const handleDateChange = (newFilters) => {
   if (startDate && endDate) {
     const start = new Date(startDate);
     const end = new Date(endDate);
-    
+
     if (isNaN(start) || isNaN(end) || start > end) {
       console.error("Ошибка: некорректные даты");
       return; // Прерываем выполнение функции при некорректных датах
@@ -446,13 +455,12 @@ const handleDateChange = (newFilters) => {
   filters.value = {
     ...newFilters,
     startDate: startDate ? new Date(startDate).toISOString() : null,
-    endDate: endDate ? new Date(endDate).toISOString() : null,
+    endDate: endDate ? new Date(endDate).toISOString() : null
   };
 
   console.log("Новые фильтры:", filters.value);
   fetchCities(0, true); // Сброс данных и запрос с фильтрами
 };
-
 
 const format2 = (date) => {
   const day = String(date.getDate()).padStart(2, "0"); // Добавляем ведущий ноль для дня
@@ -576,7 +584,7 @@ const fetchCities = async (offset = 0, resetData = false) => {
     const newData = response.data.answer.items;
     if (resetData) {
       cities.value = newData;
-    }else{
+    } else {
       cities.value = [...cities.value, ...newData];
     }
 
@@ -594,13 +602,11 @@ const fetchCities = async (offset = 0, resetData = false) => {
   }
 };
 
-
 const filteredCities = computed(() => {
   return cities.value.filter((client) => {
     // Преобразуем строку даты клиента в объект Date
     const clientDate = new Date(client.survey_date);
     clientDate.setHours(0, 0, 0, 0); // Сбрасываем время до полуночи, чтобы сравнивать только дату
-    
 
     // Преобразуем начальную и конечную даты фильтра
     const startDate = filters.value.startDate
@@ -626,7 +632,6 @@ const filteredCities = computed(() => {
     const dateMatch =
       (!startDate || clientDate >= startDate) &&
       (!endDate || clientDate <= endDate);
-      
 
     return cityMatch && regionMatch && dateMatch;
   });

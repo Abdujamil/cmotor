@@ -36,7 +36,7 @@
         <div class="table-cell">{{ name.managerComparison }}</div>
         <div class="table-cell">{{ name.nps.toFixed(2) }}</div>
         <div class="table-cell">
-          {{ name.averageNPSPrevious ? name.averageNPSPrevious : "Нет данных" }}
+          {{ name.averageNPSPrevious ? name.averageNPSPrevious : "" }}
         </div>
       </div>
       <div class="table-row" v-else>
@@ -50,7 +50,7 @@
           {{ overallAverageSalonQuality.toFixed(2) }}
         </div>
         <div class="table-cell">
-          {{ overallComparison !== null ? overallComparison : "Нет данных" }}
+          {{ overallComparison !== null ? overallComparison : "" }}
         </div>
         <div class="table-cell">
           {{ overallAverageManagerQuality.toFixed(2) }}
@@ -59,11 +59,11 @@
           {{
             overallManagerComparison !== null
               ? overallManagerComparison
-              : "Нет данных"
+              : ""
           }}
         </div>
         <div class="table-cell">
-          {{ overallNPS !== null ? overallNPS.toFixed(2) : "Нет данных" }}
+          {{ overallNPS !== null ? overallNPS.toFixed(2) : "" }}
         </div>
         <div class="table-cell">{{ overallNPSComparison }}</div>
       </div>
@@ -584,7 +584,7 @@ const fetchData = async () => {
       const managerComparison =
         previousManagerAverage !== null
           ? (averageManagerQuality - previousManagerAverage).toFixed(2)
-          : "Нет данных";
+          : "";
 
       const averageNPSPrevious = previousPeriodMap[city.name]
         ? (
@@ -636,7 +636,7 @@ const fetchData = async () => {
     overallNPSComparison.value =
       averageNPSPrevious !== null
         ? (overallNPS.value - averageNPSPrevious).toFixed(2)
-        : "Нет данных";
+        : "";
   } catch (error) {
     console.error("Ошибка при получении данных:", error.message);
   }

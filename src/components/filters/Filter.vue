@@ -13,6 +13,7 @@
         @update:model-value="handleDateChange"
         select-text="Выбрать"
         cancel-text="Отменить"
+        :enable-time-picker="false"
       >
       </VueDatePicker>
     </div>
