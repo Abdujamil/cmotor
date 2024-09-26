@@ -605,16 +605,20 @@ const fetchCities = async (offset = 0, resetData = false) => {
 const filteredCities = computed(() => {
   return cities.value.filter((client) => {
     // Преобразуем строку даты клиента в объект Date
-    const clientDate = new Date(client.survey_date);
-    clientDate.setHours(0, 0, 0, 0); // Сбрасываем время до полуночи, чтобы сравнивать только дату
+    const [day, month, year] = client.survey_date.split(".").map(Number);
+    const clientDate = new Date(year, month - 1, day); // месяц на 1 меньше
+    clientDate.setHours(0, 0, 0, 0);
 
     // Преобразуем начальную и конечную даты фильтра
     const startDate = filters.value.startDate
       ? new Date(filters.value.startDate)
       : null;
+    console.log("startDate:", startDate);
+
     const endDate = filters.value.endDate
       ? new Date(filters.value.endDate)
       : null;
+    console.log("endDate:", endDate);
 
     if (startDate) startDate.setHours(0, 0, 0, 0); // Сброс времени для начальной даты
     if (endDate) endDate.setHours(23, 59, 59, 999); // Сброс времени для конечной даты, чтобы включить последний день

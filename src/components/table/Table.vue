@@ -2143,8 +2143,9 @@ const fetchClients = async (offset = 0, resetData = false) => {
 const filteredData = computed(() => {
   return loadedData.value.filter((client) => {
     // Преобразуем строку даты клиента в объект Date
-    const clientDate = new Date(client.date);
-    clientDate.setHours(0, 0, 0, 0); // Сбрасываем время до полуночи, чтобы сравнивать только дату
+    const [day, month, year] = client.date.split(".").map(Number);
+    const clientDate = new Date(year, month - 1, day); // месяц на 1 меньше
+    clientDate.setHours(0, 0, 0, 0);
 
     // Преобразуем начальную и конечную даты фильтра
     const startDate = filters.value.startDate

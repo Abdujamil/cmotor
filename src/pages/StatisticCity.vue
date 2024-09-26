@@ -518,7 +518,6 @@ const calculateRegionAverages = async () => {
   let tradeInCallsSouth = 0; // Трейд-ин звонки для Юга
   let tradeInCallsNorth = 0; // Трейд-ин звонки для Севера
 
-
   let totalTradeInCallsCurrentMonth = 0; // Общее количество трейд-ин звонков за текущий месяц
   let totalTradeInCallsPreviousMonth = 0; // Общее количество трейд-ин звонков за предыдущий месяц
 
@@ -630,8 +629,10 @@ const calculateRegionAverages = async () => {
         ? "0.0 %"
         : "0 %";
 
-        console.log("Динамика количества звонков в трейд-ин: ", tradeInCallsDynamic);
-        
+    console.log(
+      "Динамика количества звонков в трейд-ин: ",
+      tradeInCallsDynamic
+    );
 
     return {
       region,
@@ -648,6 +649,28 @@ const calculateRegionAverages = async () => {
   });
 };
 
+const handleDateChange = (newFilters) => {
+  const { startDate, endDate } = newFilters;
+
+  filters.value = {
+    ...newFilters,
+    startDate: startDate ? new Date(startDate).toISOString() : null, // Преобразуем строку или null в дату
+    endDate: endDate ? new Date(endDate).toISOString() : null // Преобразуем строку или null в дату
+  };
+
+  console.log("Новые фильтры:", filters.value);
+
+  fetchClients(0, true); // Сброс данных и запрос с фильтрами
+};
+
+const handleFilterChange = ({
+  selectedRegion: newRegion,
+  selectedCity: newCity
+}) => {
+  selectedRegion.value = newRegion;
+  selectedCity.value = newCity;
+};
+
 const filteredCitiesData = computed(() => {
   return citiesData.value.filter((city) => {
     if (selectedCity.value) {
@@ -662,14 +685,6 @@ const filteredCitiesData = computed(() => {
     }
   });
 });
-
-const handleFilterChange = ({
-  selectedRegion: newRegion,
-  selectedCity: newCity
-}) => {
-  selectedRegion.value = newRegion;
-  selectedCity.value = newCity;
-};
 
 // Table to Excel
 const downloadTable = () => {

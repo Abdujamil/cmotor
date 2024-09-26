@@ -5,26 +5,26 @@ import { ref } from "vue";
 const showCallsSubmenu = ref(false);
 const showStatsSubmenu = ref(false);
 const showNPSSubmenu = ref(false);
-const activeMenu = ref(""); // Активное главное меню
-const activeSubmenu = ref(""); // Активное подменю
+const activeMenu = ref("allCities"); // Активное главное меню
+const activeSubmenu = ref("allCities"); // Активное подменю
 
 // Функция переключения видимости подменю
 const toggleSubmenu = (submenu) => {
   if (submenu === "calls") {
     showCallsSubmenu.value = !showCallsSubmenu.value;
-    showStatsSubmenu.value = false;
-    showNPSSubmenu.value = false;
+    // showStatsSubmenu.value = false;
+    // showNPSSubmenu.value = false;
     activeMenu.value = "calls"; // Устанавливаем активное главное меню
   } else if (submenu === "stats") {
     showStatsSubmenu.value = !showStatsSubmenu.value;
-    showCallsSubmenu.value = false;
-    showNPSSubmenu.value = false;
+    // showCallsSubmenu.value = false;
+    // showNPSSubmenu.value = false;
     activeMenu.value = "stats";
   } else if (submenu === "nps") {
     showNPSSubmenu.value = !showNPSSubmenu.value;
-    showCallsSubmenu.value = false;
-    showStatsSubmenu.value = false;
-    activeMenu.value = "nps";
+    // showCallsSubmenu.value = false;
+    // showStatsSubmenu.value = false;
+    // activeMenu.value = "nps";
   }
 };
 

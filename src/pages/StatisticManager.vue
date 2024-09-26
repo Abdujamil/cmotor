@@ -196,12 +196,16 @@ const fetchTotalItems = async () => {
 };
 
 const filterByDate = (items) => {
+
+  
   if (!dateFilter.value.startDate || !dateFilter.value.endDate) {
     return items;
   }
-
+  
   const start = new Date(dateFilter.value.startDate);
   const end = new Date(dateFilter.value.endDate);
+  console.log("start:", start);
+  console.log("end:", end);
 
   return items.filter((item) => {
     const itemDate = new Date(item.date);
