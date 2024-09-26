@@ -42,24 +42,30 @@
       <div class="table-row" v-else>
         <div class="table-cell">Ничего не найдено</div>
       </div>
-      
+
       <!-- Table Footer -->
       <div class="table-row footer">
         <div class="table-cell">Общие значения:</div>
         <div class="table-cell">
-          {{ overallAverageSalonQuality.toFixed(2) }}
+          {{
+            overallAverageSalonQuality
+              ? overallAverageSalonQuality.toFixed(2)
+              : ""
+          }}
         </div>
         <div class="table-cell">
           {{ overallComparison !== null ? overallComparison : "" }}
         </div>
         <div class="table-cell">
-          {{ overallAverageManagerQuality.toFixed(2) }}
+          {{
+            overallAverageManagerQuality
+              ? overallAverageManagerQuality.toFixed(2)
+              : ""
+          }}
         </div>
         <div class="table-cell">
           {{
-            overallManagerComparison !== null
-              ? overallManagerComparison
-              : ""
+            overallManagerComparison !== null ? overallManagerComparison : ""
           }}
         </div>
         <div class="table-cell">
@@ -108,308 +114,6 @@ import Filter from "../components/filters/Filter.vue";
 import IButton from "../components/installButton/IButton.vue";
 import axios from "axios";
 
-// const managers = {
-//   managerName: [
-//     "Эдуард Мукин",
-//     "Турал Мамедли",
-//     "Алексей Шевчук",
-//     "Армен Мкртчян",
-//     "Не представился",
-//     "Вадим Гусейнов",
-//     "Роман Мкртчян",
-//     "Алексей Краюхин",
-//     "Павел Дацюк",
-//     "Данил Проценко",
-//     "Алексей Гостев",
-//     "Станислав Питулин",
-//     "Антон Терлецкий",
-//     "Радик Салахов",
-//     "Егор Марчук",
-//     "Арсений Камерер",
-//     "Владислав Бубнов",
-//     "Павел Зрячиков",
-//     "Артемий Ефимов",
-//     "Константин управляющий",
-//     "Сергей Казымов",
-//     "Антон Тупицын",
-//     "Антон Швалев",
-//     "Не представился",
-//     "Роман Шералиев",
-//     "Артем Чигарьков",
-//     "Дамир Шаймерденов",
-//     "Никита Гришихин",
-//     "Андрей Григорьев",
-//     "Ринат Юсупов",
-//     "Илья Пятыгин",
-//     "Данил Тагиев",
-//     "Данил Кучин",
-//     "Диннур Фасхутдинов",
-//     "Илья Васкевич",
-//     "Кирилл Кривцов",
-//     "Денис Илюхин",
-//     "Кирилл Келлер",
-//     "Федор Асадов",
-//     "Дмитрий Маник",
-//     "Владимир РОП",
-//     "Василий Дианов",
-//     "Илья Кошман",
-//     "Леонид Фотин",
-//     "Николай Васильев",
-//     "Алексей Ощепков",
-//     "Михаил РОП",
-//     "Сергей Карпенко",
-//     "Не представился",
-//     "Оскар Курмакаев",
-//     "Никита Аксёнов",
-//     "Владислав Петров",
-//     "Иван Манцеленко",
-//     "Денис Лисин",
-//     "Филипп Козырев",
-//     "Александр Кузнецов",
-//     "Михаил Вахонин",
-//     "Данил Королев",
-//     "Алексей Бухтияров",
-//     "Данил Гриневич",
-//     "Алексей Лихачев",
-//     "Алексей Ямщиков",
-//     "Георгий Сироткин",
-//     "Артем Васюков",
-//     "Глеб Каменский",
-//     "Ярослав Дорошенко",
-//     "Турдали Эрназаров",
-//     "Кирил Макеев",
-//     "Илья Гологузов",
-//     "Ян Лалетин",
-//     "Захар Русанов",
-//     "Павел Мымрин",
-//     "Вадим Олексенко",
-//     "Дмитрий Гаврилюк",
-//     "Вадим Николаев",
-//     "Дмитрий Вебер",
-//     "Савелий Власов",
-//     "Владимир Камагоров",
-//     "Юрий Капустинский",
-//     "Александр Аносов",
-//     "Антон РОП",
-//     "Виктор Баханский",
-//     "Илья Долженок",
-//     "Никита Карепов",
-//     "Михаил Гусейнов",
-//     "Данил Арнаутов",
-//     "Илья Катков",
-//     "Владимир Полещук",
-//     "Илья Бушмелев",
-//     "Леонид Шушарин",
-//     "Алексей Фроликов",
-//     "Роман Касымов",
-//     "Анатолий Саранцев",
-//     "Александр Тюрин",
-//     "Вячеслав Глазунов"
-//   ],
-//   percentCall: [
-//     "87%",
-//     "82%",
-//     "83%",
-//     "85%",
-//     "86%",
-//     "87%",
-//     "88%",
-//     "82%",
-//     "80%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "87%",
-//     "81%",
-//     "82%",
-//     "84%",
-//     "85%",
-//     "80%",
-//     "82%",
-//     "84%",
-//     "83%",
-//     "85%",
-//     "82%",
-//     "84%",
-//     "85%",
-//     "80%",
-//     "82%",
-//     "84%",
-//     "83%",
-//     "82%",
-//     "84%",
-//     "85%",
-//     "80%",
-//     "82%",
-//     "84%",
-//     "83%",
-//     "82%",
-//     "84%",
-//     "85%",
-//     "80%",
-//     "82%",
-//     "84%",
-//     "83%"
-//   ],
-//   numberCall: [
-//     "10",
-//     "12",
-//     "14",
-//     "16",
-//     "18",
-//     "20",
-//     "22",
-//     "24",
-//     "26",
-//     "28",
-//     "30",
-//     "32",
-//     "34",
-//     "36",
-//     "38",
-//     "40",
-//     "42",
-//     "44",
-//     "46",
-//     "48",
-//     "50",
-//     "52",
-//     "54",
-//     "56",
-//     "58",
-//     "60",
-//     "62",
-//     "64",
-//     "66",
-//     "68",
-//     "70",
-//     "72",
-//     "74",
-//     "76",
-//     "78",
-//     "80",
-//     "82",
-//     "84",
-//     "86",
-//     "88",
-//     "90",
-//     "92",
-//     "94",
-//     "96",
-//     "98",
-//     "100",
-//     "102",
-//     "104",
-//     "106",
-//     "108",
-//     "110",
-//     "112",
-//     "114",
-//     "116",
-//     "118",
-//     "120",
-//     "122",
-//     "124",
-//     "126",
-//     "128",
-//     "130",
-//     "132",
-//     "134",
-//     "92",
-//     "94",
-//     "96",
-//     "98",
-//     "100",
-//     "92",
-//     "94",
-//     "96",
-//     "98",
-//     "100",
-//     "92",
-//     "94",
-//     "96",
-//     "98",
-//     "100",
-//     "92",
-//     "94",
-//     "96",
-//     "98",
-//     "100",
-//     "92",
-//     "94",
-//     "96",
-//     "98",
-//     "100",
-//     "92",
-//     "94",
-//     "96",
-//     "98",
-//     "100",
-//     "92",
-//     "94",
-//     "96",
-//     "98",
-//     "100"
-//   ]
-// };
-
-// const regions = Object.keys(managers);
 const selectedRegion = ref("");
 const selectedCity = ref("");
 
@@ -429,11 +133,6 @@ const downloadTable = () => {
   }
 };
 
-const managers = ref({
-  numberCall: [],
-  percentCall: []
-});
-
 const filteredData = ref([]);
 const overallAverageSalonQuality = ref(0);
 const overallComparison = ref(null); // Для общего сравнения
@@ -442,6 +141,8 @@ const overallAverageManagerQuality = ref(0);
 const overallManagerComparison = ref(0);
 const overallNPS = ref(0);
 const overallNPSComparison = ref(null);
+const selectedStartDate = ref(null);
+const selectedEndDate = ref(null);
 
 const cities = ref({
   Север: [
@@ -457,31 +158,18 @@ const cities = ref({
   Юг: ["Тюмень", "Сургут", "Пермь", "Самара", "Челябинск", "Тюмень_Республики"]
 });
 
-
-const filteredCitiesData = computed(() => {
-  return citiesData.value.filter((city) => {
-    if (selectedCity.value) {
-      // Если выбран город, показываем только этот город
-      return city.city === selectedCity.value;
-    } else if (selectedRegion.value) {
-      // Если выбран регион, фильтруем по всем городам в этом регионе
-      return cities.value[selectedRegion.value].includes(city.city);
-    } else {
-      // Если не выбран ни регион, ни город, показываем все города
-      return true;
-    }
-  });
-});
-
 const handleFilterChange = ({
   selectedRegion: newRegion,
-  selectedCity: newCity
+  selectedCity: newCity,
+  startDate,
+  endDate
 }) => {
   selectedRegion.value = newRegion;
   selectedCity.value = newCity;
+  selectedStartDate.value = startDate;
+  selectedEndDate.value = endDate;
+  fetchData(); // вызовем fetchData, чтобы обновить данные при смене фильтра
 };
-
-
 
 // Состояние текущих данных
 const currentDataSet = ref(""); // По умолчанию отображаем NPS
@@ -501,6 +189,7 @@ const fetchData = async () => {
     let totalCount = 0;
     let totalCountPrevious = 0;
     let totalNPSPrevious = 0; // Для хранения NPS за прошлый месяц
+    
 
     // Даты для фильтрации
     const currentDate = new Date();
@@ -511,6 +200,9 @@ const fetchData = async () => {
     const previousPeriodMap = {};
 
     data.forEach((item) => {
+
+      const cityName = item.city;
+
       if (
         currentDataSet !== "" &&
         item.transaction_type.toLowerCase() !== currentDataSet.value
@@ -519,12 +211,37 @@ const fetchData = async () => {
         return;
       }
 
-      const cityName = item.city;
-      const salonQuality = parseFloat(item.salon_quality);
-      const managerQuality = parseFloat(item.manager_quality);
       const surveyDate = new Date(
         item.survey_date.split(".").reverse().join("-")
       );
+
+      // Фильтрация по дате
+      if (
+        selectedStartDate.value &&
+        surveyDate < new Date(selectedStartDate.value)
+      ) {
+        return;
+      }
+      if (
+        selectedEndDate.value &&
+        surveyDate > new Date(selectedEndDate.value)
+      ) {
+        return;
+      }
+
+
+      // Фильтрация по региону
+      if (selectedRegion.value && !cities.value[selectedRegion.value].includes(cityName)) {
+        return; // Пропускаем, если город не в выбранном регионе
+      }
+
+      // Фильтрация по городу
+      if (selectedCity.value && cityName !== selectedCity.value) {
+        return; // Пропускаем, если выбран город и он не совпадает
+      }
+
+      const salonQuality = parseFloat(item.salon_quality);
+      const managerQuality = parseFloat(item.manager_quality);
 
       // Обработка данных по городу
       if (!cityMap[cityName]) {
@@ -654,13 +371,14 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+
 .table-container {
   overflow: auto;
   height: 570px;
   max-height: 570px;
   border-radius: 8px;
   display: flex;
-  align-items: center;
+  align-items: start;
   justify-content: space-between;
   gap: 30px;
 }
@@ -755,6 +473,15 @@ onMounted(() => {
 
 .data-table tbody tr:nth-child(even) {
   background: none; /* Фон по умолчанию */
+}
+
+.table-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  max-height: 485px;
 }
 
 .table-nav__btns {

@@ -93,6 +93,13 @@ const cities = ref({
   Юг: ["Тюмень", "Сургут", "Пермь", "Самара", "Челябинск", "Тюмень_Республики"]
 });
 
+const filters = ref({
+  selectedRegion: "",
+  selectedCity: "",
+  startDate: null,
+  endDate: null
+});
+
 const cityRegionMap = {
   Тюмень: "Юг",
   Сургут: "Юг",
@@ -130,7 +137,15 @@ const calculateTotal = (formData) => {
 // Асинхронная функция для получения данных
 const fetchData = async () => {
   try {
-    const response = await fetchTotalItems();
+    const filterParams = {
+      // Другие параметры...
+      startDate: filters.value.startDate || "",
+      endDate: filters.value.endDate || ""
+    };
+
+    const response = await fetchTotalItems({
+      params: filterParams,
+    });
 
     tableData.value = response.items;
     calculateRegionAverages(); // После получения данных вычисляем средние значения по регионам
@@ -238,7 +253,6 @@ function calculateCallsDynamicFromLastPeriod(cityEntries) {
 const fetchFactsOnly = async () => {
   try {
     const response = await fetchTotalItems();
-
     // Извлечение данных
     const factsData = response.items;
 
@@ -649,28 +663,6 @@ const calculateRegionAverages = async () => {
   });
 };
 
-const handleDateChange = (newFilters) => {
-  const { startDate, endDate } = newFilters;
-
-  filters.value = {
-    ...newFilters,
-    startDate: startDate ? new Date(startDate).toISOString() : null, // Преобразуем строку или null в дату
-    endDate: endDate ? new Date(endDate).toISOString() : null // Преобразуем строку или null в дату
-  };
-
-  console.log("Новые фильтры:", filters.value);
-
-  fetchClients(0, true); // Сброс данных и запрос с фильтрами
-};
-
-const handleFilterChange = ({
-  selectedRegion: newRegion,
-  selectedCity: newCity
-}) => {
-  selectedRegion.value = newRegion;
-  selectedCity.value = newCity;
-};
-
 const filteredCitiesData = computed(() => {
   return citiesData.value.filter((city) => {
     if (selectedCity.value) {
@@ -685,6 +677,29 @@ const filteredCitiesData = computed(() => {
     }
   });
 });
+
+// const handleFilterChange = ({
+//   selectedRegion: newRegion,
+//   selectedCity: newCity
+// }) => {
+//   selectedRegion.value = newRegion;
+//   selectedCity.value = newCity;
+// };
+
+const handleFilterChange = (newFilters) => {
+  filters.value.selectedRegion = newFilters.selectedRegion || "";
+  filters.value.selectedCity = newFilters.selectedCity || "";
+
+  // Если фильтры по датам присутствуют, обновляем их
+  if (newFilters.startDate || newFilters.endDate) {
+    filters.value.startDate = newFilters.startDate ? new Date(newFilters.startDate).toISOString() : null;
+    filters.value.endDate = newFilters.endDate ? new Date(newFilters.endDate).toISOString() : null;
+  }
+
+  // Перезапрашиваем данные
+  fetchData();
+};
+
 
 // Table to Excel
 const downloadTable = () => {
