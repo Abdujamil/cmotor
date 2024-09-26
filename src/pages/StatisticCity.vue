@@ -144,7 +144,7 @@ const fetchData = async () => {
     };
 
     const response = await fetchTotalItems({
-      params: filterParams,
+      params: filterParams
     });
 
     tableData.value = response.items;
@@ -648,9 +648,14 @@ const calculateRegionAverages = async () => {
       tradeInCallsDynamic
     );
 
-    console.log("totalTradeInCallsPreviousMonth: ", totalTradeInCallsPreviousMonth);
-    console.log("totalTradeInCallsCurrentMonth: ", totalTradeInCallsCurrentMonth);
-    
+    console.log(
+      "totalTradeInCallsPreviousMonth: ",
+      totalTradeInCallsPreviousMonth
+    );
+    console.log(
+      "totalTradeInCallsCurrentMonth: ",
+      totalTradeInCallsCurrentMonth
+    );
 
     return {
       region,
@@ -682,30 +687,14 @@ const filteredCitiesData = computed(() => {
   });
 });
 
-// const handleFilterChange = ({
-//   selectedRegion: newRegion,
-//   selectedCity: newCity
-// }) => {
-//   selectedRegion.value = newRegion;
-//   selectedCity.value = newCity;
-// };
-
-const handleFilterChange = (newFilters) => {
-  filters.value.selectedRegion = newFilters.selectedRegion || "";
-  filters.value.selectedCity = newFilters.selectedCity || "";
-
-  // Если фильтры по датам присутствуют, обновляем их
-  if (newFilters.startDate || newFilters.endDate) {
-    filters.value.startDate = newFilters.startDate ? new Date(newFilters.startDate).toISOString() : null;
-    filters.value.endDate = newFilters.endDate ? new Date(newFilters.endDate).toISOString() : null;
-  }
-
-  // Перезапрашиваем данные
-  fetchData();
+const handleFilterChange = ({
+  selectedRegion: newRegion,
+  selectedCity: newCity
+}) => {
+  selectedRegion.value = newRegion;
+  selectedCity.value = newCity;
 };
 
-
-// Table to Excel
 const downloadTable = () => {
   if (table.value) {
     const ws = XLSX.utils.table_to_sheet(table.value);
@@ -721,6 +710,8 @@ onMounted(() => {
   calculatePreviousPeriodDynamic();
 });
 </script>
+
+<!-- TODO -- Фильтр по датам -->
 
 <style scoped>
 .filters-statis-city {

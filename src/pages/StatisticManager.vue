@@ -52,10 +52,28 @@ const tableData3 = ref([]); // Табличные данные и общее к�
 const filteredManagers = ref([]); // Данные для отображения в таблице
 const dateFilter = ref({ startDate: null, endDate: null });
 
-const managersData = {};
+const cities = {
+  Север: [
+    "Кемерово",
+    "Новокузнецк",
+    "Барнаул",
+    "Красноярск ПЖ",
+    "Красноярск Брянка",
+    "Омск",
+    "Томск",
+    "Сургут_ГИ"
+  ],
+  Юг: [
+    "Тюмень",
+    "Сургут",
+    "Пермь",
+    "Самара",
+    "Челябинск",
+    "Тюмень_Республики"
+  ]
+};
 
-// Список регионов и городов
-const regions = Object.keys(managersData);
+const regions = Object.keys(cities);
 const selectedRegion = ref("");
 const selectedCity = ref("");
 
@@ -104,8 +122,7 @@ const processData = () => {
     const cityMatch = !selectedCity.value || city === selectedCity.value;
     const regionMatch =
       !selectedRegion.value ||
-      (regions[selectedRegion.value] &&
-        regions[selectedRegion.value].includes(city));
+      (cities[selectedRegion.value] && cities[selectedRegion.value].includes(city));
 
     // Если город или регион совпадает, добавляем менеджера в результаты
     if (cityMatch || regionMatch) {
@@ -166,7 +183,7 @@ const handleFilterChange = ({
 };
 
 const onRegionChange = () => {
-  selectedCity.value = "";
+  selectedCity.value = ""; // Сбрасываем выбранный город
 };
 
 watch(dateFilter, processData, { immediate: true });
