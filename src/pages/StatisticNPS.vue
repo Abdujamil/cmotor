@@ -413,6 +413,8 @@ import axios from "axios";
 const selectedRegion = ref("");
 const selectedCity = ref("");
 
+const citiesData = ref([]);
+
 const downloadTable = () => {
   if (table.value) {
     // Преобразуем HTML таблицу в формат рабочего листа Excel
@@ -441,73 +443,35 @@ const overallManagerComparison = ref(0);
 const overallNPS = ref(0);
 const overallNPSComparison = ref(null);
 
-// const filteredData = computed(() => {
-//   // Проверяем, какой тип данных выбран
-//   let dataToFilter = [];
-//   if (currentDataSet.value === "nps") {
-//     dataToFilter = cities; // NPS данные
-//   } else if (currentDataSet.value === "buyers") {
-//     dataToFilter = citiesP; // Покупатели данные
-//   } else if (currentDataSet.value === "commission") {
-//     dataToFilter = citiesK; // Комиссия данные
-//   }
+const cities = ref({
+  Север: [
+    "Кемерово",
+    "Новокузнецк",
+    "Барнаул",
+    "Красноярск ПЖ",
+    "Красноярск Брянка",
+    "Омск",
+    "Томск",
+    "Сургут_ГИ"
+  ],
+  Юг: ["Тюмень", "Сургут", "Пермь", "Самара", "Челябинск", "Тюмень_Республики"]
+});
 
-//   // Фильтруем данные по выбранному городу
-//   if (selectedCity.value) {
-//     return dataToFilter.filter(city => city.includes(selectedCity.value));
-//   }
 
-//   // Если город не выбран, возвращаем все данные для текущего типа
-//   return dataToFilter;
-// });
-
-// Общий NPS
-const cities = [
-  "Барнаул",
-  "Кемерово",
-  "Красноярск",
-  "Не указан",
-  "Новокузнецк",
-  "Омск",
-  "Пермь",
-  "Самара",
-  "Сургут",
-  "Томск",
-  "Тюмень",
-  "Челябинск"
-];
-
-// Покупатели
-const citiesP = [
-  "Покупатели",
-  "Покупатели",
-  "Покупатели",
-  "Покупатели",
-  "Покупатели",
-  "Покупатели",
-  "Покупатели",
-  "Покупатели",
-  "Покупатели",
-  "Покупатели",
-  "Покупатели",
-  "Покупатели"
-];
-
-// Комиссия
-const citiesK = [
-  "Комиссия",
-  "Комиссия",
-  "Комиссия",
-  "Комиссия",
-  "Комиссия",
-  "Комиссия",
-  "Комиссия",
-  "Комиссия",
-  "Комиссия",
-  "Комиссия",
-  "Комиссия",
-  "Комиссия"
-];
+const filteredCitiesData = computed(() => {
+  return citiesData.value.filter((city) => {
+    if (selectedCity.value) {
+      // Если выбран город, показываем только этот город
+      return city.city === selectedCity.value;
+    } else if (selectedRegion.value) {
+      // Если выбран регион, фильтруем по всем городам в этом регионе
+      return cities.value[selectedRegion.value].includes(city.city);
+    } else {
+      // Если не выбран ни регион, ни город, показываем все города
+      return true;
+    }
+  });
+});
 
 const handleFilterChange = ({
   selectedRegion: newRegion,
@@ -517,9 +481,10 @@ const handleFilterChange = ({
   selectedCity.value = newCity;
 };
 
+
+
 // Состояние текущих данных
 const currentDataSet = ref(""); // По умолчанию отображаем NPS
-const displayedData = ref(cities);
 
 const fetchData = async () => {
   try {

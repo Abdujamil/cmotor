@@ -232,11 +232,10 @@
           <div class="table-cell">Удалить</div>
         </div>
         <!-- Filtered Table Rows -->
-        <div
-          class="table-row body"
-          v-for="(city, index) in cities"
-          :key="index"
-        >
+        <div class="table-row body" 
+        v-for="(city, index) in filteredCities" 
+        :key="index" 
+        v-if="filteredCities.length > 0">
           <div class="table-cell">{{ index + 1 }}</div>
           <div class="table-cell">{{ city.city }}</div>
           <div class="table-cell">{{ city.salon_quality }}</div>
@@ -249,10 +248,7 @@
               {{ city.comment }}
             </p>
           </div>
-
-          <div
-            @click.stop="startEditing(index)"
-            class="table-cell table-cell-comment comment-rop" >
+          <div @click.stop="startEditing(index)" class="table-cell table-cell-comment comment-rop" >
             <svg
               title="Редактирование"
               v-if="editingIndex !== index"
@@ -286,11 +282,12 @@
               </p>
             </div>
           </div>
-
           <div class="table-cell" style="min-width: 95px">
             <div @click.stop="toggleDropdown('status', index)" class="dropdown">
-              <div class="dropdown-toggle" style="padding-left: 0;">
-                <span id="dropdown-selected">{{ cities[index].editedStatus }}</span>
+              <div class="dropdown-toggle" style="padding-left: 0">
+                <span id="dropdown-selected">{{
+                  cities[index].editedStatus
+                }}</span>
 
                 <span class="dropdown-arrow">
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -301,7 +298,11 @@
                   </svg>
                 </span>
               </div>
-              <div v-if="showStatusDropdowns[index]" class="dropdown-menu" style="width: 110px;">
+              <div
+                v-if="showStatusDropdowns[index]"
+                class="dropdown-menu"
+                style="width: 110px"
+              >
                 <div
                   class="dropdown-item"
                   v-for="(option, idx) in statusOptions"
@@ -313,20 +314,28 @@
               </div>
             </div>
           </div>
-
-          <div class="table-cell" style="max-width: 90px;">
-            <td style="display: flex; align-items: center; justify-content: center">
+          <div class="table-cell" style="max-width: 90px">
+            <td
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+            >
               <img
                 class="delete-icon-block"
                 title="Удалить"
                 @click="() => deleteCity(city.id)"
                 src="../../src/assets/icons8-delete.svg"
                 alt="delete"
-                style="margin: 0;"
+                style="margin: 0"
               />
             </td>
           </div>
         </div>
+        <div class="table-row" v-else>
+        <div class="table-cell">Ничего не найдено</div>
+      </div>
       </div>
     </div>
   </div>
@@ -335,7 +344,7 @@
 <script setup>
 import Filter from "../components/filters/Filter.vue";
 import IButton from "../components/installButton/IButton.vue";
-import { ref, nextTick, onMounted, onBeforeUnmount } from "vue";
+import { ref, nextTick, onMounted, onBeforeUnmount, computed } from "vue";
 import axios from "axios";
 import * as XLSX from "xlsx";
 
@@ -359,6 +368,12 @@ const selectedSlQuality = ref("");
 const selectedManagerWork = ref("");
 const selectedDealsType = ref("");
 const date = ref();
+const filters = ref({
+  selectedRegion: "",
+  selectedCity: "",
+  startDate: null, // Начальная дата
+  endDate: null // Конечная дата
+}); // Дефолтные значения фильтров
 
 const cities = ref([]); // Массив для хранения данных
 
@@ -376,6 +391,27 @@ const citiess = [
   "Тюмень",
   "Челябинск"
 ];
+
+const regions = {
+  Юг: [
+    "Тюмень",
+    "Сургут",
+    "Пермь",
+    "Самара",
+    "Челябинск",
+    "Сургут_ГИ",
+    "Тюмень_Республики"
+  ],
+  Север: [
+    "Кемерово",
+    "Новокузнецк",
+    "Барнаул",
+    "Красноярск ПЖ",
+    "Красноярск Брянка",
+    "Омск",
+    "Томск"
+  ]
+};
 
 const formData = ref({
   city: "",
@@ -400,15 +436,9 @@ const handleDateChange = (newFilters) => {
   if (startDate && endDate) {
     const start = new Date(startDate);
     const end = new Date(endDate);
-
-    // Проверка на валидность дат
-    if (isNaN(start) || isNaN(end)) {
-      console.error("Ошибка: некорректные значения дат");
-      return; // Прерываем выполнение функции при некорректных датах
-    }
-
-    if (start > end) {
-      console.error("Ошибка: endDate не может предшествовать startDate");
+    
+    if (isNaN(start) || isNaN(end) || start > end) {
+      console.error("Ошибка: некорректные даты");
       return; // Прерываем выполнение функции при некорректных датах
     }
   }
@@ -416,13 +446,13 @@ const handleDateChange = (newFilters) => {
   filters.value = {
     ...newFilters,
     startDate: startDate ? new Date(startDate).toISOString() : null,
-    endDate: endDate ? new Date(endDate).toISOString() : null
+    endDate: endDate ? new Date(endDate).toISOString() : null,
   };
 
   console.log("Новые фильтры:", filters.value);
-
-  fetchClients(0, true); // Сброс данных и запрос с фильтрами
+  fetchCities(0, true); // Сброс данных и запрос с фильтрами
 };
+
 
 const format2 = (date) => {
   const day = String(date.getDate()).padStart(2, "0"); // Добавляем ведущий ноль для дня
@@ -489,7 +519,6 @@ const selectDealsType = (DealsType) => {
 const showStatusDropdowns = ref(cities.value.map(() => false));
 console.log("showStatusDropdowns:", showStatusDropdowns.value);
 
-
 // Переключение видимости дропдаунов
 function toggleDropdown(type, index) {
   if (type === "brand") {
@@ -517,10 +546,24 @@ function toggleDropdown(type, index) {
 }
 
 // Функция для получения данных из БД
-const fetchCities = async () => {
+const fetchCities = async (offset = 0, resetData = false) => {
   try {
     const filterParams = {
-      order: "id_desc"
+      count: 100000,
+      order: "id_desc",
+      offset,
+      region: filters.value.selectedRegion || "", // Добавляем регион
+      city: filters.value.selectedCity || "", // Добавляем город
+
+      startDate:
+        filters.value.startDate instanceof Date
+          ? filters.value.startDate.toISOString()
+          : filters.value.startDate || "",
+
+      endDate:
+        filters.value.endDate instanceof Date
+          ? filters.value.endDate.toISOString()
+          : filters.value.endDate || ""
     };
 
     const response = await axios.get(
@@ -529,6 +572,13 @@ const fetchCities = async () => {
         params: filterParams
       }
     );
+
+    const newData = response.data.answer.items;
+    if (resetData) {
+      cities.value = newData;
+    }else{
+      cities.value = [...cities.value, ...newData];
+    }
 
     // cities.value = response.data.answer.items;
 
@@ -539,11 +589,48 @@ const fetchCities = async () => {
     }));
 
     showStatusDropdowns.value = cities.value.map(() => false); // Инициализация после загрузки
-
   } catch (error) {
     console.error("Ошибка при получении данных:", error);
   }
 };
+
+
+const filteredCities = computed(() => {
+  return cities.value.filter((client) => {
+    // Преобразуем строку даты клиента в объект Date
+    const clientDate = new Date(client.survey_date);
+    clientDate.setHours(0, 0, 0, 0); // Сбрасываем время до полуночи, чтобы сравнивать только дату
+    
+
+    // Преобразуем начальную и конечную даты фильтра
+    const startDate = filters.value.startDate
+      ? new Date(filters.value.startDate)
+      : null;
+    const endDate = filters.value.endDate
+      ? new Date(filters.value.endDate)
+      : null;
+
+    if (startDate) startDate.setHours(0, 0, 0, 0); // Сброс времени для начальной даты
+    if (endDate) endDate.setHours(23, 59, 59, 999); // Сброс времени для конечной даты, чтобы включить последний день
+
+    // Логика фильтрации по городам и регионам
+    const cityMatch =
+      !filters.value.selectedCity || client.city === filters.value.selectedCity;
+
+    // Фильтрация по выбранному региону
+    const regionMatch =
+      !filters.value.selectedRegion ||
+      regions[filters.value.selectedRegion]?.includes(client.city);
+
+    // Фильтрация по диапазону дат
+    const dateMatch =
+      (!startDate || clientDate >= startDate) &&
+      (!endDate || clientDate <= endDate);
+      
+
+    return cityMatch && regionMatch && dateMatch;
+  });
+});
 
 // Функция для сохранения rop_comment
 const saveComment = async (index) => {
