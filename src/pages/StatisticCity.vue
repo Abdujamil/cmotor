@@ -75,6 +75,9 @@ const selectedRegion = ref("");
 const selectedCity = ref("");
 const filteredTableData = ref([]);
 
+const selectedStartDate = ref(null);
+const selectedEndDate = ref(null);
+
 const tableData = ref([]);
 
 const citiesData = ref([]);
@@ -138,17 +141,27 @@ const calculateTotal = (formData) => {
 const fetchData = async () => {
   try {
     const filterParams = {
-      // Другие параметры...
-      startDate: filters.value.startDate || "",
-      endDate: filters.value.endDate || ""
+      startDate:
+        filters.value.startDate instanceof Date
+          ? filters.value.startDate.toISOString()
+          : filters.value.startDate || "",
+
+      endDate:
+        filters.value.endDate instanceof Date
+          ? filters.value.endDate.toISOString()
+          : filters.value.endDate || ""
     };
 
-    const response = await fetchTotalItems({
-      params: filterParams
-    });
-
+    const response = await fetchTotalItems({ params: filterParams });
     tableData.value = response.items;
-    calculateRegionAverages(); // После получения данных вычисляем средние значения по регионам
+
+    console.log(
+      "Starting calculateRegionAverages with dates:",
+      filters.value.startDate,
+      filters.value.endDate
+    );
+    // Передаем выбранные даты в calculateRegionAverages
+    calculateRegionAverages(filters.value.startDate, filters.value.endDate);
   } catch (error) {
     console.error("Ошибка при получении данных:", error);
   }
@@ -171,6 +184,27 @@ function filterByMonth(entries, month) {
     );
   });
 }
+
+const filterDataByDate = (data, startDate, endDate) => {
+  if (!startDate || !endDate) {
+    console.log("No dates provided, returning all data");
+    return data; // Если даты не выбраны, возвращаем все данные
+  }
+
+  const start = new Date(startDate.split(".").reverse().join("-"));
+  const end = new Date(endDate.split(".").reverse().join("-"));
+  end.setHours(23, 59, 59, 999); // Конец дня
+
+  console.log("start:", start);
+  console.log("end:", end);
+
+  return data.filter((item) => {
+    if (!item.date) return false; // Пропускаем записи без даты
+    const itemDate = new Date(item.date.split(".").reverse().join("-"));
+    console.log("itemDate:", itemDate);
+    return itemDate >= start && itemDate <= end;
+  });
+};
 
 // Функция для расчета динамики от прошлого периода
 function calculateDynamicFromLastPeriod(cityEntries) {
@@ -476,9 +510,25 @@ const getPreviousMonthData = (data) => {
 };
 
 // Функция для расчета средних значений по регионам
-const calculateRegionAverages = async () => {
+const calculateRegionAverages = async (startDate, endDate) => {
+  console.log(
+    "Starting calculateRegionAverages with dates:",
+    startDate,
+    endDate
+  );
+
   if (!Array.isArray(tableData.value)) {
     console.error("tableData.value не является массивом:", tableData.value);
+    return;
+  }
+
+  const filteredData = filterDataByDate(tableData.value, startDate, endDate);
+  filteredTableData.value = filteredData;
+
+  console.log("Filtered data:", filteredData);
+
+  if (filteredData.length === 0) {
+    alert("Нет данных для выбранного диапазона дат.");
     return;
   }
 
@@ -509,14 +559,14 @@ const calculateRegionAverages = async () => {
 
   // Получаем данные для текущего месяца
   const currentMonthData = getDataForMonth(
-    tableData.value,
+    filteredData,
     currentMonth,
     currentYear
   );
 
   // Получаем данные для предыдущего месяца
   const previousMonthData = getDataForMonth(
-    tableData.value,
+    filteredData,
     previousMonth,
     previousYear
   );
@@ -545,8 +595,9 @@ const calculateRegionAverages = async () => {
     if (region === "Юг") {
       totalCallsSouth += fact;
       tradeInCallsSouth += tradeIn; // Суммируем звонки трейд-ин для Юга
+
       if (currentMonthData.length > 0) {
-        totalTradeInCallsPreviousMonth += tradeIn; // Предыдущий месяц
+        totalTradeInCallsCurrentMonth += tradeIn; // Предыдущий месяц
       }
     } else if (region === "Север") {
       totalCallsNorth += fact;
@@ -689,15 +740,77 @@ const filteredCitiesData = computed(() => {
 
 const handleFilterChange = ({
   selectedRegion: newRegion,
-  selectedCity: newCity
+  selectedCity: newCity,
+  startDate,
+  endDate
 }) => {
   selectedRegion.value = newRegion;
   selectedCity.value = newCity;
+  selectedStartDate.value = startDate;
+  selectedEndDate.value = endDate;
+
+  console.log("Selected dates:", startDate, endDate);
+
+  fetchData();
 };
 
 const downloadTable = () => {
   if (table.value) {
-    const ws = XLSX.utils.table_to_sheet(table.value);
+    // Создаем временную таблицу
+    const tempTable = document.createElement("table");
+
+    // Копируем заголовок
+    const headerRow = tempTable.insertRow();
+    const headers = [
+      "По регионам",
+      "Среднее значение качества звонка",
+      "Динамика от прошлого периода",
+      "Кол-во звонков",
+      "Динамика от прошлого периода",
+      "Кол-во звонков в трейд-ин",
+      "Процент звонков в трейд-ин от общего кол-ва",
+      "Динамика от прошлого периода"
+    ];
+    
+    headers.forEach(header => {
+      const cell = headerRow.insertCell();
+      cell.textContent = header;
+    });
+
+    // Копируем строки из filteredTableData
+    filteredTableData.value.forEach(row => {
+      const rowElement = tempTable.insertRow();
+      rowElement.insertCell().textContent = row.region;
+      rowElement.insertCell().textContent = row.averageCallQuality;
+      rowElement.insertCell().textContent = row.previousPeriodDynamic;
+      rowElement.insertCell().textContent = row.totalCalls;
+      rowElement.insertCell().textContent = row.callsDynamic;
+      rowElement.insertCell().textContent = row.tradeInCalls;
+      rowElement.insertCell().textContent = row.tradeInPercentage;
+      rowElement.insertCell().textContent = row.dynamicFromLastPeriod;
+    });
+
+    // Копируем заголовок для городов
+    const cityHeaderRow = tempTable.insertRow();
+    const cityHeaderCell = cityHeaderRow.insertCell();
+    cityHeaderCell.colSpan = headers.length; // Для заголовка "По городам"
+    cityHeaderCell.textContent = "По городам";
+
+    // Копируем строки из filteredCitiesData
+    filteredCitiesData.value.forEach(city => {
+      const cityRow = tempTable.insertRow();
+      cityRow.insertCell().textContent = city.city;
+      cityRow.insertCell().textContent = city.cityAverageCallQuality;
+      cityRow.insertCell().textContent = city.cityPreviousPeriodDynamic;
+      cityRow.insertCell().textContent = city.cityTotalCalls;
+      cityRow.insertCell().textContent = city.cityCallsDynamic;
+      cityRow.insertCell().textContent = city.cityTradeInCalls;
+      cityRow.insertCell().textContent = city.cityTradeInPercentage;
+      cityRow.insertCell().textContent = city.cityDynamicFromLastPeriod;
+    });
+
+    // Генерируем Excel файл
+    const ws = XLSX.utils.table_to_sheet(tempTable);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
     XLSX.writeFile(wb, "static-table-city.xlsx");

@@ -773,10 +773,24 @@ onBeforeUnmount(() => {
 
 const downloadTable = () => {
   if (table.value) {
-    // Преобразуем HTML таблицу в формат рабочего листа Excel
-    const ws = XLSX.utils.table_to_sheet(table.value);
+    // Создаем массив для хранения данных
+    const data = [];
 
-    // Создаем книгу Excel и добавляем рабочий лист
+    // Собираем заголовки
+    const headers = Array.from(table.value.querySelectorAll('.header .table-cell'))
+      .map(cell => cell.textContent);
+    data.push(headers); // Добавляем заголовки в массив данных
+
+    // Собираем строки из filteredCities
+    const rows = Array.from(table.value.querySelectorAll('.table-row.body'));
+    rows.forEach(row => {
+      const rowData = Array.from(row.querySelectorAll('.table-cell'))
+        .map(cell => cell.textContent);
+      data.push(rowData); // Добавляем каждую строку в массив данных
+    });
+
+    // Создаем рабочий лист
+    const ws = XLSX.utils.aoa_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
 
@@ -784,6 +798,7 @@ const downloadTable = () => {
     XLSX.writeFile(wb, "data-nps-table.xlsx");
   }
 };
+
 </script>
 
 <style lang="scss" scoped>

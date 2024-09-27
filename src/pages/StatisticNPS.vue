@@ -36,7 +36,11 @@
         <div class="table-cell">{{ name.managerComparison }}</div>
         <div class="table-cell">{{ name.nps.toFixed(2) }}</div>
         <div class="table-cell">
-          {{ name.averageNPSPrevious ? name.averageNPSPrevious.toFixed(2) : "" }}
+          {{
+            name.averageNPSPrevious
+              ? name.averageNPSPrevious.toFixed(2) + " %"
+              : ""
+          }}
         </div>
       </div>
       <div class="table-row" v-else>
@@ -47,14 +51,10 @@
       <div class="table-row footer">
         <div class="table-cell">Общие значения:</div>
         <div class="table-cell">
-          {{
-            overallAverageSalonQuality
-              ? overallAverageSalonQuality.toFixed(2)
-              : ""
-          }}
+          {{ overallAverageSalonQuality ? overallAverageSalonQuality.toFixed(2) : "" }}
         </div>
         <div class="table-cell">
-          {{ overallComparison !== null ? overallComparison : "" }}
+          {{ overallComparison ? overallComparison : "" }}
         </div>
         <div class="table-cell">
           {{
@@ -118,18 +118,69 @@ const selectedRegion = ref("");
 const selectedCity = ref("");
 
 const citiesData = ref([]);
+const table = ref(null);
 
 const downloadTable = () => {
   if (table.value) {
-    // Преобразуем HTML таблицу в формат рабочего листа Excel
-    const ws = XLSX.utils.table_to_sheet(table.value);
+    // Создаем временную таблицу
+    const tempTable = document.createElement("table");
 
-    // Создаем книгу Excel и добавляем рабочий лист
+    // Копируем заголовок
+    const headerRow = tempTable.insertRow();
+    const headers = [
+      "Город",
+      "Среднее качество работы салона",
+      "Сравнение с прошлым периодом",
+      "Среднее качество работы менеджера",
+      "Сравнение с прошлым периодом",
+      "Среднее значение NPS",
+      "Сравнение с прошлым периодом"
+    ];
+
+    headers.forEach((header) => {
+      const cell = headerRow.insertCell();
+      cell.textContent = header;
+    });
+
+    // Копируем строки из filteredData
+    filteredData.value.forEach((name) => {
+      const rowElement = tempTable.insertRow();
+      rowElement.insertCell().textContent = name.name;
+      rowElement.insertCell().textContent = name.averageSalonQuality.toFixed(2);
+      rowElement.insertCell().textContent = name.managerComparison;
+      rowElement.insertCell().textContent =
+        name.averageManagerQuality.toFixed(2);
+      rowElement.insertCell().textContent = name.managerComparison;
+      rowElement.insertCell().textContent = name.nps.toFixed(2);
+      rowElement.insertCell().textContent = name.averageNPSPrevious
+        ? name.averageNPSPrevious.toFixed(2) + " %"
+        : "";
+    });
+
+    // Добавляем футер
+    const footerRow = tempTable.insertRow();
+    footerRow.insertCell().textContent = "Общие значения:";
+    footerRow.insertCell().textContent = overallAverageSalonQuality.value
+      ? overallAverageSalonQuality.value.toFixed(2)
+      : "";
+    footerRow.insertCell().textContent =
+      overallComparison.value !== null ? overallComparison.value : "";
+    footerRow.insertCell().textContent = overallAverageManagerQuality.value
+      ? overallAverageManagerQuality.value.toFixed(2)
+      : "";
+    footerRow.insertCell().textContent =
+      overallManagerComparison.value !== null
+        ? overallManagerComparison.value
+        : "";
+    footerRow.insertCell().textContent =
+      overallNPS.value !== null ? overallNPS.value.toFixed(2) : "";
+    footerRow.insertCell().textContent = overallNPSComparison.value;
+
+    // Генерируем Excel файл
+    const ws = XLSX.utils.table_to_sheet(tempTable);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-
-    // Генерируем и сохраняем файл Excel
-    XLSX.writeFile(wb, "table.xlsx");
+    XLSX.writeFile(wb, "static-table-nps.xlsx");
   }
 };
 
@@ -189,7 +240,6 @@ const fetchData = async () => {
     let totalCount = 0;
     let totalCountPrevious = 0;
     let totalNPSPrevious = 0; // Для хранения NPS за прошлый месяц
-    
 
     // Даты для фильтрации
     const currentDate = new Date();
@@ -200,7 +250,6 @@ const fetchData = async () => {
     const previousPeriodMap = {};
 
     data.forEach((item) => {
-
       const cityName = item.city;
 
       if (
@@ -229,9 +278,11 @@ const fetchData = async () => {
         return;
       }
 
-
       // Фильтрация по региону
-      if (selectedRegion.value && !cities.value[selectedRegion.value].includes(cityName)) {
+      if (
+        selectedRegion.value &&
+        !cities.value[selectedRegion.value].includes(cityName)
+      ) {
         return; // Пропускаем, если город не в выбранном регионе
       }
 
@@ -300,7 +351,7 @@ const fetchData = async () => {
 
       const managerComparison =
         previousManagerAverage !== null
-          ? (averageManagerQuality - previousManagerAverage).toFixed(2)
+          ? (averageManagerQuality - previousManagerAverage).toFixed(2) + " %"
           : "";
 
       const averageNPSPrevious = previousPeriodMap[city.name]
@@ -330,14 +381,14 @@ const fetchData = async () => {
         ? (
             totalManagerQuality / totalCount -
             totalManagerQualityPrevious / totalCountPrevious
-          ).toFixed(2)
+          ).toFixed(2) + " %"
         : null;
     overallComparison.value =
       totalCount > 0
         ? (
             totalQuality / totalCount -
             totalQualityPrevious / totalCountPrevious
-          ).toFixed(2)
+          ).toFixed(2) + " %"
         : null;
 
     // Рассчитываем общее NPS
@@ -352,9 +403,8 @@ const fetchData = async () => {
 
     overallNPSComparison.value =
       averageNPSPrevious !== null
-        ? (overallNPS.value - averageNPSPrevious).toFixed(2)
+        ? (overallNPS.value - averageNPSPrevious).toFixed(2) + " %"
         : "";
-        
   } catch (error) {
     console.error("Ошибка при получении данных:", error.message);
   }
@@ -372,7 +422,6 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-
 .table-container {
   overflow: auto;
   height: 570px;

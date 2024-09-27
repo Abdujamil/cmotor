@@ -20,7 +20,8 @@ a:hover {
 body {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
   background-color: #092d7d;
   font-size: 16px;
   font-style: normal;
@@ -162,6 +163,26 @@ body {
 .dp__input{
   background: transparent !important;
   font-size: 14px;
+}
+
+.dp__input::-webkit-input-placeholder{
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+.dp__input::-moz-placeholder{
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+.dp__input:-ms-input-placeholder{
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+.dp__input::-ms-input-placeholder{
+  color: #ffffff !important;
+  opacity: 1 !important;
 }
 
 .dp__input::placeholder{

@@ -27,7 +27,7 @@ export const fetchClients = async (filters, itemsPerPage, offset = 0) => {
 // Функция для получения общего количества записей
 export const fetchTotalItems = async () => {
   try {
-    const response = await axios.get("https://crystal-motors.ru/method.getClients?count=100000");
+    const response = await axios.get("https://crystal-motors.ru/method.getClients?count=all");
     return response.data.answer;
   } catch (error) {
     console.error("Ошибка при получении общего количества записей:", error.message);
