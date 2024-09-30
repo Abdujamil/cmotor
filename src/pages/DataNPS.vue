@@ -133,7 +133,7 @@
             <label for="manager">Номер телефона</label>
 
             <MaskInput
-              mask="+7##########"
+              mask="7##########"
               placeholder="Телефон"
               v-model="formData.phone_number"
             />

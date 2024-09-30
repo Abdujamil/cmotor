@@ -29,7 +29,7 @@
       >
         <div class="table-cell">{{ name.name }}</div>
         <div class="table-cell">{{ name.averageSalonQuality.toFixed(2) }}</div>
-        <div class="table-cell">{{ name.managerComparison }}</div>
+        <div class="table-cell">{{ name.salonComparison }}</div>
         <div class="table-cell">
           {{ name.averageManagerQuality.toFixed(2) }}
         </div>
@@ -147,7 +147,7 @@ const downloadTable = () => {
       const rowElement = tempTable.insertRow();
       rowElement.insertCell().textContent = name.name;
       rowElement.insertCell().textContent = name.averageSalonQuality.toFixed(2);
-      rowElement.insertCell().textContent = name.managerComparison;
+      rowElement.insertCell().textContent = name.salonComparison;
       rowElement.insertCell().textContent =
         name.averageManagerQuality.toFixed(2);
       rowElement.insertCell().textContent = name.managerComparison;
@@ -339,6 +339,14 @@ const fetchData = async () => {
     // Формируем массив для отображения
     filteredData.value = Object.values(cityMap).map((city) => {
       const averageSalonQuality = city.totalQuality / city.count;
+
+      const salonComparison =
+        totalQualityPrevious !== 0
+          ? (averageSalonQuality - totalQualityPrevious / totalCountPrevious).toFixed(
+              2
+            ) + " %"
+          : "";
+
       const averageManagerQuality =
         city.totalManagerQuality / city.managerCount;
       const nps = (averageSalonQuality + averageManagerQuality) / 2;
@@ -366,6 +374,7 @@ const fetchData = async () => {
       return {
         name: city.name,
         averageSalonQuality,
+        salonComparison,
         averageManagerQuality,
         nps,
         managerComparison,

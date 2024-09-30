@@ -64,14 +64,7 @@ const cities = {
     "Томск",
     "Сургут_ГИ"
   ],
-  Юг: [
-    "Тюмень",
-    "Сургут",
-    "Пермь",
-    "Самара",
-    "Челябинск",
-    "Тюмень_Республики"
-  ]
+  Юг: ["Тюмень", "Сургут", "Пермь", "Самара", "Челябинск", "Тюмень_Республики"]
 };
 
 const regions = Object.keys(cities);
@@ -85,7 +78,7 @@ const getCitiesForRegion = (region) => {
 const fetchTotalItems = async () => {
   try {
     const response = await axios.get(
-      "https://crystal-motors.ru/method.getClients?count=100000"
+      "https://crystal-motors.ru/method.getClients?count=all"
     );
     tableData3.value = response.data.answer.items;
     processData();
@@ -117,13 +110,12 @@ const processData = () => {
     const managerName = item.manager;
     const city = item.city;
 
-    // Проверка, соответствует ли выбранный город или регион
     const cityMatch = !selectedCity.value || city === selectedCity.value;
     const regionMatch =
       !selectedRegion.value ||
-      (cities[selectedRegion.value] && cities[selectedRegion.value].includes(city));
+      (cities[selectedRegion.value] &&
+        cities[selectedRegion.value].includes(city));
 
-    // Если город или регион совпадает, добавляем менеджера в результаты
     if (cityMatch || regionMatch) {
       if (!managerData[managerName]) {
         managerData[managerName] = {
@@ -135,7 +127,6 @@ const processData = () => {
         };
       }
 
-      // Логика вычисления для менеджера
       const total =
         Number(item.obrashenie) +
         Number(item.salon) +
@@ -154,19 +145,22 @@ const processData = () => {
       managerData[managerName].totalCalls += parseInt(item.fact, 10);
       managerData[managerName].totalPlan += parseInt(item.plan, 10);
       managerData[managerName].totalPercentage += total;
+
       managerData[managerName].count += 1;
+
     }
   });
 
   filteredManagers.value = Object.values(managerData).map((manager) => {
     const averagePercentage =
-      manager.count === 0 ? 0 : manager.totalPercentage / manager.count;
+      manager.totalCalls === 0
+        ? 0
+        : (manager.totalPlan / manager.totalCalls);  
     return {
       ...manager,
       averagePercentage: parseFloat(averagePercentage.toFixed(2))
     };
   });
-
 };
 
 const handleFilterChange = ({
@@ -192,15 +186,19 @@ const downloadTable = () => {
     const data = [];
 
     // Собираем заголовки
-    const headers = Array.from(table.value.querySelectorAll('.header .table-cell'))
-      .map(cell => cell.textContent);
+    const headers = Array.from(
+      table.value.querySelectorAll(".header .table-cell")
+    ).map((cell) => cell.textContent);
     data.push(headers); // Добавляем заголовки в массив данных
 
     // Собираем строки из filteredManagers
-    const rows = Array.from(table.value.querySelectorAll('.table-row:not(.header)'));
-    rows.forEach(row => {
-      const rowData = Array.from(row.querySelectorAll('.table-cell'))
-        .map(cell => cell.textContent);
+    const rows = Array.from(
+      table.value.querySelectorAll(".table-row:not(.header)")
+    );
+    rows.forEach((row) => {
+      const rowData = Array.from(row.querySelectorAll(".table-cell")).map(
+        (cell) => cell.textContent
+      );
       data.push(rowData); // Добавляем каждую строку в массив данных
     });
 
@@ -213,7 +211,6 @@ const downloadTable = () => {
     XLSX.writeFile(wb, "managers-table.xlsx");
   }
 };
-
 
 watch(dateFilter, processData, { immediate: true });
 
