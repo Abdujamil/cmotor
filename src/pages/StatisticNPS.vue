@@ -12,12 +12,30 @@
       <!-- Table Header -->
       <div class="table-row header">
         <div class="table-cell">Город</div>
-        <div class="table-cell">Среднее качество работы салона</div>
-        <div class="table-cell">Сравнение с прошлым периодом</div>
-        <div class="table-cell">Среднее качество работы менеджера</div>
-        <div class="table-cell">Сравнение с прошлым периодом</div>
-        <div class="table-cell">Среднее значение NPS</div>
-        <div class="table-cell">Сравнение с прошлым периодом</div>
+        <div class="table-cell" @click="sortData('averageSalonQuality')">
+          Среднее качество работы салона
+          <span v-if="sortKey === 'averageSalonQuality'">{{ sortOrder === 'asc' ? '↓↑' : '↓↑' }}</span>
+        </div>
+        <div class="table-cell" @click="sortData('salonComparison')">
+          Сравнение с прошлым периодом
+          <span v-if="sortKey === 'salonComparison'">{{ sortOrder === 'asc' ? '↓↑' : '↓↑' }}</span>
+        </div>
+        <div class="table-cell" @click="sortData('averageManagerQuality')">
+          Среднее качество работы менеджера
+          <span v-if="sortKey === 'averageManagerQuality'">{{ sortOrder === 'asc' ? '↓↑' : '↓↑' }}</span>
+        </div>
+        <div class="table-cell" @click="sortData('managerComparison')">
+          Сравнение с прошлым периодом
+          <span v-if="sortKey === 'managerComparison'">{{ sortOrder === 'asc' ? '↓↑' : '↓↑' }}</span>
+        </div>
+        <div class="table-cell" @click="sortData('nps')">
+          Среднее значение NPS
+          <span v-if="sortKey === 'nps'">{{ sortOrder === 'asc' ? '↓↑' : '↓↑' }}</span>
+        </div>
+        <div class="table-cell" @click="sortData('averageNPSPrevious')">
+          Сравнение с прошлым периодом
+          <span v-if="sortKey === 'averageNPSPrevious'">{{ sortOrder === 'asc' ? '↓↑' : '↓↑' }}</span>
+        </div>
       </div>
       <!-- Filtered Table Rows -->
 
@@ -117,6 +135,51 @@ import axios from "axios";
 const selectedRegion = ref("");
 const selectedCity = ref("");
 
+const sortKey = ref('');
+// Установим начальное значение для сортировки
+const sortKeys = ref({
+  averageSalonQuality: 'asc',
+  salonComparison: 'asc',
+  averageManagerQuality: 'asc',
+  managerComparison: 'asc',
+  nps: 'asc',
+  averageNPSPrevious: 'asc',
+});
+const sortOrder = ref('asc');
+
+// Вычисляемое свойство для сортировки данных
+const sortedData = computed(() => {
+  return [...filteredData.value].sort((a, b) => {
+    for (const key in sortKeys.value) {
+      if (sortKeys.value[key]) {
+        const aValue = a[key];
+        const bValue = b[key];
+
+        if (sortKeys.value[key] === 'asc') {
+          if (aValue < bValue) return -1;
+          if (aValue > bValue) return 1;
+        } else {
+          if (aValue > bValue) return -1;
+          if (aValue < bValue) return 1;
+        }
+      }
+    }
+    return 0; // Если нет сортировки
+  });
+});
+
+// Метод для сортировки данных при нажатии на заголовок колонки
+const sortData = (key) => {
+  // Сбросить сортировку для всех колонок
+  for (const k in sortKeys.value) {
+    if (k === key) {
+      sortKeys.value[k] = sortKeys.value[k] === 'asc' ? 'desc' : 'asc'; // Меняем порядок для нажатой колонки
+    } else {
+      sortKeys.value[k] = 'asc'; // Сбросить другие колонки
+    }
+  }
+};
+
 const citiesData = ref([]);
 const table = ref(null);
 
@@ -204,9 +267,8 @@ const cities = ref({
     "Красноярск Брянка",
     "Омск",
     "Томск",
-    "Сургут_ГИ"
   ],
-  Юг: ["Тюмень", "Сургут", "Пермь", "Самара", "Челябинск", "Тюмень_Республики"]
+  Юг: ["Тюмень", "Сургут", "Сургут_ГИ", "Пермь", "Самара", "Челябинск", "Тюмень_Республики"]
 });
 
 const handleFilterChange = ({
@@ -417,6 +479,11 @@ const fetchData = async () => {
   } catch (error) {
     console.error("Ошибка при получении данных:", error.message);
   }
+};
+
+const switchData2 = (dataSet) => {
+  currentDataSet.value = dataSet;
+  fetchData(); // Переопределите или измените этот вызов в зависимости от вашей логики
 };
 
 const switchData = (type) => {

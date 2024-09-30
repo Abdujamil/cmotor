@@ -1,6 +1,212 @@
 <template>
+  <!-- Edit field -->
+  <div v-if="showFormEdit" class="form-fields">
+    <form @submit.prevent="updateClient">
+      <div class="form-fields__title">
+        <h2>Редактирование полей</h2>
+        <div class="form-fields__title-btns">
+          <button type="submit" class="btn btn-green">Сохранить</button>
+          <button @click="cancelForm" class="btn btn-red">Отменить</button>
+        </div>
+      </div>
+
+      <div class="dataNps-selects form-fields__selects">
+        <div class="dataNps-selects-head">
+          <div
+            class="form-fields__select form-fields__selects-city"
+            ref="cityDropdown"
+          >
+            <label for="city">Город</label>
+            <div class="dropdown">
+              <div class="dropdown-toggle" @click="toggleDropdown('city')">
+                <span>{{ selectedCity || "Выберите город" }}</span>
+                <span class="dropdown-arrow">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M16.0299 7.42016C16.3234 7.71345 16.3234 8.18897 16.0299 8.48226L10.5283 13.9802C10.3873 14.1211 10.1962 14.2002 9.99685 14.2002C9.79754 14.2002 9.60638 14.1211 9.46545 13.9802L3.97011 8.48856C3.67663 8.19526 3.67663 7.71975 3.97012 7.42645C4.2636 7.13316 4.73944 7.13316 5.03292 7.42645L9.99685 12.3871L14.9671 7.42016C15.2606 7.12687 15.7364 7.12687 16.0299 7.42016Z"
+                      fill="white"
+                    />
+                  </svg>
+                </span>
+              </div>
+              <div class="dropdown-menu" v-if="showCityDropdown">
+                <div
+                  class="dropdown-item"
+                  v-for="city in citiess"
+                  :key="city"
+                  @click="selectCity(city)"
+                >
+                  {{ city }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="form-fields__select form-fields__selects-city"
+            ref="salonDropdown"
+          >
+            <label for="salon">Кач-во обслуж. в салоне</label>
+            <div class="dropdown">
+              <div class="dropdown-toggle" @click="toggleDropdown('salon')">
+                <span>{{ selectedSlQuality || "Выберите оценку" }}</span>
+                <span class="dropdown-arrow">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M16.0299 7.42016C16.3234 7.71345 16.3234 8.18897 16.0299 8.48226L10.5283 13.9802C10.3873 14.1211 10.1962 14.2002 9.99685 14.2002C9.79754 14.2002 9.60638 14.1211 9.46545 13.9802L3.97011 8.48856C3.67663 8.19526 3.67663 7.71975 3.97012 7.42645C4.2636 7.13316 4.73944 7.13316 5.03292 7.42645L9.99685 12.3871L14.9671 7.42016C15.2606 7.12687 15.7364 7.12687 16.0299 7.42016Z"
+                      fill="white"
+                    />
+                  </svg>
+                </span>
+              </div>
+              <div class="dropdown-menu" v-if="showQualSlaonDropdown">
+                <div
+                  class="dropdown-item"
+                  v-for="ratingSl in ratingsSalon"
+                  :key="ratingSl"
+                  @click="selectsalon_quality(ratingSl)"
+                >
+                  {{ ratingSl }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="form-fields__select form-fields__selects-city"
+            ref="managerDropdown"
+          >
+            <label for="manager">Кач-во работы менеджера</label>
+            <div class="dropdown">
+              <div
+                class="dropdown-toggle"
+                @click="toggleDropdown('managerWork')"
+              >
+                <span>{{ selectedManagerWork || "Выберите оценку" }}</span>
+                <span class="dropdown-arrow">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M16.0299 7.42016C16.3234 7.71345 16.3234 8.18897 16.0299 8.48226L10.5283 13.9802C10.3873 14.1211 10.1962 14.2002 9.99685 14.2002C9.79754 14.2002 9.60638 14.1211 9.46545 13.9802L3.97011 8.48856C3.67663 8.19526 3.67663 7.71975 3.97012 7.42645C4.2636 7.13316 4.73944 7.13316 5.03292 7.42645L9.99685 12.3871L14.9671 7.42016C15.2606 7.12687 15.7364 7.12687 16.0299 7.42016Z"
+                      fill="white"
+                    />
+                  </svg>
+                </span>
+              </div>
+              <div class="dropdown-menu" v-if="showManagerWorkDropdown">
+                <div
+                  class="dropdown-item"
+                  v-for="rating in ratingsManagerWork"
+                  :key="rating"
+                  @click="selectManagerWork(rating)"
+                >
+                  {{ rating }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-fields__select form-fields__selects-manager">
+            <label for="manager">Номер телефона</label>
+
+            <MaskInput
+              mask="7##########"
+              placeholder="Телефон"
+              v-model="formData.phone_number"
+            />
+          </div>
+          <div class="form-fields__select form-fields__selects-manager">
+            <label for="manager">Дата опроса</label>
+            <div class="my-calendar">
+              <VueDatePicker
+                v-model="formData.survey_date"
+                :format="format2"
+                dark
+                placeholder="За всё время"
+                @update:model-value="updatedataRange"
+                locale="ru-RU"
+                select-text="Выбрать"
+                cancel-text="Отменить"
+                :enable-time-picker="false"
+              >
+              </VueDatePicker>
+            </div>
+          </div>
+        </div>
+        <div class="dataNps-selects-foot">
+          <div
+            class="form-fields__select form-fields__selects-city"
+            ref="dealsDropdown"
+          >
+            <label for="dealsType">Тип сделки</label>
+            <div class="dropdown">
+              <div class="dropdown-toggle" @click="toggleDropdown('dealsType')">
+                <span>{{ selectedDealsType || "Выберите тип сделки" }}</span>
+                <span class="dropdown-arrow">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M16.0299 7.42016C16.3234 7.71345 16.3234 8.18897 16.0299 8.48226L10.5283 13.9802C10.3873 14.1211 10.1962 14.2002 9.99685 14.2002C9.79754 14.2002 9.60638 14.1211 9.46545 13.9802L3.97011 8.48856C3.67663 8.19526 3.67663 7.71975 3.97012 7.42645C4.2636 7.13316 4.73944 7.13316 5.03292 7.42645L9.99685 12.3871L14.9671 7.42016C15.2606 7.12687 15.7364 7.12687 16.0299 7.42016Z"
+                      fill="white"
+                    />
+                  </svg>
+                </span>
+              </div>
+              <div class="dropdown-menu" v-if="showDealsTypeDropdown">
+                <div
+                  class="dropdown-item"
+                  v-for="deal in typeDeal"
+                  :key="deal"
+                  @click="selectDealsType(deal)"
+                >
+                  {{ deal }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-fields__select form-fields__selects-callComment">
+            <label for="call-comment">Комментарий по звонку:</label>
+            <textarea v-model="formData.comment" placeholder="Комментарий" />
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <!-- END Edit field -->
+
   <!-- Add new field -->
-  <div v-if="showForm" class="form-fields">
+  <div v-else-if="showForm" class="form-fields">
     <form @submit.prevent="addCity">
       <div class="form-fields__title">
         <h2>Добавление нового поля</h2>
@@ -233,6 +439,7 @@
           <div class="table-cell">Комментарий</div>
           <div class="table-cell">Комментарий РОПа</div>
           <div class="table-cell">Статус</div>
+          <div class="table-cell">Редактировать</div>
           <div class="table-cell">Удалить</div>
         </div>
         <!-- Filtered Table Rows -->
@@ -254,9 +461,7 @@
               {{ city.comment }}
             </p>
           </div>
-          <div
-            @click.stop="startEditing(index)"
-            class="table-cell table-cell-comment comment-rop"
+          <div @click.stop="startEditing(index)" class="table-cell table-cell-comment comment-rop"
           >
             <svg
               title="Редактирование"
@@ -324,6 +529,24 @@
             </div>
           </div>
           <div class="table-cell" style="max-width: 90px">
+            <div @click="editClient(city)" class="edit-icon-block">
+              <svg
+                title="Редактирование"
+                id="edit-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 18 18"
+                fill="none"
+              >
+                <path
+                  d="M16.875 8.43754V14.0625C16.875 15.6132 15.6132 16.875 14.0625 16.875H3.9375C2.38683 16.875 1.125 15.6132 1.125 14.0625V3.93754C1.125 2.38686 2.38683 1.12504 3.9375 1.12504H9.5625C9.87314 1.12504 10.125 1.37689 10.125 1.68754C10.125 1.99818 9.87314 2.25004 9.5625 2.25004H3.9375C3.00698 2.25004 2.25 3.00702 2.25 3.93754V14.0625C2.25 14.9931 3.00698 15.75 3.9375 15.75H14.0625C14.993 15.75 15.75 14.9931 15.75 14.0625V8.43754C15.75 8.12689 16.0019 7.87504 16.3125 7.87504C16.6231 7.87504 16.875 8.12689 16.875 8.43754ZM5.22731 9.16485L13.1023 1.28985C13.3221 1.07005 13.678 1.07005 13.8977 1.28985L16.7102 4.10235C16.93 4.32214 16.93 4.67807 16.7102 4.89772L8.83519 12.7727C8.72972 12.8782 8.5867 12.9375 8.4375 12.9375H5.625C5.31436 12.9375 5.0625 12.6857 5.0625 12.375V9.56254C5.0625 9.41333 5.12184 9.27032 5.22731 9.16485ZM12.6079 3.37504L14.625 5.39216L15.5171 4.50004L13.5 2.48291L12.6079 3.37504ZM6.1875 11.8125H8.20463L13.8296 6.18754L11.8125 4.17041L6.1875 9.79541V11.8125Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </div>
+          </div>
+          <div class="table-cell" style="max-width: 90px">
             <td
               style="
                 display: flex;
@@ -368,6 +591,7 @@ const editedComments = ref([]); // Изменяем на массив для к�
 const editInput = ref([]); // Массив для каждого поля ввода
 
 const showForm = ref(false);
+const showFormEdit = ref(false);
 const showCityDropdown = ref(false);
 const showQualSlaonDropdown = ref(false);
 const showManagerWorkDropdown = ref(false);
@@ -426,7 +650,7 @@ const formData = ref({
   city: "",
   salon_quality: "",
   manager_quality: "",
-  phone_number_number: "",
+  phone_number: "",
   survey_date: "",
   transaction_type: "",
   comment: "",
@@ -483,10 +707,12 @@ const updatedataRange = (dates) => {
 
 const toggleForm = () => {
   showForm.value = !showForm.value;
+  // showFormEdit.value = !showFormEdit.value;
 };
 
 const cancelForm = () => {
   showForm.value = false;
+  showFormEdit.value = false;
 };
 
 // Функция выбора статуса
@@ -613,12 +839,10 @@ const filteredCities = computed(() => {
     const startDate = filters.value.startDate
       ? new Date(filters.value.startDate)
       : null;
-    console.log("startDate:", startDate);
 
     const endDate = filters.value.endDate
       ? new Date(filters.value.endDate)
       : null;
-    console.log("endDate:", endDate);
 
     if (startDate) startDate.setHours(0, 0, 0, 0); // Сброс времени для начальной даты
     if (endDate) endDate.setHours(23, 59, 59, 999); // Сброс времени для конечной даты, чтобы включить последний день
@@ -669,7 +893,7 @@ const saveStatus = async (index) => {
 
   try {
     await axios.get(
-      "https://crystal-motors.ru/method.editSending?count=10000",
+      "https://crystal-motors.ru/method.editSending?count=all",
       {
         params: {
           id: cities.value[index].id,
@@ -742,6 +966,45 @@ const addCity = async () => {
   }
 };
 
+const updateClient = async () => {
+  try {
+
+    const params = new URLSearchParams(formData.value).toString();
+
+    // Убедитесь, что URL и метод правильно настроены на сервере
+    await axios.get(`https://crystal-motors.ru/method.editSending?${params}`);
+
+    alert("Данные успешно обновлены!");
+    
+    showFormEdit.value = false;
+   
+    // Вызовите функцию для обновления списка клиентов
+    await fetchCities();
+  } catch (error) {
+    console.error("Ошибка при обновлении данных клиента:", error);
+  }
+};
+
+
+const editClient = (city) => {
+  if (city) {
+    showFormEdit.value = !showFormEdit.value;
+    formData.value = { ...city }; // Клонируем данные клиента в formData2
+
+    const getNumber = (string) =>
+      (String(string || "").match(/\.?\d+/g) || [0]).join("") || 0;
+
+    // Форматируем номер телефона
+    formData.value.phone = getNumber(city.phone);
+    console.log("Форматированный номер телефона:", formData.value.phone);
+
+    // Устанавливаем выбранный город из данных клиента
+    selectedCity.value = city.city || "";
+  } else {
+    console.error("Не удалось загрузить данные клиента.");
+  }
+};
+
 // Функция для удаления клиента
 const deleteCity = async (id) => {
   try {
@@ -777,15 +1040,17 @@ const downloadTable = () => {
     const data = [];
 
     // Собираем заголовки
-    const headers = Array.from(table.value.querySelectorAll('.header .table-cell'))
-      .map(cell => cell.textContent);
+    const headers = Array.from(
+      table.value.querySelectorAll(".header .table-cell")
+    ).map((cell) => cell.textContent);
     data.push(headers); // Добавляем заголовки в массив данных
 
     // Собираем строки из filteredCities
-    const rows = Array.from(table.value.querySelectorAll('.table-row.body'));
-    rows.forEach(row => {
-      const rowData = Array.from(row.querySelectorAll('.table-cell'))
-        .map(cell => cell.textContent);
+    const rows = Array.from(table.value.querySelectorAll(".table-row.body"));
+    rows.forEach((row) => {
+      const rowData = Array.from(row.querySelectorAll(".table-cell")).map(
+        (cell) => cell.textContent
+      );
       data.push(rowData); // Добавляем каждую строку в массив данных
     });
 
@@ -798,7 +1063,6 @@ const downloadTable = () => {
     XLSX.writeFile(wb, "data-nps-table.xlsx");
   }
 };
-
 </script>
 
 <style lang="scss" scoped>

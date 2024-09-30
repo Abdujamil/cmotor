@@ -524,8 +524,6 @@ const calculateRegionAverages = async (startDate = null, endDate = null) => {
 
   const filteredData = filterDataByDate(tableData.value, startDate, endDate); // тут данных почему-то нет пусто
 
-  console.log("tableData.value:", tableData.value);
-
   if (filteredData.length === 0) {
     alert("Нет данных для выбранного диапазона дат.");
     return;
@@ -547,36 +545,25 @@ const calculateRegionAverages = async (startDate = null, endDate = null) => {
     previousYear
   );
 
-  const getDataForMonth = (data, targetMonth, targetYear, attempts = 0) => {
-    if (attempts > 12) return []; // Ограничение по количеству попыток
-    if (targetMonth < 0 && targetYear <= 0) return []; // Выход, если нет месяцев для проверки
-
-    console.log(`Проверка: месяц ${targetMonth}, год ${targetYear}`);
-
-    const foundData = data.filter((item) => {
+  const getDataForMonth = (data, targetMonth, targetYear) => {
+    let foundData = data.filter((item) => {
       const itemDate = new Date(item.date.split(".").reverse().join("-"));
-      console.log("Преобразованная дата:", itemDate);
-      console.log(`Сравнение: ${itemDate.getMonth()} === ${targetMonth} && ${itemDate.getFullYear()} === ${targetYear}`);
-
-      // Проверка на текущий и предыдущий месяц
       return (
         itemDate.getMonth() === targetMonth &&
         itemDate.getFullYear() === targetYear
       );
     });
 
-    console.log("Найденные данные:", foundData);
-
     // Если данных нет, проверяем предыдущий месяц
     if (foundData.length === 0) {
-      if (targetMonth > 0) {
-        return getDataForMonth(data, targetMonth - 1, targetYear, attempts + 1);
-      } else if (targetYear > 0) {
-        return getDataForMonth(data, 11, targetYear - 1, attempts + 1);
+      if (targetMonth === 0) {
+        // Если это январь, возвращаем пустой массив
+        return [];
       }
+      return getDataForMonth(data, targetMonth - 1, targetYear);
     }
 
-    return foundData; // Возвращаем найденные данные или пустой массив
+    return foundData; // Возвращаем найденные данные
   };
 
   // Получаем данные для текущего месяца

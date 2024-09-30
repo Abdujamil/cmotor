@@ -1,3 +1,5 @@
+<!-- TODO радиокнопки доделать -->
+
 <template>
   <!-- Add new field -->
   <div v-if="showForm" class="form-fields">
@@ -271,28 +273,7 @@
       <div class="checkboxes__container">
         <div class="checkboxes__container-row">
           <label for="fact-call">Факт звонка:</label>
-          <div class="radio-group">
-            <p>
-              <input
-                type="radio"
-                id="test1"
-                v-model="formData2.fact"
-                name="fact-call"
-                checked
-                value="0"
-              />
-              <label for="test1">0</label>
-            </p>
-            <p>
-              <input
-                type="radio"
-                id="test2"
-                v-model="formData2.fact"
-                name="fact-call"
-                value="0.5"
-              />
-              <label for="test2">0.5</label>
-            </p>
+          <div class="radio-group fact">
             <p>
               <input
                 type="radio"
@@ -300,8 +281,19 @@
                 v-model="formData2.fact"
                 name="fact-call"
                 value="1"
+                checked
               />
               <label for="test3">1</label>
+            </p>
+            <p class="fact-checkbox">
+              <input
+                type="checkbox"
+                id="test2"
+                v-model="formData2.fact"
+                name="fact-call"
+                value="1"
+              />
+              <label for="test2">Не учитывать в расчетах</label>
             </p>
           </div>
         </div>
@@ -1065,8 +1057,8 @@
       <div class="checkboxes__container">
         <div class="checkboxes__container-row">
           <label for="fact-call">Факт звонка:</label>
-          <div class="radio-group">
-            <p>
+          <div class="radio-group fact">
+            <!-- <p>
               <input
                 type="radio"
                 id="test1"
@@ -1076,17 +1068,7 @@
                 value="0"
               />
               <label for="test1">0</label>
-            </p>
-            <p>
-              <input
-                type="radio"
-                id="test2"
-                v-model="formData2.fact"
-                name="fact-call"
-                value="0.5"
-              />
-              <label for="test2">0.5</label>
-            </p>
+            </p> -->
             <p>
               <input
                 type="radio"
@@ -1094,8 +1076,20 @@
                 v-model="formData2.fact"
                 name="fact-call"
                 value="1"
+                checked
               />
               <label for="test3">1</label>
+            </p>
+            <p class="fact-checkbox">
+              <input
+                type="checkbox"
+                id="test2"
+                v-model="formData2.fact"
+                name="fact-call"
+                value=" "
+                :checked="formData2.fact === ' '"
+              />
+              <label for="test2">Не учитывать в расчетах</label>
             </p>
           </div>
         </div>
@@ -1805,23 +1799,23 @@ const regions = {
 };
 
 const managersByCity = {
-  "Сургут": [
+  Сургут: [
     "Эдуард Мукин",
     "Турал Мамедли",
     "Алексей Шевчук",
     "Армен Мкртчян",
     "Не представился",
     "Вадим Гусейнов",
-    "Роман Мкртчян",
+    "Роман Мкртчян"
   ],
-  "Тюмень": [
+  Тюмень: [
     "Алексей Краюхин",
     "Павел Дацюк",
     "Данил Проценко",
     "Алексей Гостев",
-    "Станислав Питулин",
+    "Станислав Питулин"
   ],
-  "Пермь": [
+  Пермь: [
     "Антон Терлецкий",
     "Радик Салахов",
     "Егор Марчук",
@@ -1831,34 +1825,34 @@ const managersByCity = {
     "Артемий Ефимов",
     "Константин управляющий",
     "Сергей Казымов",
-    "Антон Тупицын",
+    "Антон Тупицын"
   ],
-  "Самара": [
+  Самара: [
     "Антон Швалев",
     "Не представился",
     "Роман Шералиев",
     "Артем Чигарьков",
     "Дамир Шаймерденов",
     "Никита Гришихин",
-    "Андрей Григорьев",
+    "Андрей Григорьев"
   ],
-  "Челябинск": [
+  Челябинск: [
     "Ринат Юсупов",
     "Илья Пятыгин",
     "Данил Тагиев",
     "Данил Кучин",
     "Диннур Фасхутдинов",
     "Илья Васкевич",
-    "Кирилл Кривцов",
+    "Кирилл Кривцов"
   ],
-  "Кемерово": [
+  Кемерово: [
     "Денис Илюхин",
     "Кирилл Келлер",
     "Федор Асадов",
     "Дмитрий Маник",
-    "Владимир РОП",
+    "Владимир РОП"
   ],
-  "Барнаул": [
+  Барнаул: [
     "Василий Дианов",
     "Илья Кошман",
     "Леонид Фотин",
@@ -1867,9 +1861,9 @@ const managersByCity = {
     "Михаил РОП",
     "Сергей Карпенко",
     "Не представился",
-    "Оскар Курмакаев",
+    "Оскар Курмакаев"
   ],
-  "Новокузнецк": [
+  Новокузнецк: [
     "Никита Аксёнов",
     "Владислав Петров",
     "Иван Манцеленко",
@@ -1878,7 +1872,7 @@ const managersByCity = {
     "Александр Кузнецов",
     "Михаил Вахонин",
     "Данил Королев",
-    "Алексей Бухтияров",
+    "Алексей Бухтияров"
   ],
   "Красноярск ПЖ": [
     "Данил Гриневич",
@@ -1888,7 +1882,7 @@ const managersByCity = {
     "Артем Васюков",
     "Глеб Каменский",
     "Ярослав Дорошенко",
-    "Турдали Эрназаров",
+    "Турдали Эрназаров"
   ],
   "Красноярск Брянка": [
     "Кирил Макеев",
@@ -1896,9 +1890,9 @@ const managersByCity = {
     "Ян Лалетин",
     "Захар Русанов",
     "Павел Мымрин",
-    "Вадим Олексенко",
+    "Вадим Олексенко"
   ],
-  "Омск": [
+  Омск: [
     "Дмитрий Гаврилюк",
     "Вадим Николаев",
     "Дмитрий Вебер",
@@ -1912,9 +1906,9 @@ const managersByCity = {
     "Никита Карепов",
     "Михаил Гусейнов",
     "Данил Арнаутов",
-    "Илья Катков",
+    "Илья Катков"
   ],
-  "Томск": [
+  Томск: [
     "Владимир Полещук",
     "Илья Бушмелев",
     "Леонид Шушарин",
@@ -1922,8 +1916,8 @@ const managersByCity = {
     "Роман Касымов",
     "Анатолий Саранцев",
     "Александр Тюрин",
-    "Вячеслав Глазунов",
-  ],
+    "Вячеслав Глазунов"
+  ]
 };
 
 const cancelForm = () => {
@@ -2476,7 +2470,7 @@ body {
   overflow: hidden;
 }
 
-.my-calendar{
+.my-calendar {
   max-width: 270px;
 }
 
@@ -2519,6 +2513,12 @@ body {
   background-color: white;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   border-radius: 4px;
+}
+
+.fact-checkbox{
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 @import url("./table.scss");

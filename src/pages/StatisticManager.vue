@@ -37,6 +37,14 @@
           </div>
           <div class="table-cell">{{ manager.totalCalls }}</div>
         </div>
+
+        <div class="table-row footer">
+          <div class="table-cell">Сумма: {{ footerValues.totalCallsSum }}</div>
+          <div class="table-cell">{{ footerValues.averagePercentage }}%</div>
+          <div class="table-cell">
+            {{ footerValues.totalCallsSum }}
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -70,6 +78,7 @@ const cities = {
 const regions = Object.keys(cities);
 const selectedRegion = ref("");
 const selectedCity = ref("");
+const footerValues = ref({ totalCallsSum: 0, averagePercentage: 0 });
 
 const getCitiesForRegion = (region) => {
   return regions[region] || [];
@@ -99,6 +108,20 @@ const filterByDate = (items) => {
     const itemDate = new Date(item.date);
     return itemDate >= start && itemDate <= end;
   });
+};
+
+const calculateFooterValues = () => {
+  const totalCallsSum = filteredManagers.value.reduce(
+    (sum, manager) => sum + manager.totalCalls,
+    0
+  );
+  const totalPercentageSum = filteredManagers.value.reduce(
+    (sum, manager) => sum + manager.averagePercentage * manager.totalCalls,
+    0
+  );
+  const averagePercentage =
+    totalCallsSum === 0 ? 0 : (totalPercentageSum / totalCallsSum).toFixed(2);
+  return { totalCallsSum, averagePercentage };
 };
 
 const processData = () => {
@@ -147,20 +170,19 @@ const processData = () => {
       managerData[managerName].totalPercentage += total;
 
       managerData[managerName].count += 1;
-
     }
   });
 
   filteredManagers.value = Object.values(managerData).map((manager) => {
     const averagePercentage =
-      manager.totalCalls === 0
-        ? 0
-        : (manager.totalPlan / manager.totalCalls);  
+      manager.totalCalls === 0 ? 0 : manager.totalPlan / manager.totalCalls;
     return {
       ...manager,
       averagePercentage: parseFloat(averagePercentage.toFixed(2))
     };
   });
+  // Вызов для обновления значений в футере
+  footerValues.value = calculateFooterValues();
 };
 
 const handleFilterChange = ({
@@ -271,6 +293,8 @@ onMounted(() => {
   text-align: center;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
+  position: sticky;
+  top: 0;
 }
 
 .table-row.header-2 {
@@ -284,6 +308,12 @@ onMounted(() => {
   align-items: start;
   justify-content: start;
   padding: 10px 36px;
+}
+
+.table-row.footer {
+  background: #111111;
+  position: sticky;
+  bottom: 0;
 }
 
 .table-cell {
