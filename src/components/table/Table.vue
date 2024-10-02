@@ -782,6 +782,9 @@
             </p>
           </div>
         </div>
+        <div class="checkboxes__container-row" style="justify-content: center">
+          <button type="submit" class="btn btn-green">Сохранить</button>
+        </div>
       </div>
     </form>
   </div>
@@ -1565,6 +1568,10 @@
             </p>
           </div>
         </div>
+
+        <div class="checkboxes__container-row" style="justify-content: center">
+          <button type="submit" class="btn btn-green">Сохранить</button>
+        </div>
       </div>
     </form>
   </div>
@@ -1908,6 +1915,14 @@ const managersByCity = {
 const cancelForm = () => {
   showForm.value = false;
   showFormEdit.value = false;
+
+  formData2.value = {
+    name: "",
+    phone: "",
+    email: "",
+    city: "",
+    avto: "",
+  };
 };
 
 // Состояние дропдаунов
@@ -2080,11 +2095,12 @@ const handleDateChange = (newFilters) => {
 const fetchTotalItems = async () => {
   try {
     const response = await axios.get(
-      `https://crystal-motors.ru/method.getClients?count=100000`
+      `https://crystal-motors.ru/method.getClients?count=all`
     );
     totalItems2.value = response.data.answer.count;
-
     tableData3.value = response.data.answer.items;
+    
+    calculateAveragePlan();
   } catch (error) {
     console.error(
       "Ошибка при получении общего количества записей:",
@@ -2315,6 +2331,7 @@ const addClient = async () => {
     currentPage.value = 0; // Сброс страницы на первую
 
     // Вызовите функцию для обновления списка клиентов
+    await fetchTotalItems();
     await fetchClients();
 
     // Закройте формы после обновления
@@ -2459,11 +2476,13 @@ const updateClient = async () => {
     alert("Данные успешно обновлены!");
 
     // Очищение текущие данные таблицы перед обновлением
+    formData2.value = [];
     tableData2.value = [];
     loadedData.value = [];
     currentPage.value = 0;
 
     // Вызовите функцию для обновления списка клиентов
+    await fetchTotalItems();
     await fetchClients();
 
     showFormEdit.value = false;
@@ -2485,6 +2504,7 @@ const deleteClient = async (id) => {
     currentPage.value = 0; // Сброс страницы на первую
 
     // Вызовите функцию для обновления списка клиентов
+    await fetchTotalItems();
     await fetchClients();
   } catch (error) {
     console.error("Ошибка при удалении данных:", error);

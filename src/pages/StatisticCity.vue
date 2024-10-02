@@ -100,8 +100,8 @@ const cityRegionMap = {
   Кемерово: "Север",
   Барнаул: "Север",
   Новокузнецк: "Север",
-  "Красноярск (Брянка)": "Север",
-  "Красноярск (ЛПК)": "Север",
+  "Красноярск Брянка": "Север",
+  "Красноярск ПЖ": "Север",
   Омск: "Север",
   Томск: "Север"
 };
@@ -127,6 +127,7 @@ const calculateTotal = (formData) => {
 
 // Асинхронная функция для получения данных
 const fetchData = async (offset = 0, resetData = false) => {
+  console.warn("fetchData вызван", offset, resetData);
   try {
     const filterParams = {
       offset,
@@ -159,13 +160,12 @@ const fetchData = async (offset = 0, resetData = false) => {
   }
 };
 
-
 // Вспомогательная функция для фильтрации данных за определенный месяц
-function filterByMonth(entries, month) {  
+function filterByMonth(entries, month) {
   return entries.filter((entry) => {
     const entryDate = new Date(entry.date.split(".").reverse().join("-"));
     // console.log("Entry Date:", entryDate, "Month:", month);
-    
+
     return (
       entryDate.getMonth() === month.getMonth() &&
       entryDate.getFullYear() === month.getFullYear()
@@ -182,16 +182,14 @@ function getCurrentMonthEntries(cityEntries) {
   );
 }
 
-
 // Вспомогательная функция для получения предыдущего месяца
 function getPreviousMonthEntries(cityEntries) {
   const now = new Date();
   const previousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
   // console.log("Previous Month:", previousMonth);
-  
+
   return filterByMonth(cityEntries, previousMonth);
 }
-
 
 // Вспомогательная функция для получения предыдущего месяца
 function getPreviousMonth() {
@@ -218,7 +216,6 @@ function calculateDynamicFromLastPeriod(cityEntries) {
   // Если нет данных за текущий месяц, ищем за предыдущий месяц
   if (currentMonthEntries.length === 0) {
     currentMonthEntries = filterByMonth(filteredEntries, previousMonth);
-    console.log("Using previous month entries:", currentMonthEntries);
   }
 
   // Данные за прошлый месяц
@@ -253,13 +250,8 @@ function calculateCallsDynamicFromLastPeriod(cityEntries) {
     filters.value.endDate
   );
 
-  console.log("filteredEntries:", filteredEntries);
-  
-
   const currentMonthEntries = getCurrentMonthEntries(filteredEntries);
-  console.log("currentMonthEntries:", currentMonthEntries);
   const previousMonthEntries = getPreviousMonthEntries(filteredEntries);
-  console.log("previousMonthEntries:", previousMonthEntries);
 
   // Если нет данных за прошлый месяц, динамику не рассчитываем
   if (previousMonthEntries.length === 0) return "";
@@ -283,7 +275,6 @@ function calculateCallsDynamicFromLastPeriod(cityEntries) {
 
   return dynamic.toFixed(2) + "%";
 }
-
 
 const filterDataByDate = (data, startDate, endDate) => {
   if (!startDate || !endDate) {
@@ -410,9 +401,9 @@ const sumCallsByRegion = async () => {
   }
 };
 
-
 // Рассчитываем динамику для среднего значения качества звонков
 const calculatePreviousPeriodDynamic = (currentAverage, previousAverage) => {
+  console.log("Calculating dynamic with:", currentAverage, previousAverage);
   // Проверка на существование и валидность данных
   if (
     !currentAverage ||
@@ -427,20 +418,81 @@ const calculatePreviousPeriodDynamic = (currentAverage, previousAverage) => {
   return dynamic.toFixed(2) + " %";
 };
 
-// Функция для фильтрации по текущему месяцу
+const getMonthData = (data, targetMonthStart, targetMonthEnd) => {
+  return data.filter((item) => {
+    if (!item.date) return false;
+
+    const itemDate = new Date(item.date.split(".").reverse().join("-"));
+    return itemDate >= targetMonthStart && itemDate < targetMonthEnd;
+  });
+};
+
 const getCurrentMonthData = (data) => {
   const now = new Date();
   const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-  return data.filter((item) => {
-    if (!item.date) {
-      return false; // Пропускаем записи без даты
+  // Получаем данные за текущий месяц
+  const currentMonthData = getMonthData(
+    data,
+    currentMonthStart,
+    nextMonthStart
+  );
+  console.log("Current Month Data:", currentMonthData);
+
+  // Если нет данных за текущий месяц, ищем за предыдущие месяцы
+  if (currentMonthData.length === 0) {
+    let uniquePreviousMonthData = [];
+    let monthOffset = 1; // Начинаем с предыдущего месяца
+
+    while (uniquePreviousMonthData.length === 0) {
+      const previousMonthStart = new Date(
+        now.getFullYear(),
+        now.getMonth() - monthOffset,
+        1
+      );
+      const previousMonthEnd = new Date(
+        now.getFullYear(),
+        now.getMonth() - monthOffset + 1,
+        1
+      );
+
+      const previousMonthData = getMonthData(
+        data,
+        previousMonthStart,
+        previousMonthEnd
+      );
+      console.log(
+        `Previous Month Data (Offset ${monthOffset}):`,
+        previousMonthData
+      );
+
+      // Проверка на дублирование с текущим месяцем
+      uniquePreviousMonthData = previousMonthData.filter((prevItem) => {
+        return !currentMonthData.some(
+          (currItem) => currItem.date === prevItem.date
+        );
+      });
+
+      // Если уникальные данные найдены, выходим из цикла
+      if (uniquePreviousMonthData.length > 0) {
+        break;
+      }
+
+      // Если уникальные данные не найдены, увеличиваем смещение
+      monthOffset++;
+
+      // Прерываем цикл, если мы вышли за пределы возможных месяцев
+      if (now.getMonth() - monthOffset < 0 && now.getFullYear() <= 0) {
+        console.log("No unique data found after checking previous months.");
+        return [];
+      }
     }
 
-    const itemDate = new Date(item.date.split(".").reverse().join("-"));
+    return uniquePreviousMonthData;
+  }
 
-    return itemDate >= currentMonthStart;
-  });
+  return currentMonthData;
 };
 
 // Функция для фильтрации по предыдущему месяцу
@@ -461,12 +513,6 @@ const getPreviousMonthData = (data) => {
 
 // Функция для расчета средних значений по регионам
 const calculateRegionAverages = async (startDate, endDate) => {
-  console.log(
-    "Starting calculateRegionAverages with dates:",
-    startDate,
-    endDate
-  );
-
   if (!Array.isArray(tableData.value)) {
     console.error("tableData.value не является массивом:", tableData.value);
     return;
@@ -524,35 +570,21 @@ const calculateRegionAverages = async (startDate, endDate) => {
     Север: []
   };
 
-  const factsData = await fetchFactsOnly();
+  const response = await fetchTotalItems();
+  const factsData = response.items;
   let totalCallsSouth = 0;
   let totalCallsNorth = 0;
-  let tradeInCallsSouth = 0; // Трейд-ин звонки для Юга
-  let tradeInCallsNorth = 0; // Трейд-ин звонки для Севера
-
-  let totalTradeInCallsCurrentMonth = 0; // Общее количество трейд-ин звонков за текущий месяц
-  let totalTradeInCallsPreviousMonth = 0; // Общее количество трейд-ин звонков за предыдущий месяц
 
   // Проходим по каждому элементу данных и суммируем звонки по регионам
   filteredData.forEach((entry) => {
     const city = entry.city;
     const fact = parseInt(entry.fact) || 0; // Преобразуем fact в число
-    const tradeIn = parseInt(entry.prodan) || 0; // Используем поле prodan для трейд-ин
     const region = cityRegionMap[city];
 
     if (region === "Юг") {
       totalCallsSouth += fact;
-      tradeInCallsSouth += tradeIn; // Суммируем звонки трейд-ин для Юга
-
-      if (currentMonthData.length > 0) {
-        totalTradeInCallsCurrentMonth += tradeIn; // Предыдущий месяц
-      }
     } else if (region === "Север") {
       totalCallsNorth += fact;
-      tradeInCallsNorth += tradeIn; // Суммируем звонки трейд-ин для Севера
-      if (previousMonthData.length > 0) {
-        totalTradeInCallsPreviousMonth += tradeIn; // Предыдущий месяц
-      }
     }
   });
 
@@ -575,6 +607,7 @@ const calculateRegionAverages = async (startDate, endDate) => {
 
   filteredTableData.value = Object.keys(regionData).map((region) => {
     const regionCities = regionData[region];
+
     const currentRegionData = getCurrentMonthData(regionCities);
     const previousRegionData = getPreviousMonthData(regionCities);
 
@@ -586,11 +619,25 @@ const calculateRegionAverages = async (startDate, endDate) => {
       0
     );
 
+    console.log(
+      "totalCurrentCalls:",
+      totalCurrentCalls,
+      "totalPreviousCalls:",
+      totalPreviousCalls
+    );
+
     const totalQuality = regionCities.reduce(
       (sum, quality) => sum + quality.value,
       0
     );
     const averageQuality = (totalQuality / regionCities.length).toFixed(2);
+
+    console.log(
+      "totalQuality:",
+      totalQuality,
+      "averageQuality:",
+      averageQuality
+    );
 
     const averageCurrentQuality =
       currentRegionData.length > 0
@@ -608,10 +655,19 @@ const calculateRegionAverages = async (startDate, endDate) => {
           ).toFixed(2)
         : 0;
 
+    console.log(
+      "averageCurrentQuality:",
+      averageCurrentQuality,
+      "averagePreviousQuality:",
+      averagePreviousQuality
+    );
+
     const previousPeriodDynamic = calculatePreviousPeriodDynamic(
       averageCurrentQuality,
       averagePreviousQuality
     );
+
+    console.log("previousPeriodDynamic:", previousPeriodDynamic);
 
     const callsDynamic =
       totalPreviousCalls > 0
@@ -623,14 +679,23 @@ const calculateRegionAverages = async (startDate, endDate) => {
         ? "0.0 %"
         : "0 %";
 
+    // if (averageCurrentQuality === averagePreviousQuality) {
+    //   console.log(`Skipping ${region} due to identical average quality.`);
+    //   return {
+    //     region,
+    //     callsDynamic: "0 %",
+    //     totalCalls: totalCurrentCalls || "0",
+    //     averageCallQuality: averageQuality + " %",
+    //     previousPeriodDynamic: "No Change"
+    //   };
+    // }
+
     return {
       region,
-      previousPeriodDynamic: previousPeriodDynamic
-        ? previousPeriodDynamic
-        : "0 %",
       callsDynamic: callsDynamic || "0 %",
       totalCalls: totalCurrentCalls || "0",
-      averageCallQuality: averageQuality + " %"
+      averageCallQuality: averageQuality + " %",
+      previousPeriodDynamic: previousPeriodDynamic
     };
   });
 };
@@ -669,9 +734,10 @@ const handleFilterChange = async ({
     filters.value.endDate
   );
 
-  await calculateRegionAverages(filters.value.startDate, filters.value.endDate);
-
-  await fetchData();
+  await Promise.all([
+    fetchData(),
+    calculateRegionAverages(filters.value.startDate, filters.value.endDate)
+  ]);
 };
 
 const downloadTable = () => {
@@ -736,10 +802,12 @@ const downloadTable = () => {
   }
 };
 
-onMounted(() => {
-  fetchData();
-  fetchFactsOnly();
-  calculatePreviousPeriodDynamic();
+onMounted(async () => {
+  await Promise.all([
+    fetchData(),
+    fetchFactsOnly(),
+    calculatePreviousPeriodDynamic()
+  ]);
 });
 </script>
 
@@ -756,6 +824,7 @@ onMounted(() => {
 }
 
 .table {
+  max-width: 750px;
   display: flex;
   flex-direction: column;
   border-collapse: collapse;

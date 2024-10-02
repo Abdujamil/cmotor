@@ -661,6 +661,7 @@ onMounted(() => {
 }
 
 .table {
+  max-width: 750px;
   display: flex;
   flex-direction: column;
   border-collapse: collapse;

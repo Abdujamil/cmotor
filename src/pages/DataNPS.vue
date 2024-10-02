@@ -448,6 +448,13 @@
           v-for="(city, index) in filteredCities"
           :key="index"
           v-if="filteredCities.length > 0"
+          :class="[
+            'table-row',
+            {
+              'not-processed': city.editedStatus === 'Не отработан',
+              'processed': city.editedStatus === 'Отработан'
+            }
+          ]"
         >
           <div class="table-cell">{{ index + 1 }}</div>
           <div class="table-cell">{{ city.city }}</div>
@@ -461,7 +468,9 @@
               {{ city.comment }}
             </p>
           </div>
-          <div @click.stop="startEditing(index)" class="table-cell table-cell-comment comment-rop"
+          <div
+            @click.stop="startEditing(index)"
+            class="table-cell table-cell-comment comment-rop"
           >
             <svg
               title="Редактирование"
@@ -899,25 +908,28 @@ const saveComment = async (index) => {
 
   try {
     // Отправка данных на сервер
-    const response = await axios.get("https://crystal-motors.ru/method.editSending", {
-      params: { // Используем params для передачи параметров
-        id: cities.value[index].id,
-        rop_comment: comment
+    const response = await axios.get(
+      "https://crystal-motors.ru/method.editSending",
+      {
+        params: {
+          // Используем params для передачи параметров
+          id: cities.value[index].id,
+          rop_comment: comment
+        }
       }
-    });
-    
+    );
+
     // Обновляем комментарий в локальном состоянии
     cities.value[index].editedRopComment = comment;
 
     console.log("Комментарий успешно обновлён:", comment);
 
     // Завершаем редактирование
-    editingIndex.value = null; 
+    editingIndex.value = null;
   } catch (error) {
     console.error("Ошибка при обновлении комментария:", error);
   }
 };
-
 
 // Функция для сохранения статуса
 const saveStatus = async (index) => {
@@ -925,15 +937,12 @@ const saveStatus = async (index) => {
   console.log("Статус:", status);
 
   try {
-    await axios.get(
-      "https://crystal-motors.ru/method.editSending?count=all",
-      {
-        params: {
-          id: cities.value[index].id,
-          status: status
-        }
+    await axios.get("https://crystal-motors.ru/method.editSending?count=all", {
+      params: {
+        id: cities.value[index].id,
+        status: status
       }
-    );
+    });
 
     // Обновляем статус в локальном состоянии
     cities.value[index].status = status;
@@ -1001,23 +1010,21 @@ const addCity = async () => {
 
 const updateClient = async () => {
   try {
-
     const params = new URLSearchParams(formData.value).toString();
 
     // Убедитесь, что URL и метод правильно настроены на сервере
     await axios.get(`https://crystal-motors.ru/method.editSending?${params}`);
 
     alert("Данные успешно обновлены!");
-    
+
     showFormEdit.value = false;
-   
+
     // Вызовите функцию для обновления списка клиентов
     await fetchCities();
   } catch (error) {
     console.error("Ошибка при обновлении данных клиента:", error);
   }
 };
-
 
 const editClient = (city) => {
   if (city) {
@@ -1103,6 +1110,14 @@ const downloadTable = () => {
 
 input {
   font-size: 14px;
+}
+
+.not-processed {
+  background: #b30000a3; /* Цвет для статуса "Не отработан" */
+}
+
+.processed {
+  background: #017a0169 !important; /* Цвет для статуса "Отработан" */
 }
 
 .my-calendar {
