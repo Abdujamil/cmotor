@@ -1,5 +1,3 @@
-<!-- TODO радиокнопки доделать -->
-
 <template>
   <!-- Add new field -->
   <div v-if="showForm" class="form-fields">
@@ -274,11 +272,10 @@
         <div class="checkboxes__container-row">
           <label for="fact-call">Факт звонка:</label>
           <div class="radio-group fact">
-            <p>
+            <p class="fact-checkbox">
               <input
                 type="radio"
-                id="test3"
-                v-model="formData2.fact"
+                id="test1"
                 name="fact-call"
                 value="1"
                 checked
@@ -291,7 +288,7 @@
                 id="test2"
                 v-model="formData2.fact"
                 name="fact-call"
-                value="1"
+                value="0"
               />
               <label for="test2">Не учитывать в расчетах</label>
             </p>
@@ -1058,22 +1055,10 @@
         <div class="checkboxes__container-row">
           <label for="fact-call">Факт звонка:</label>
           <div class="radio-group fact">
-            <!-- <p>
+            <p class="fact-checkbox">
               <input
                 type="radio"
                 id="test1"
-                v-model="formData2.fact"
-                name="fact-call"
-                checked
-                value="0"
-              />
-              <label for="test1">0</label>
-            </p> -->
-            <p>
-              <input
-                type="radio"
-                id="test3"
-                v-model="formData2.fact"
                 name="fact-call"
                 value="1"
                 checked
@@ -1086,8 +1071,7 @@
                 id="test2"
                 v-model="formData2.fact"
                 name="fact-call"
-                value=" "
-                :checked="formData2.fact === ' '"
+                value="0"
               />
               <label for="test2">Не учитывать в расчетах</label>
             </p>
@@ -1643,7 +1627,8 @@
             <td>{{ client.phone }}</td>
             <td>{{ client.fio }}</td>
             <td>{{ client.avto }}</td>
-            <td>{{ client.fact }}</td>
+            <td>{{ client.fact.one ? 1 : 1 }}</td>
+            <!-- <td>{{ client.fact }}</td> -->
             <td>{{ client.obrashenie }}</td>
             <td>{{ client.salon }}</td>
             <td>{{ client.cred_nal }}</td>
@@ -2222,7 +2207,7 @@ const formData2 = ref({
   phone: "",
   fio: "",
   avto: "",
-  fact: "",
+  fact: "1",
   obrashenie: "",
   salon: "",
   cred_nal: "",
@@ -2281,12 +2266,21 @@ watchEffect(() => {
   console.log("Updated formData2.avto:", formData2.value.avto);
 });
 
+// Функция добавления клиента
 const addClient = async () => {
   try {
     console.log("Добавление нового клиента:", formData2.value);
 
+    // Инициализируем переменную для суммы
+    let itogg = 0;
+
+    // Если чекбокс "Не учитывать в расчетах" не отмечен, добавляем 1 к сумме
+    if (formData2.value.fact === false) {
+      itogg += 1;
+    }
+
     // Преобразуем значения в числа и вычисляем сумму
-    const itogg =
+    itogg += 
       Number(formData2.value.obrashenie) +
       Number(formData2.value.salon) +
       Number(formData2.value.cred_nal) +
@@ -2297,7 +2291,7 @@ const addClient = async () => {
       Number(formData2.value.obrash_imeni) +
       Number(formData2.value.bodr_son) +
       Number(formData2.value.otpr_viz) +
-      Number(formData2.value.vizit) * 3 +
+      (Number(formData2.value.vizit) * 3) +
       Number(formData2.value.prod_company) +
       Number(formData2.value.zdatok);
 
@@ -2369,13 +2363,76 @@ const editClient = (client) => {
   }
 };
 
+// const updateClient = async () => {
+//   try {
+//     console.log("Обновление клиента с ID:", currentClientId.value);
+//     console.log("Обновление клиента с ID:", formData2.value);
+
+//     // Преобразуем значения в числа и вычисляем сумму
+//     const itogg =
+//       Number(formData2.value.obrashenie) +
+//       Number(formData2.value.salon) +
+//       Number(formData2.value.cred_nal) +
+//       Number(formData2.value.prodan) +
+//       Number(formData2.value.city2) +
+//       Number(formData2.value.data_visit) +
+//       Number(formData2.value.garantiya) +
+//       Number(formData2.value.obrash_imeni) +
+//       Number(formData2.value.bodr_son) +
+//       Number(formData2.value.otpr_viz) +
+//       Number(formData2.value.vizit) * 3 +
+//       Number(formData2.value.prod_company) +
+//       Number(formData2.value.zdatok);
+
+//     // Обновляем значение "itog" в formData2
+//     formData2.value.itog = itogg;
+//     formData2.value.plan = Math.floor((itogg / 14) * 100);
+
+//     // Убедитесь, что URL и метод правильно настроены на сервере
+//     await axios.get(
+//       `https://crystal-motors.ru/method.editClient?id=${
+//         currentClientId.value
+//       }&${new URLSearchParams(formData2.value).toString()}`
+//     );
+
+//     console.log(
+//       "Измененные данные клиента:",
+//       new URLSearchParams(formData2.value).toString()
+//     );
+//     alert("Данные успешно обновлены!");
+
+//     // Очищение текущие данные таблицы перед обновлением
+//     tableData2.value = [];
+//     loadedData.value = [];
+//     currentPage.value = 0; // Сброс страницы на первую
+
+//     // Вызовите функцию для обновления списка клиентов
+//     await fetchClients();
+
+//     showFormEdit.value = false;
+//     isEditing.value = false; // Закрыть форму редактирования
+//   } catch (error) {
+//     console.error("Ошибка при обновлении данных клиента:", error);
+//   }
+// };
+
+// Функция для удаления клиента
+
 const updateClient = async () => {
   try {
     console.log("Обновление клиента с ID:", currentClientId.value);
-    console.log("Обновление клиента с ID:", formData2.value);
+    console.log("Обновление клиента с данными:", formData2.value);
+
+    // Инициализируем переменную для суммы
+    let itogg = 0;
+
+    // Если чекбокс "Не учитывать в расчетах" не отмечен, добавляем 1 к сумме
+    if (formData2.value.fact === false) {
+      itogg += 1;
+    }
 
     // Преобразуем значения в числа и вычисляем сумму
-    const itogg =
+    itogg += 
       Number(formData2.value.obrashenie) +
       Number(formData2.value.salon) +
       Number(formData2.value.cred_nal) +
@@ -2386,7 +2443,7 @@ const updateClient = async () => {
       Number(formData2.value.obrash_imeni) +
       Number(formData2.value.bodr_son) +
       Number(formData2.value.otpr_viz) +
-      Number(formData2.value.vizit) * 3 +
+      (Number(formData2.value.vizit) * 3) +
       Number(formData2.value.prod_company) +
       Number(formData2.value.zdatok);
 
@@ -2396,21 +2453,15 @@ const updateClient = async () => {
 
     // Убедитесь, что URL и метод правильно настроены на сервере
     await axios.get(
-      `https://crystal-motors.ru/method.editClient?id=${
-        currentClientId.value
-      }&${new URLSearchParams(formData2.value).toString()}`
+      `https://crystal-motors.ru/method.editClient?id=${currentClientId.value}&${new URLSearchParams(formData2.value).toString()}`
     );
 
-    console.log(
-      "Измененные данные клиента:",
-      new URLSearchParams(formData2.value).toString()
-    );
     alert("Данные успешно обновлены!");
 
     // Очищение текущие данные таблицы перед обновлением
     tableData2.value = [];
     loadedData.value = [];
-    currentPage.value = 0; // Сброс страницы на первую
+    currentPage.value = 0;
 
     // Вызовите функцию для обновления списка клиентов
     await fetchClients();
@@ -2422,7 +2473,6 @@ const updateClient = async () => {
   }
 };
 
-// Функция для удаления клиента
 const deleteClient = async (id) => {
   try {
     console.log("Удаление клиента с ID:", id);

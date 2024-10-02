@@ -39,10 +39,10 @@
         </div>
 
         <div class="table-row footer">
-          <div class="table-cell">Сумма: {{ footerValues.totalCallsSum }}</div>
-          <div class="table-cell">{{ footerValues.averagePercentage }}%</div>
+          <div class="table-cell">Сумма:</div>
+          <div class="table-cell">{{ footerValues.averagePercentage ? footerValues.averagePercentage : " " }}%</div>
           <div class="table-cell">
-            {{ footerValues.totalCallsSum }}
+            {{ footerValues.totalCallsSum ? footerValues.totalCallsSum : " " }}
           </div>
         </div>
       </div>
@@ -311,7 +311,7 @@ onMounted(() => {
 }
 
 .table-row.footer {
-  background: #111111;
+  background: #111111 !important;
   position: sticky;
   bottom: 0;
 }

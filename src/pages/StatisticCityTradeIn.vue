@@ -1,5 +1,5 @@
 <template>
-  <h1>Сводная по городам</h1>
+  <h1>Сводная по городам трейд-ин</h1>
 
   <div class="statis-city">
     <div class="filters filters-statis-city">
@@ -12,9 +12,10 @@
         <!-- Table Header -->
         <div class="table-row header">
           <div class="table-cell">По регионам</div>
-          <div class="table-cell">Кол-во звонков</div>
-          <div class="table-cell">Динамика от прошлого периода</div>
-          <div class="table-cell">Среднее значение качества звонка</div>
+          <div class="table-cell">Кол-во звонков в трейд-ин</div>
+          <div class="table-cell">
+            Процент звонков в трейд-ин от общего кол-ва
+          </div>
           <div class="table-cell">Динамика от прошлого периода</div>
         </div>
         <!-- Filtered Table Rows -->
@@ -24,10 +25,9 @@
           :key="index"
         >
           <div class="table-cell">{{ row.region }}</div>
-          <div class="table-cell">{{ row.totalCalls }}</div>
-          <div class="table-cell">{{ row.callsDynamic }}</div>
-          <div class="table-cell">{{ row.averageCallQuality }}</div>
-          <div class="table-cell">{{ row.previousPeriodDynamic }}</div>
+          <div class="table-cell">{{ row.tradeInCalls }}</div>
+          <div class="table-cell">{{ row.tradeInPercentage }}</div>
+          <div class="table-cell">{{ row.dynamicFromLastPeriod }}</div>
         </div>
 
         <div class="table-row header header-2">
@@ -41,10 +41,9 @@
           :key="'city-' + index"
         >
           <div class="table-cell">{{ city.city }}</div>
-          <div class="table-cell">{{ city.cityTotalCalls }}</div>
-          <div class="table-cell">{{ city.cityCallsDynamic }}</div>
-          <div class="table-cell">{{ city.cityAverageCallQuality }}</div>
-          <div class="table-cell">{{ city.cityPreviousPeriodDynamic }}</div>
+          <div class="table-cell">{{ city.cityTradeInCalls }}</div>
+          <div class="table-cell">{{ city.cityTradeInPercentage }}</div>
+          <div class="table-cell">{{ city.cityDynamicFromLastPeriod }}</div>
         </div>
       </div>
     </div>
@@ -62,9 +61,6 @@ const table = ref(null);
 const selectedRegion = ref("");
 const selectedCity = ref("");
 const filteredTableData = ref([]);
-
-const selectedStartDate = ref(null);
-const selectedEndDate = ref(null);
 
 const tableData = ref([]);
 
@@ -134,6 +130,7 @@ const fetchData = async (offset = 0, resetData = false) => {
         filters.value.startDate instanceof Date
           ? filters.value.startDate.toISOString()
           : filters.value.startDate || "",
+
       endDate:
         filters.value.endDate instanceof Date
           ? filters.value.endDate.toISOString()
@@ -144,164 +141,68 @@ const fetchData = async (offset = 0, resetData = false) => {
 
     const newData = response.items;
 
+    tableData.value = newData;
+
     if (resetData) {
       tableData.value = newData;
     } else {
       tableData.value = [...tableData.value, ...newData];
     }
 
-    await calculateRegionAverages(
+    console.log(
+      "Starting calculateRegionAverages with dates:",
       filters.value.startDate,
       filters.value.endDate
     );
+    // Передаем выбранные даты в calculateRegionAverages
+    calculateRegionAverages(filters.value.startDate, filters.value.endDate);
   } catch (error) {
     console.error("Ошибка при получении данных:", error);
   }
 };
 
-
-// Вспомогательная функция для фильтрации данных за определенный месяц
-function filterByMonth(entries, month) {  
-  return entries.filter((entry) => {
-    const entryDate = new Date(entry.date.split(".").reverse().join("-"));
-    // console.log("Entry Date:", entryDate, "Month:", month);
-    
-    return (
-      entryDate.getMonth() === month.getMonth() &&
-      entryDate.getFullYear() === month.getFullYear()
-    );
-  });
-}
-
-// Вспомогательная функция для получения текущего месяца
-function getCurrentMonthEntries(cityEntries) {
-  const now = new Date();
-  return filterByMonth(
-    cityEntries,
-    new Date(now.getFullYear(), now.getMonth(), 1)
-  );
-}
-
-
-// Вспомогательная функция для получения предыдущего месяца
-function getPreviousMonthEntries(cityEntries) {
-  const now = new Date();
-  const previousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  // console.log("Previous Month:", previousMonth);
-  
-  return filterByMonth(cityEntries, previousMonth);
-}
-
-
-// Вспомогательная функция для получения предыдущего месяца
-function getPreviousMonth() {
-  const now = new Date();
-  const previousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-
-  return previousMonth;
-}
-
-// Функция для расчета динамики от прошлого периода
-function calculateDynamicFromLastPeriod(cityEntries) {
-  const currentMonth = new Date();
-  const previousMonth = getPreviousMonth();
-
-  const filteredEntries = filterDataByDate(
-    cityEntries,
-    filters.value.startDate,
-    filters.value.endDate
-  );
-
-  // Данные за текущий месяц
-  let currentMonthEntries = filterByMonth(filteredEntries, currentMonth);
-
-  // Если нет данных за текущий месяц, ищем за предыдущий месяц
-  if (currentMonthEntries.length === 0) {
-    currentMonthEntries = filterByMonth(filteredEntries, previousMonth);
-    console.log("Using previous month entries:", currentMonthEntries);
+const calculateTradeInDynamic = (currentMonthCalls, previousMonthCalls) => {
+  if (previousMonthCalls === 0) {
+    return currentMonthCalls > 0 ? "" : "0 %"; // Если в предыдущем месяце не было звонков
   }
-
-  // Данные за прошлый месяц
-  const previousMonthEntries = filterByMonth(filteredEntries, previousMonth);
-
-  // Если нет данных за прошлый месяц, динамику не рассчитываем
-  if (previousMonthEntries.length === 0) return "";
-
-  // Считаем среднее качество звонков за текущий и прошлый месяц
-  const currentMonthQuality =
-    currentMonthEntries.reduce((sum, entry) => sum + calculateTotal(entry), 0) /
-    (currentMonthEntries.length || 1); // Избегаем деления на 0
-
-  const previousMonthQuality =
-    previousMonthEntries.reduce(
-      (sum, entry) => sum + calculateTotal(entry),
-      0
-    ) / (previousMonthEntries.length || 1); // Избегаем деления на 0
-
-  // Рассчитываем динамику ((текущий - прошлый) / прошлый) * 100
   const dynamic =
-    ((currentMonthQuality - previousMonthQuality) / previousMonthQuality) * 100;
+    ((currentMonthCalls - previousMonthCalls) / previousMonthCalls) * 100;
+  return dynamic.toFixed(2) + " %";
+};
 
-  return dynamic.toFixed(2) + "%";
-}
+const getTradeInCallsForPeriods = (data, startDate, endDate) => {
+  const currentMonthData = filterDataByDate(data, startDate, endDate);
 
-// Функция для расчета динамики от прошлого периода для общего количества звонков
-function calculateCallsDynamicFromLastPeriod(cityEntries) {
-  const filteredEntries = filterDataByDate(
-    cityEntries,
-    filters.value.startDate,
-    filters.value.endDate
-  );
-
-  console.log("filteredEntries:", filteredEntries);
-  
-
-  const currentMonthEntries = getCurrentMonthEntries(filteredEntries);
-  console.log("currentMonthEntries:", currentMonthEntries);
-  const previousMonthEntries = getPreviousMonthEntries(filteredEntries);
-  console.log("previousMonthEntries:", previousMonthEntries);
-
-  // Если нет данных за прошлый месяц, динамику не рассчитываем
-  if (previousMonthEntries.length === 0) return "";
-  // Если нет данных за текущий месяц, динамику не рассчитываем
-  if (currentMonthEntries.length === 0) return "";
-
-  const totalCurrentCalls = currentMonthEntries.reduce(
-    (sum, entry) => sum + Number(entry.fact),
-    0
-  );
-  const totalPreviousCalls = previousMonthEntries.reduce(
-    (sum, entry) => sum + Number(entry.fact),
-    0
-  );
-
-  // Проверяем, чтобы избежать деления на ноль
-  if (totalPreviousCalls === 0) return ""; // или можете вернуть 0%
-
-  const dynamic =
-    ((totalCurrentCalls - totalPreviousCalls) / totalPreviousCalls) * 100;
-
-  return dynamic.toFixed(2) + "%";
-}
-
-
-const filterDataByDate = (data, startDate, endDate) => {
-  if (!startDate || !endDate) {
-    console.log("No dates provided, returning all data");
-    return data; // Если даты не выбраны, возвращаем все данные
-  }
+  let currentTradeInCalls = 0;
+  let previousTradeInCalls = 0;
 
   const start = new Date(startDate);
   const end = new Date(endDate);
-  end.setHours(23, 59, 59, 999); // Конец дня
 
-  return data.filter((item) => {
-    if (!item.date) return false; // Пропускаем записи без даты
-    const itemDate = new Date(item.date.split(".").reverse().join("-"));
-    // console.log("itemDate:", itemDate, "start:", start, "end:", end);
+  // Определяем предыдущий месяц
+  const previousMonth = new Date(start);
+  previousMonth.setMonth(start.getMonth() - 1);
 
-    return itemDate >= start && itemDate <= end;
+  // Фильтруем данные за текущий месяц
+  currentMonthData.forEach((entry) => {
+    const tradeIn = parseInt(entry.prodan) || 0;
+    const entryDate = new Date(entry.date.split(".").reverse().join("-"));
+
+    // Сравниваем даты для определения текущего и предыдущего месяца
+    if (
+      entryDate.getMonth() === start.getMonth() &&
+      entryDate.getFullYear() === start.getFullYear()
+    ) {
+      currentTradeInCalls += tradeIn;
+    } else if (
+      entryDate.getMonth() === previousMonth.getMonth() &&
+      entryDate.getFullYear() === previousMonth.getFullYear()
+    ) {
+      previousTradeInCalls += tradeIn;
+    }
   });
+
+  return { currentTradeInCalls, previousTradeInCalls };
 };
 
 const fetchFactsOnly = async () => {
@@ -325,7 +226,17 @@ const fetchFactsOnly = async () => {
       filters.value.endDate
     );
 
-    console.log("Filtered Facts:", filteredFacts);
+    // Определяем текущую дату
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth(); // 0 - январь, 11 - декабрь
+
+    // Устанавливаем даты для текущего и предыдущего месяцев
+    const currentPeriodStartDate = new Date(currentYear, currentMonth, 1);
+    const currentPeriodEndDate = new Date(currentYear, currentMonth + 1, 0); // Последний день текущего месяца
+
+    const previousPeriodStartDate = new Date(currentYear, currentMonth - 1, 1);
+    const previousPeriodEndDate = new Date(currentYear, currentMonth, 0); // Последний день предыдущего месяца
 
     // Вычисляем среднее значение качества звонков, динамику и формируем структуру данных для таблицы
     citiesData.value = Object.keys(citiesGrouped).map((cityName) => {
@@ -338,39 +249,75 @@ const fetchFactsOnly = async () => {
         filters.value.endDate
       );
 
-      // Суммируем значения для расчета среднего качества звонков
-      const totalQuality = currentCityEntries.reduce(
-        (sum, entry) => sum + calculateTotal(entry),
+      const totalTradeInCallsCurrent = currentCityEntries.reduce(
+        (sum, entry) => sum + (Number(entry.prodan) || 0),
         0
       );
 
-      const resultAvaregeCallQuality = Math.floor((totalQuality / 14) * 100);
+      console.log("totalTradeInCallsCurrent:", totalTradeInCallsCurrent);
+      
 
-      // Вычисляем среднее значение качества звонков
-      const averageCallQuality =
-        (resultAvaregeCallQuality / currentCityEntries.length).toFixed(2) +
-        " %";
+      // Логика для расчета предыдущего месяца
+      const previousPeriodStartDate = new Date(filters.value.startDate);
+      previousPeriodStartDate.setMonth(previousPeriodStartDate.getMonth() - 1);
 
-      // Общее количество звонков
-      const totalCalls = currentCityEntries.reduce(
-        (sum, entry) => sum + Number(entry.fact),
+      const previousPeriodEndDate = new Date(filters.value.endDate);
+      previousPeriodEndDate.setMonth(previousPeriodEndDate.getMonth() - 1);
+
+      // Используем пользовательские даты, если они заданы
+      const startDate =
+        filters.value.startDate instanceof Date
+          ? filters.value.startDate
+          : currentPeriodStartDate;
+
+      const endDate =
+        filters.value.endDate instanceof Date
+          ? filters.value.endDate
+          : currentPeriodEndDate;
+
+      const previousCityEntries = filterDataByDate(
+        cityEntries,
+        previousPeriodStartDate.toISOString().split("T")[0],
+        previousPeriodEndDate.toISOString().split("T")[0]
+      );
+
+      const totalTradeInCallsPrevious = previousCityEntries.reduce(
+        (sum, entry) => sum + (Number(entry.prodan) || 0),
         0
       );
 
-      // Рассчитываем динамику от прошлого периода
-      const dynamicFromLastPeriod =
-        calculateDynamicFromLastPeriod(currentCityEntries);
+      const totalCallsCurrent = currentCityEntries.reduce(
+        (sum, entry) => sum + (Number(entry.fact) || 0),
+        0
+      );
 
-      // Рассчитываем динамику от прошлого периода для общего количества звонков
-      const callsDynamicFromLastPeriod =
-        calculateCallsDynamicFromLastPeriod(currentCityEntries);
+      // Рассчитываем процент звонков трейд-ин от общего количества звонков
+      const tradeInPercentage =
+        totalCallsCurrent > 0
+          ? ((totalTradeInCallsCurrent / totalCallsCurrent) * 100).toFixed(2) +
+            " %"
+          : "0 %";
+
+      // Рассчитываем динамику
+      let tradeInDynamic;
+      if (totalTradeInCallsPrevious === 0) {
+        tradeInDynamic = totalTradeInCallsCurrent > 0 ? " " : " "; // если в предыдущем месяце не было звонков
+      } else {
+        tradeInDynamic =
+          (
+            ((totalTradeInCallsCurrent - totalTradeInCallsPrevious) /
+              totalTradeInCallsPrevious) *
+            100
+          ).toFixed(2) + " %";
+      }
+
+      console.log("tradeInDynamic", tradeInDynamic);
 
       return {
         city: cityName,
-        cityAverageCallQuality: averageCallQuality || "",
-        cityPreviousPeriodDynamic: dynamicFromLastPeriod || "",
-        cityTotalCalls: totalCalls || "",
-        cityCallsDynamic: callsDynamicFromLastPeriod || ""
+        cityTradeInCalls: totalTradeInCallsCurrent || "",
+        cityTradeInPercentage: tradeInPercentage || "",
+        cityDynamicFromLastPeriod: tradeInDynamic || ""
       };
     });
 
@@ -410,6 +357,7 @@ const sumCallsByRegion = async () => {
   }
 };
 
+sumCallsByRegion();
 
 // Рассчитываем динамику для среднего значения качества звонков
 const calculatePreviousPeriodDynamic = (currentAverage, previousAverage) => {
@@ -420,42 +368,28 @@ const calculatePreviousPeriodDynamic = (currentAverage, previousAverage) => {
     !previousAverage ||
     isNaN(previousAverage)
   ) {
-    return ""; // Если данные отсутствуют или неверны
+    return "N/A"; // Если данные отсутствуют или неверны
   }
 
   const dynamic = ((currentAverage - previousAverage) / previousAverage) * 100;
   return dynamic.toFixed(2) + " %";
 };
 
-// Функция для фильтрации по текущему месяцу
-const getCurrentMonthData = (data) => {
-  const now = new Date();
-  const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+const filterDataByDate = (data, startDate, endDate) => {
+  if (!startDate || !endDate) {
+    console.log("No dates provided, returning all data");
+    return data; // Если даты не выбраны, возвращаем все данные
+  }
+
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  end.setHours(23, 59, 59, 999); // Конец дня
 
   return data.filter((item) => {
-    if (!item.date) {
-      return false; // Пропускаем записи без даты
-    }
-
+    if (!item.date) return false; // Пропускаем записи без даты
     const itemDate = new Date(item.date.split(".").reverse().join("-"));
 
-    return itemDate >= currentMonthStart;
-  });
-};
-
-// Функция для фильтрации по предыдущему месяцу
-const getPreviousMonthData = (data) => {
-  const now = new Date();
-  const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-
-  return data.filter((item) => {
-    if (!item.date) {
-      return false; // Пропускаем записи без даты
-    }
-
-    const itemDate = new Date(item.date.split(".").reverse().join("-"));
-    return itemDate >= previousMonthStart && itemDate < currentMonthStart;
+    return itemDate >= start && itemDate <= end;
   });
 };
 
@@ -474,14 +408,17 @@ const calculateRegionAverages = async (startDate, endDate) => {
 
   const filteredData = filterDataByDate(tableData.value, startDate, endDate);
 
+  console.log("tableData.value:", tableData.value);
+
   if (filteredData.length === 0) {
     alert("Нет данных для выбранного диапазона дат.");
     return;
   }
 
-  const now = new Date();
   const currentMonth = new Date().getMonth(); // Текущий месяц
   const currentYear = new Date().getFullYear(); // Текущий год
+
+  console.log("Текущий месяц:", currentMonth, "Текущий год:", currentYear);
 
   const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1; // Предыдущий месяц
   const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear;
@@ -575,62 +512,34 @@ const calculateRegionAverages = async (startDate, endDate) => {
 
   filteredTableData.value = Object.keys(regionData).map((region) => {
     const regionCities = regionData[region];
-    const currentRegionData = getCurrentMonthData(regionCities);
-    const previousRegionData = getPreviousMonthData(regionCities);
 
     const totalCurrentCalls =
       region === "Юг" ? totalCallsSouth : totalCallsNorth;
 
-    const totalPreviousCalls = previousMonthData.reduce(
-      (sum, item) => sum + (parseInt(item.fact) || 0),
-      0
-    );
+    const tradeInCalls =
+      region === "Юг" ? tradeInCallsSouth : tradeInCallsNorth;
+    const tradeInPercentage =
+      totalCurrentCalls > 0
+        ? ((tradeInCalls / totalCurrentCalls) * 100).toFixed(2) + " %"
+        : "0 %";
 
-    const totalQuality = regionCities.reduce(
-      (sum, quality) => sum + quality.value,
-      0
-    );
-    const averageQuality = (totalQuality / regionCities.length).toFixed(2);
-
-    const averageCurrentQuality =
-      currentRegionData.length > 0
+    // Динамика количества звонков в трейд-ин
+    const tradeInCallsDynamic =
+      totalTradeInCallsPreviousMonth > 0
         ? (
-            currentRegionData.reduce((sum, item) => sum + item.value, 0) /
-            currentRegionData.length
-          ).toFixed(2)
-        : 0;
-
-    const averagePreviousQuality =
-      previousRegionData.length > 0
-        ? (
-            previousRegionData.reduce((sum, item) => sum + item.value, 0) /
-            previousRegionData.length
-          ).toFixed(2)
-        : 0;
-
-    const previousPeriodDynamic = calculatePreviousPeriodDynamic(
-      averageCurrentQuality,
-      averagePreviousQuality
-    );
-
-    const callsDynamic =
-      totalPreviousCalls > 0
-        ? (
-            ((totalCurrentCalls - totalPreviousCalls) / totalPreviousCalls) *
+            ((totalTradeInCallsCurrentMonth - totalTradeInCallsPreviousMonth) /
+              totalTradeInCallsPreviousMonth) *
             100
-          ).toFixed(0) + " %"
-        : totalCurrentCalls > 0
+          ).toFixed(2) + " %"
+        : totalTradeInCallsCurrentMonth > 0
         ? "0.0 %"
         : "0 %";
 
     return {
       region,
-      previousPeriodDynamic: previousPeriodDynamic
-        ? previousPeriodDynamic
-        : "0 %",
-      callsDynamic: callsDynamic || "0 %",
-      totalCalls: totalCurrentCalls || "0",
-      averageCallQuality: averageQuality + " %"
+      tradeInCalls: tradeInCalls || "0",
+      tradeInPercentage: tradeInPercentage || "0 %",
+      dynamicFromLastPeriod: tradeInCallsDynamic || "0 %"
     };
   });
 };
@@ -670,8 +579,7 @@ const handleFilterChange = async ({
   );
 
   await calculateRegionAverages(filters.value.startDate, filters.value.endDate);
-
-  await fetchData();
+  await fetchFactsOnly(); // Обновление фактов с новыми фильтрами
 };
 
 const downloadTable = () => {
@@ -742,9 +650,6 @@ onMounted(() => {
   calculatePreviousPeriodDynamic();
 });
 </script>
-
-<!-- TODO -- Фильтр по датам -->
-
 <style scoped>
 .filters-statis-city {
   display: flex;

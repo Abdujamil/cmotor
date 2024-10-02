@@ -9,6 +9,7 @@ const routes = [
   { path: "/statisticManager", component: () => import("../pages/StatisticManager.vue") },
   { path: "/npsAdd", component: () => import("../pages/DataNPS.vue") },
   { path: "/npsList", component: () => import("../pages/StatisticNPS.vue") },
+  { path: "/StatisticCityTradeIn", component: () => import("../pages/StatisticCityTradeIn.vue") },
 ];
 
 // Создание экземпляра роутера

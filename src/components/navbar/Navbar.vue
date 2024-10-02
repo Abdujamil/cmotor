@@ -1,39 +1,3 @@
-<script setup>
-import { ref } from "vue";
-
-// Переменные для управления видимостью подменю и отслеживания активных пунктов меню
-const showCallsSubmenu = ref(false);
-const showStatsSubmenu = ref(false);
-const showNPSSubmenu = ref(false);
-const activeMenu = ref("allCities"); // Активное главное меню
-const activeSubmenu = ref("allCities"); // Активное подменю
-
-// Функция переключения видимости подменю
-const toggleSubmenu = (submenu) => {
-  if (submenu === "calls") {
-    showCallsSubmenu.value = !showCallsSubmenu.value;
-    // showStatsSubmenu.value = false;
-    // showNPSSubmenu.value = false;
-    activeMenu.value = "calls"; // Устанавливаем активное главное меню
-  } else if (submenu === "stats") {
-    showStatsSubmenu.value = !showStatsSubmenu.value;
-    // showCallsSubmenu.value = false;
-    // showNPSSubmenu.value = false;
-    activeMenu.value = "stats";
-  } else if (submenu === "nps") {
-    showNPSSubmenu.value = !showNPSSubmenu.value;
-    // showCallsSubmenu.value = false;
-    // showStatsSubmenu.value = false;
-    // activeMenu.value = "nps";
-  }
-};
-
-// Установка активного подменю
-const setActiveSubmenu = (item) => {
-  activeSubmenu.value = item;
-};
-</script>
-
 <template>
   <div class="nav">
     <div class="nav__title">Меню</div>
@@ -117,6 +81,18 @@ const setActiveSubmenu = (item) => {
             >Сводная по городам</RouterLink
           >
         </div>
+
+        <div
+          class="nav__item"
+          :class="{
+            'nav__item--active': activeSubmenu === 'statisticCityTradeIn'
+          }"
+          @click="setActiveSubmenu('statisticCityTradeIn')"
+        >
+          <RouterLink class="nav__link" to="/statisticCityTradeIn"
+            >Сводная по городам трейд-ин</RouterLink
+          >
+        </div>
         <div
           class="nav__item"
           :class="{ 'nav__item--active': activeSubmenu === 'statisticManager' }"
@@ -169,9 +145,7 @@ const setActiveSubmenu = (item) => {
           :class="{ 'nav__item--active': activeSubmenu === 'npsAdd' }"
           @click="setActiveSubmenu('npsAdd')"
         >
-          <RouterLink class="nav__link" to="/npsAdd"
-            >Данные NPS</RouterLink
-          >
+          <RouterLink class="nav__link" to="/npsAdd">Данные NPS</RouterLink>
         </div>
       </div>
     </div>
@@ -188,6 +162,42 @@ const setActiveSubmenu = (item) => {
     </div>
   </div>
 </template>
+
+<script setup>
+import { ref } from "vue";
+
+// Переменные для управления видимостью подменю и отслеживания активных пунктов меню
+const showCallsSubmenu = ref(false);
+const showStatsSubmenu = ref(false);
+const showNPSSubmenu = ref(false);
+const activeMenu = ref("allCities"); // Активное главное меню
+const activeSubmenu = ref("allCities"); // Активное подменю
+
+// Функция переключения видимости подменю
+const toggleSubmenu = (submenu) => {
+  if (submenu === "calls") {
+    showCallsSubmenu.value = !showCallsSubmenu.value;
+    // showStatsSubmenu.value = false;
+    // showNPSSubmenu.value = false;
+    activeMenu.value = "calls"; // Устанавливаем активное главное меню
+  } else if (submenu === "stats") {
+    showStatsSubmenu.value = !showStatsSubmenu.value;
+    // showCallsSubmenu.value = false;
+    // showNPSSubmenu.value = false;
+    activeMenu.value = "stats";
+  } else if (submenu === "nps") {
+    showNPSSubmenu.value = !showNPSSubmenu.value;
+    // showCallsSubmenu.value = false;
+    // showStatsSubmenu.value = false;
+    // activeMenu.value = "nps";
+  }
+};
+
+// Установка активного подменю
+const setActiveSubmenu = (item) => {
+  activeSubmenu.value = item;
+};
+</script>
 
 <style lang="scss">
 @import "./navbar.scss";

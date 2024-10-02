@@ -1,5 +1,5 @@
 <template>
-  <div class="dropdowns">
+  <div class="dropdowns" ref="filterContainer">
     <p>Показать статистику:</p>
     <div class="my-calendar">
       <VueDatePicker
@@ -19,7 +19,7 @@
     </div>
 
     <!-- Dropdown for selecting region -->
-    <div class="dropdown" ref="regionDropdown">
+    <div class="dropdown" ref="regionDropdown" @click.stop>
       <div class="dropdown-toggle" @click="toggleDropdown('region')">
         <span id="dropdown-selected-region">{{
           selectedRegion || "Выбрать регион"
@@ -54,7 +54,7 @@
     </div>
 
     <!-- Dropdown for selecting city -->
-    <div class="dropdown" ref="cityDropdown">
+    <div class="dropdown" ref="cityDropdown" @click.stop>
       <div class="dropdown-toggle" @click="toggleDropdown('city')">
         <span id="dropdown-selected-city">{{
           selectedCity || "Выбрать город"
@@ -121,9 +121,6 @@ const selectedCity = ref("");
 
 const dateRange = ref([new Date(), null]); // [startDate, endDate]
 
-const formatDate = (date) => {
-  return date ? date.toLocaleDateString("ru-RU") : null;
-};
 
 const handleDateChange = (dates) => {
   const startDate = dates && dates[0] ? new Date(dates[0]) : null;
@@ -204,10 +201,10 @@ const filteredCities = computed(() => {
 const toggleDropdown = (type) => {
   if (type === "region") {
     showRegionDropdown.value = !showRegionDropdown.value;
-    showCityDropdown.value = false;
+    if (showCityDropdown.value) showCityDropdown.value = false;
   } else if (type === "city") {
     showCityDropdown.value = !showCityDropdown.value;
-    showRegionDropdown.value = false;
+    if (showRegionDropdown.value) showRegionDropdown.value = false;
   }
 };
 
@@ -232,21 +229,17 @@ const selectCity = (city) => {
   emitFilterChange();
 };
 
+const regionDropdownRef = ref(null);
+const cityDropdownRef = ref(null);
+const filterContainer = ref(null);
+
 const handleClickOutside = (event) => {
-  const regionDropdown = regionDropdownRef.value;
-  const cityDropdown = cityDropdownRef.value;
-
-  if (regionDropdown && !regionDropdown.contains(event.target)) {
+  if (filterContainer.value && !filterContainer.value.contains(event.target)) {
     showRegionDropdown.value = false;
-  }
-
-  if (cityDropdown && !cityDropdown.contains(event.target)) {
     showCityDropdown.value = false;
   }
 };
 
-const regionDropdownRef = ref(null);
-const cityDropdownRef = ref(null);
 
 onMounted(() => {
   document.addEventListener("click", handleClickOutside);
