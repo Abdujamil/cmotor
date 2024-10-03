@@ -115,12 +115,23 @@ const calculateFooterValues = () => {
     (sum, manager) => sum + manager.totalCalls,
     0
   );
+
+  console.log("totalCallsSum:", totalCallsSum); //NaN
+  
+
   const totalPercentageSum = filteredManagers.value.reduce(
     (sum, manager) => sum + manager.averagePercentage * manager.totalCalls,
     0
   );
+
+  console.log("totalPercentageSum:", totalPercentageSum); //NaN
+  
+
   const averagePercentage =
     totalCallsSum === 0 ? 0 : (totalPercentageSum / totalCallsSum).toFixed(2);
+
+    console.log("averagePercentage:", averagePercentage); //NaN
+
   return { totalCallsSum, averagePercentage };
 };
 
@@ -150,23 +161,27 @@ const processData = () => {
         };
       }
 
-      const total =
-        Number(item.obrashenie) +
-        Number(item.salon) +
-        Number(item.cred_nal) +
-        Number(item.prodan) +
-        Number(item.city2) +
-        Number(item.data_visit) +
-        Number(item.garantiya) +
-        Number(item.obrash_imeni) +
-        Number(item.bodr_son) * 1.5 +
-        Number(item.otpr_viz) +
-        Number(item.vizit) * 3 +
-        Number(item.prod_company) +
-        Number(item.zdatok) * 0.5;
+      // Преобразуем все возможные числовые значения в числа
+      const total = [
+        item.obrashenie,
+        item.salon,
+        item.cred_nal,
+        item.prodan,
+        item.city2,
+        item.data_visit,
+        item.garantiya,
+        item.obrash_imeni,
+        item.bodr_son * 1.5,
+        item.otpr_viz,
+        item.vizit * 3,
+        item.prod_company,
+        item.zdatok * 0.5
+      ]
+        .map(value => Number(value))  // Преобразуем в числа
+        .reduce((sum, value) => sum + (isNaN(value) ? 0 : value), 0);  // Если value NaN, считаем его как 0
 
-      managerData[managerName].totalCalls += parseInt(item.fact, 10);
-      managerData[managerName].totalPlan += parseInt(item.plan, 10);
+      managerData[managerName].totalCalls += parseInt(item.fact, 10) || 0; // Проверяем на NaN
+      managerData[managerName].totalPlan += parseInt(item.plan, 10) || 0;   // Проверяем на NaN
       managerData[managerName].totalPercentage += total;
 
       managerData[managerName].count += 1;
@@ -174,15 +189,18 @@ const processData = () => {
   });
 
   filteredManagers.value = Object.values(managerData).map((manager) => {
+    // Проверка на деление на 0
     const averagePercentage =
       manager.totalCalls === 0 ? 0 : manager.totalPlan / manager.totalCalls;
     return {
       ...manager,
-      averagePercentage: parseFloat(averagePercentage.toFixed(2))
+      averagePercentage: isNaN(averagePercentage) ? 0 : parseFloat(averagePercentage.toFixed(2)) // Проверка на NaN
     };
   });
+
   // Вызов для обновления значений в футере
   footerValues.value = calculateFooterValues();
+  console.log("footerValues:", footerValues.value); // Печать для проверки значений
 };
 
 const handleFilterChange = ({

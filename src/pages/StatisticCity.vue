@@ -495,17 +495,29 @@ const fetchFactsOnly = async () => {
 
     // Функция для расчета динамики по сравнению с предыдущим периодом
     const calculateCityDynamic = (currentCityEntries, previousCityEntries) => {
-      const currentCalls = currentCityEntries.reduce(
-        (sum, entry) => sum + Number(entry.fact),
-        0
-      );
-      const previousCalls = previousCityEntries.reduce(
-        (sum, entry) => sum + Number(entry.fact),
-        0
-      );
-      const callsDynamic = previousCalls > 0 
-        ? ((currentCalls - previousCalls) / previousCalls) * 100
-        : 0;
+      // Суммируем фактические звонки для текущего периода
+      const currentCalls = currentCityEntries.reduce((sum, entry) => {
+        const fact = Number(entry.fact); // Преобразуем фактические данные в числа
+        return sum + (isNaN(fact) ? 0 : fact); // Если данные не числа, считаем их как 0
+      }, 0);
+
+      // Суммируем фактические звонки для предыдущего периода
+      const previousCalls = previousCityEntries.reduce((sum, entry) => {
+        const fact = Number(entry.fact); // Преобразуем фактические данные в числа
+        return sum + (isNaN(fact) ? 0 : fact); // Если данные не числа, считаем их как 0
+      }, 0);
+
+      // Рассчитываем динамику звонков
+      let callsDynamic = 0;
+      if (previousCalls > 0) {
+        callsDynamic = ((currentCalls - previousCalls) / previousCalls) * 100; // Вычисляем динамику
+      } else if (currentCalls > 0) {
+        callsDynamic = 100; // Если в предыдущем периоде не было звонков, а в текущем есть, динамика - 100%
+      } else {
+        callsDynamic = 0; // Если в обоих периодах нет звонков, динамика - 0%
+      }
+
+      // Возвращаем динамику с округлением до целых чисел и добавлением знака процента
       return callsDynamic.toFixed(0) + " %";
     };
 
@@ -521,13 +533,14 @@ const fetchFactsOnly = async () => {
       );
 
       // Если нет фильтра, берем все данные
-      const previousCityEntries = filters.value.startDate && filters.value.endDate
-        ? filterDataByDate(
-            cityEntries,
-            previousPeriodStartDate.toISOString().split("T")[0],
-            previousPeriodEndDate.toISOString().split("T")[0]
-          )
-        : cityEntries;
+      const previousCityEntries =
+        filters.value.startDate && filters.value.endDate
+          ? filterDataByDate(
+              cityEntries,
+              previousPeriodStartDate.toISOString().split("T")[0],
+              previousPeriodEndDate.toISOString().split("T")[0]
+            )
+          : cityEntries;
 
       // Суммируем значения для расчета среднего качества звонков
       const totalQuality = currentCityEntries.reduce(
@@ -536,7 +549,8 @@ const fetchFactsOnly = async () => {
       );
       const resultAvaregeCallQuality = Math.floor((totalQuality / 14) * 100);
       const averageCallQuality =
-        (resultAvaregeCallQuality / currentCityEntries.length).toFixed(2) + " %";
+        (resultAvaregeCallQuality / currentCityEntries.length).toFixed(2) +
+        " %";
 
       // Общее количество звонков
       const totalCalls = currentCityEntries.reduce(
@@ -545,7 +559,10 @@ const fetchFactsOnly = async () => {
       );
 
       // Рассчитываем динамику от прошлого периода
-      const callsDynamicFromLastPeriod = calculateCityDynamic(currentCityEntries, previousCityEntries);
+      const callsDynamicFromLastPeriod = calculateCityDynamic(
+        currentCityEntries,
+        previousCityEntries
+      );
 
       return {
         city: cityName,
@@ -562,7 +579,6 @@ const fetchFactsOnly = async () => {
     return [];
   }
 };
-
 
 // Функция для группировки и суммирования звонков по регионам
 const sumCallsByRegion = async () => {
@@ -730,7 +746,7 @@ const getPreviousMonthData = (data) => {
 //   // console.log("previousMonth:", previousMonth, "previousYear:", previousYear); // previousMonth: 8 previousYear: 2024
 
 //   // Функция для получения данных за выбранный месяц и год
-  
+
 //   const getDataForMonth = (data, targetMonth, targetYear) => {
 //     // Фильтруем данные по месяцу и году
 //     let foundData = data.filter((item) => {
@@ -756,7 +772,6 @@ const getPreviousMonthData = (data) => {
 
 //     return foundData;
 //   };
-
 
 //   const currentMonthData = getDataForMonth(
 //     filteredData,
@@ -956,7 +971,7 @@ const getPreviousMonthData = (data) => {
 //     previousWeekEnd.setDate(previousWeekStart.getDate() + 6); // Конец недели через 6 дней
 
 //     console.warn("getPreviousWeek:","previousWeekStart:", previousWeekStart, "previousWeekEnd:", previousWeekEnd);
-    
+
 //     return { start: previousWeekStart, end: previousWeekEnd };
 //   };
 
@@ -1088,7 +1103,10 @@ const calculateRegionAverages = async (startDate, endDate) => {
   const getDataForMonth = (data, targetMonth, targetYear) => {
     let foundData = data.filter((item) => {
       const itemDate = new Date(item.date);
-      return itemDate.getMonth() === targetMonth && itemDate.getFullYear() === targetYear;
+      return (
+        itemDate.getMonth() === targetMonth &&
+        itemDate.getFullYear() === targetYear
+      );
     });
 
     // Если данных нет для месяца, проверим предыдущий месяц
@@ -1115,14 +1133,23 @@ const calculateRegionAverages = async (startDate, endDate) => {
     return { start: previousWeekStart, end: previousWeekEnd };
   };
 
-  const { start: previousWeekStart, end: previousWeekEnd } = getPreviousWeek(startDate);
+  const { start: previousWeekStart, end: previousWeekEnd } =
+    getPreviousWeek(startDate);
 
   // Получаем данные за текущий и предыдущий месяц
   const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
   const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear;
 
-  const currentMonthData = getDataForMonth(filteredData, currentMonth, currentYear);
-  const previousMonthData = getDataForMonth(filteredData, previousMonth, previousYear);
+  const currentMonthData = getDataForMonth(
+    filteredData,
+    currentMonth,
+    currentYear
+  );
+  const previousMonthData = getDataForMonth(
+    filteredData,
+    previousMonth,
+    previousYear
+  );
 
   const regionData = {
     Юг: [],
@@ -1162,10 +1189,19 @@ const calculateRegionAverages = async (startDate, endDate) => {
 
   filteredTableData.value = Object.keys(regionData).map((region) => {
     const regionCities = regionData[region];
-    const currentRegionData = getDataForMonth(regionCities, currentMonth, currentYear);
-    const previousRegionData = getDataForMonth(regionCities, previousMonth, previousYear);
+    const currentRegionData = getDataForMonth(
+      regionCities,
+      currentMonth,
+      currentYear
+    );
+    const previousRegionData = getDataForMonth(
+      regionCities,
+      previousMonth,
+      previousYear
+    );
 
-    const totalCurrentCalls = region === "Юг" ? totalCallsSouth : totalCallsNorth;
+    const totalCurrentCalls =
+      region === "Юг" ? totalCallsSouth : totalCallsNorth;
     const totalPreviousCalls = previousMonthData.reduce(
       (sum, item) => sum + (parseInt(item.fact) || 0),
       0
@@ -1201,22 +1237,25 @@ const calculateRegionAverages = async (startDate, endDate) => {
       averagePreviousQuality
     );
 
-    const previousPeriodDyn = (startDate && endDate) 
-      ? (
-          averagePreviousQuality > 0
-            ? ((averageCurrentQuality - averagePreviousQuality) / averagePreviousQuality) * 100
+    const previousPeriodDyn =
+      startDate && endDate
+        ? (averagePreviousQuality > 0
+            ? ((averageCurrentQuality - averagePreviousQuality) /
+                averagePreviousQuality) *
+              100
             : 0
-        ).toFixed(0) + " %"
-      : " ";
+          ).toFixed(0) + " %"
+        : " ";
 
     // Динамика по умолчанию не рассчитывается, если не выбран фильтр по датам
-    const callsDynamic = (startDate && endDate) 
-      ? (
-          totalPreviousCalls > 0
-            ? ((totalCurrentCalls - totalPreviousCalls) / totalPreviousCalls) * 100
+    const callsDynamic =
+      startDate && endDate
+        ? (totalPreviousCalls > 0
+            ? ((totalCurrentCalls - totalPreviousCalls) / totalPreviousCalls) *
+              100
             : 0
-        ).toFixed(0) + " %"
-      : " ";
+          ).toFixed(0) + " %"
+        : " ";
 
     return {
       region,
