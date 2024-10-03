@@ -96,8 +96,8 @@ const cityRegionMap = {
   Кемерово: "Север",
   Барнаул: "Север",
   Новокузнецк: "Север",
-  "Красноярск (Брянка)": "Север",
-  "Красноярск (ЛПК)": "Север",
+  "Красноярск Брянка": "Север",
+  "Красноярск ПЖ": "Север",
   Омск: "Север",
   Томск: "Север"
 };
@@ -389,6 +389,8 @@ const filterDataByDate = (data, startDate, endDate) => {
     if (!item.date) return false; // Пропускаем записи без даты
     const itemDate = new Date(item.date.split(".").reverse().join("-"));
 
+    // console.log("itemDate:", itemDate, "start:", start, "end:", end);
+
     return itemDate >= start && itemDate <= end;
   });
 };
@@ -448,6 +450,8 @@ const calculateRegionAverages = async (startDate, endDate) => {
     currentMonth,
     currentYear
   );
+  console.log("currentMonthData:", currentMonthData);
+  
 
   // Получаем данные для предыдущего месяца
   const previousMonthData = getDataForMonth(
@@ -492,6 +496,7 @@ const calculateRegionAverages = async (startDate, endDate) => {
       }
     }
   });
+  
 
   // Заполняем regionData с данными, включая дату
   factsData.forEach((client) => {
