@@ -9,15 +9,58 @@
 
     <div class="table-container">
       <div ref="table" class="table">
-        <!-- Table Header -->
+       <!-- Table Header -->
         <div class="table-row header">
-          <div class="table-cell">По регионам</div>
-          <div class="table-cell">Кол-во звонков в трейд-ин</div>
-          <div class="table-cell">
-            Процент звонков в трейд-ин от общего кол-ва
+          <div class="table-cell" @click="sortData('city')">По регионам
+             <span>
+            <span
+              v-if="sortKey === 'city' && sortOrder === 'asc'"
+              >↑</span
+            >
+            <span
+              v-if="sortKey === 'city' && sortOrder === 'desc'"
+              >↓</span
+            >
+          </span>
           </div>
-          <div class="table-cell">Динамика от прошлого периода</div>
+          <div class="table-cell" @click="sortData('cityTradeInCalls')">Кол-во звонков в трейд-ин
+             <span>
+            <span
+              v-if="sortKey === 'cityTradeInCalls' && sortOrder === 'asc'"
+              >↑</span
+            >
+            <span
+              v-if="sortKey === 'cityTradeInCalls' && sortOrder === 'desc'"
+              >↓</span
+            >
+          </span>
+          </div>
+          <div class="table-cell" @click="sortData('cityTradeInPercentage')">Процент звонков в трейд-ин от общего кол-ва
+             <span>
+            <span
+              v-if="sortKey === 'cityTradeInPercentage' && sortOrder === 'asc'"
+              >↑</span
+            >
+            <span
+              v-if="sortKey === 'cityTradeInPercentage' && sortOrder === 'desc'"
+              >↓</span
+            >
+          </span>
+          </div>
+          <div class="table-cell" @click="sortData('cityDynamicFromLastPeriod')">Динамика от прошлого периода
+             <span>
+            <span
+              v-if="sortKey === 'cityDynamicFromLastPeriod' && sortOrder === 'asc'"
+              >↑</span
+            >
+            <span
+              v-if="sortKey === 'cityDynamicFromLastPeriod' && sortOrder === 'desc'"
+              >↓</span
+            >
+          </span>
+          </div>
         </div>
+
         <!-- Filtered Table Rows -->
         <div
           class="table-row"
@@ -37,7 +80,7 @@
         <!-- Filtered City Rows -->
         <div
           class="table-row"
-          v-for="(city, index) in filteredCitiesData"
+          v-for="(city, index) in sortedData"
           :key="'city-' + index"
         >
           <div class="table-cell">{{ city.city }}</div>
@@ -61,6 +104,8 @@ const table = ref(null);
 const selectedRegion = ref("");
 const selectedCity = ref("");
 const filteredTableData = ref([]);
+const sortKey = ref('');
+const sortOrder = ref('asc');
 
 const tableData = ref([]);
 
@@ -149,6 +194,9 @@ const fetchData = async (offset = 0, resetData = false) => {
       tableData.value = [...tableData.value, ...newData];
     }
 
+    filteredTableData.value = [...tableData.value];
+    filteredCitiesData.value = [...newData];
+
     console.log(
       "Starting calculateRegionAverages with dates:",
       filters.value.startDate,
@@ -159,6 +207,39 @@ const fetchData = async (offset = 0, resetData = false) => {
   } catch (error) {
     console.error("Ошибка при получении данных:", error);
   }
+};
+
+// Вычисляемое свойство для сортировки данных
+const sortedData = computed(() => {
+  const data = [...citiesData.value];
+  console.log("data:", data);
+  
+  return data.sort((a, b) => {
+    const aValue = a[sortKey.value];
+    const bValue = b[sortKey.value];
+
+    if (aValue === undefined || bValue === undefined) {
+      console.error(`Ключ "${sortKey.value}" не найден в одном из объектов:`, a, b);
+      return 0; // Не сортировать, если ключ не найден
+    }
+    
+    
+    if (sortOrder.value === 'asc') {
+      return aValue > bValue ? 1 : -1;
+    } else {
+      return aValue < bValue ? 1 : -1;
+    }
+  });
+});
+// Метод для сортировки данных при нажатии на заголовок колонки
+const sortData = (key) => {
+  if (sortKey.value === key) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortKey.value = key;
+    sortOrder.value = 'asc';
+  }
+  console.log(`sortKey: ${sortKey.value}, sortOrder: ${sortOrder.value}`);
 };
 
 const calculateTradeInDynamic = (currentMonthCalls, previousMonthCalls) => {
@@ -450,7 +531,7 @@ const calculateRegionAverages = async (startDate, endDate) => {
     currentMonth,
     currentYear
   );
-  console.log("currentMonthData:", currentMonthData);
+  console.log("currentMonthData:", currentMonthData)
   
 
   // Получаем данные для предыдущего месяца
@@ -529,15 +610,14 @@ const calculateRegionAverages = async (startDate, endDate) => {
         : "0 %";
 
     // Динамика количества звонков в трейд-ин
-    const tradeInCallsDynamic =
-      totalTradeInCallsPreviousMonth > 0
-        ? (
+    const tradeInCallsDynamic = 
+    startDate && endDate ? (
             ((totalTradeInCallsCurrentMonth - totalTradeInCallsPreviousMonth) /
               totalTradeInCallsPreviousMonth) *
             100
           ).toFixed(2) + " %"
         : totalTradeInCallsCurrentMonth > 0
-        ? "0.0 %"
+        ? " "
         : "0 %";
 
     return {
@@ -655,7 +735,7 @@ onMounted(() => {
   calculatePreviousPeriodDynamic();
 });
 </script>
-<style scoped>
+<style scoped lang="scss">
 .filters-statis-city {
   display: flex;
   justify-content: space-between;
@@ -688,6 +768,10 @@ onMounted(() => {
   text-align: center;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
+
+  .table-cell {
+    gap: 6px;
+  }
 }
 
 .table-row.header-2 {

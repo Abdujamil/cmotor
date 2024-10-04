@@ -1750,6 +1750,14 @@ const showFormEdit = ref(false);
 const toggleForm = () => {
   showForm.value = !showForm.value;
   showFormEdit.value = !showFormEdit.value;
+
+  formData2.value = {
+    name: "",
+    phone: "",
+    email: "",
+    city: "",
+    avto: "",
+  };
 };
 
 const cities = [
@@ -2099,7 +2107,7 @@ const fetchTotalItems = async () => {
     );
     totalItems2.value = response.data.answer.count;
     tableData3.value = response.data.answer.items;
-    
+
     calculateAveragePlan();
   } catch (error) {
     console.error(
@@ -2325,6 +2333,53 @@ const addClient = async () => {
 
     alert("Данные успешно добавлены!");
 
+    // Очищаем форму
+    formData2.value = {
+      city: "",
+      region: "",
+      date: "",
+      manager: "",
+      phone: "",
+      fio: "",
+      avto: "",
+      fact: "1",
+      obrashenie: "",
+      salon: "",
+      cred_nal: "",
+      prodan: "",
+      city2: "",
+      data_visit: "",
+      garantiya: "",
+      obrash_imeni: "",
+      bodr_son: "",
+      otpr_viz: "",
+      vizit: "",
+      prod_company: "",
+      zdatok: "",
+      itog: "",
+      plan: "",
+      comment: ""
+    };
+
+    // Сбрасываем выбранный город и другие дропдауны
+    selectedCity.value = ""; // Сбрасываем город
+    showCityDropdown.value = false; // Закрываем dropdown
+
+    // Если есть другие дропдауны, их тоже нужно сбрасывать, например:
+    selectedBrand.value = null; // Для марки авто, если она есть
+    showBrandDropdown.value = false; // Закрываем dropdown для бренда
+    selectedManager.value = null; // Сбрасываем менеджера
+    showManagerDropdown.value = false; // Закрываем dropdown для менеджера
+
+    selectedModel.value = null; // Сбрасываем модель
+    showModelDropdown.value = false; // Закрываем dropdown для модели
+
+    // Сбрасываем дату
+    date.value = null; // или null, в зависимости от того, как ты используешь этот параметр
+
+    // Очищаем номер телефона
+    formData2.value.phone = "";
+
     // Очищение текущие данные таблицы перед обновлением
     tableData2.value = [];
     loadedData.value = [];
@@ -2380,61 +2435,6 @@ const editClient = (client) => {
   }
 };
 
-// const updateClient = async () => {
-//   try {
-//     console.log("Обновление клиента с ID:", currentClientId.value);
-//     console.log("Обновление клиента с ID:", formData2.value);
-
-//     // Преобразуем значения в числа и вычисляем сумму
-//     const itogg =
-//       Number(formData2.value.obrashenie) +
-//       Number(formData2.value.salon) +
-//       Number(formData2.value.cred_nal) +
-//       Number(formData2.value.prodan) +
-//       Number(formData2.value.city2) +
-//       Number(formData2.value.data_visit) +
-//       Number(formData2.value.garantiya) +
-//       Number(formData2.value.obrash_imeni) +
-//       Number(formData2.value.bodr_son) +
-//       Number(formData2.value.otpr_viz) +
-//       Number(formData2.value.vizit) * 3 +
-//       Number(formData2.value.prod_company) +
-//       Number(formData2.value.zdatok);
-
-//     // Обновляем значение "itog" в formData2
-//     formData2.value.itog = itogg;
-//     formData2.value.plan = Math.floor((itogg / 14) * 100);
-
-//     // Убедитесь, что URL и метод правильно настроены на сервере
-//     await axios.get(
-//       `https://crystal-motors.ru/method.editClient?id=${
-//         currentClientId.value
-//       }&${new URLSearchParams(formData2.value).toString()}`
-//     );
-
-//     console.log(
-//       "Измененные данные клиента:",
-//       new URLSearchParams(formData2.value).toString()
-//     );
-//     alert("Данные успешно обновлены!");
-
-//     // Очищение текущие данные таблицы перед обновлением
-//     tableData2.value = [];
-//     loadedData.value = [];
-//     currentPage.value = 0; // Сброс страницы на первую
-
-//     // Вызовите функцию для обновления списка клиентов
-//     await fetchClients();
-
-//     showFormEdit.value = false;
-//     isEditing.value = false; // Закрыть форму редактирования
-//   } catch (error) {
-//     console.error("Ошибка при обновлении данных клиента:", error);
-//   }
-// };
-
-// Функция для удаления клиента
-
 const updateClient = async () => {
   try {
     console.log("Обновление клиента с ID:", currentClientId.value);
@@ -2474,6 +2474,7 @@ const updateClient = async () => {
     );
 
     alert("Данные успешно обновлены!");
+
 
     // Очищение текущие данные таблицы перед обновлением
     formData2.value = [];

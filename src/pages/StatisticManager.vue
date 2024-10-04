@@ -17,9 +17,27 @@
       <div ref="table" class="table">
         <!-- Table Header -->
         <div class="table-row header">
-          <div class="table-cell">ФИО менеджера</div>
-          <div class="table-cell">Процент обработки звонка</div>
-          <div class="table-cell">Количество звонков</div>
+          <div class="table-cell" @click="sortTable('name')">
+            ФИО менеджера 
+            <span>
+              <span v-if="sortOrder.key === 'name' && sortOrder.order === 'asc'">↑</span>
+              <span v-if="sortOrder.key === 'name' && sortOrder.order === 'desc'">↓</span>
+            </span>
+          </div>
+          <div class="table-cell" @click="sortTable('averagePercentage')">
+            Процент обработки звонка 
+            <span>
+              <span v-if="sortOrder.key === 'averagePercentage' && sortOrder.order === 'asc'">↑</span>
+              <span v-if="sortOrder.key === 'averagePercentage' && sortOrder.order === 'desc'">↓</span>
+            </span>
+          </div>
+          <div class="table-cell" @click="sortTable('totalCalls')">
+            Количество звонков 
+            <span>
+              <span v-if="sortOrder.key === 'totalCalls' && sortOrder.order === 'asc'">↑</span>
+              <span v-if="sortOrder.key === 'totalCalls' && sortOrder.order === 'desc'">↓</span>
+            </span>
+          </div>
         </div>
         <!-- Filtered Table Rows -->
         <div
@@ -49,6 +67,7 @@
     </div>
   </div>
 </template>
+
 <script setup>
 import Filter from "../components/filters/Filter.vue";
 import IButton from "../components/installButton/IButton.vue";
@@ -57,8 +76,8 @@ import axios from "axios";
 import * as XLSX from "xlsx";
 
 const managers = ref([]);
-const tableData3 = ref([]); // Табличные данные и общее количество записей
-const filteredManagers = ref([]); // Данные для отображения в таблице
+const tableData3 = ref([]);
+const filteredManagers = ref([]);
 const dateFilter = ref({ startDate: null, endDate: null });
 const table = ref(null);
 const cities = {
@@ -79,6 +98,7 @@ const regions = Object.keys(cities);
 const selectedRegion = ref("");
 const selectedCity = ref("");
 const footerValues = ref({ totalCallsSum: 0, averagePercentage: 0 });
+const sortOrder = ref({ key: '', order: 'asc' });
 
 const getCitiesForRegion = (region) => {
   return regions[region] || [];
@@ -116,28 +136,19 @@ const calculateFooterValues = () => {
     0
   );
 
-  console.log("totalCallsSum:", totalCallsSum); //NaN
-  
-
   const totalPercentageSum = filteredManagers.value.reduce(
     (sum, manager) => sum + manager.averagePercentage * manager.totalCalls,
     0
   );
 
-  console.log("totalPercentageSum:", totalPercentageSum); //NaN
-  
-
   const averagePercentage =
     totalCallsSum === 0 ? 0 : (totalPercentageSum / totalCallsSum).toFixed(2);
-
-    console.log("averagePercentage:", averagePercentage); //NaN
 
   return { totalCallsSum, averagePercentage };
 };
 
 const processData = () => {
   const managerData = {};
-
   const filteredItems = filterByDate(tableData3.value);
 
   filteredItems.forEach((item) => {
@@ -161,7 +172,6 @@ const processData = () => {
         };
       }
 
-      // Преобразуем все возможные числовые значения в числа
       const total = [
         item.obrashenie,
         item.salon,
@@ -177,30 +187,27 @@ const processData = () => {
         item.prod_company,
         item.zdatok * 0.5
       ]
-        .map(value => Number(value))  // Преобразуем в числа
-        .reduce((sum, value) => sum + (isNaN(value) ? 0 : value), 0);  // Если value NaN, считаем его как 0
+        .map(value => Number(value))
+        .reduce((sum, value) => sum + (isNaN(value) ? 0 : value), 0);
 
-      managerData[managerName].totalCalls += parseInt(item.fact, 10) || 0; // Проверяем на NaN
-      managerData[managerName].totalPlan += parseInt(item.plan, 10) || 0;   // Проверяем на NaN
+      managerData[managerName].totalCalls += parseInt(item.fact, 10) || 0;
+      managerData[managerName].totalPlan += parseInt(item.plan, 10) || 0;
       managerData[managerName].totalPercentage += total;
-
       managerData[managerName].count += 1;
     }
   });
 
   filteredManagers.value = Object.values(managerData).map((manager) => {
-    // Проверка на деление на 0
     const averagePercentage =
       manager.totalCalls === 0 ? 0 : manager.totalPlan / manager.totalCalls;
     return {
       ...manager,
-      averagePercentage: isNaN(averagePercentage) ? 0 : parseFloat(averagePercentage.toFixed(2)) // Проверка на NaN
+      averagePercentage: isNaN(averagePercentage) ? 0 : parseFloat(averagePercentage.toFixed(2))
     };
   });
 
   // Вызов для обновления значений в футере
   footerValues.value = calculateFooterValues();
-  console.log("footerValues:", footerValues.value); // Печать для проверки значений
 };
 
 const handleFilterChange = ({
@@ -222,16 +229,12 @@ const onRegionChange = () => {
 
 const downloadTable = () => {
   if (table.value) {
-    // Создаем массив для хранения данных
     const data = [];
-
-    // Собираем заголовки
     const headers = Array.from(
       table.value.querySelectorAll(".header .table-cell")
     ).map((cell) => cell.textContent);
-    data.push(headers); // Добавляем заголовки в массив данных
+    data.push(headers);
 
-    // Собираем строки из filteredManagers
     const rows = Array.from(
       table.value.querySelectorAll(".table-row:not(.header)")
     );
@@ -239,17 +242,31 @@ const downloadTable = () => {
       const rowData = Array.from(row.querySelectorAll(".table-cell")).map(
         (cell) => cell.textContent
       );
-      data.push(rowData); // Добавляем каждую строку в массив данных
+      data.push(rowData);
     });
 
-    // Создаем рабочий лист
     const ws = XLSX.utils.aoa_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-
-    // Генерируем и сохраняем файл Excel
     XLSX.writeFile(wb, "managers-table.xlsx");
   }
+};
+
+const sortTable = (key) => {
+  if (sortOrder.value.key === key) {
+    sortOrder.value.order = sortOrder.value.order === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortOrder.value.key = key;
+    sortOrder.value.order = 'asc';
+  }
+
+  const orderMultiplier = sortOrder.value.order === 'asc' ? 1 : -1;
+  
+  filteredManagers.value.sort((a, b) => {
+    if (a[key] < b[key]) return -1 * orderMultiplier;
+    if (a[key] > b[key]) return 1 * orderMultiplier;
+    return 0;
+  });
 };
 
 watch(dateFilter, processData, { immediate: true });
@@ -258,6 +275,7 @@ onMounted(() => {
   fetchTotalItems();
 });
 </script>
+
 
 <style lang="scss" scoped>
 .table-container {
@@ -313,6 +331,10 @@ onMounted(() => {
   border-top-right-radius: 8px;
   position: sticky;
   top: 0;
+
+  .table-cell{
+    gap: 6px;
+  }
 }
 
 .table-row.header-2 {

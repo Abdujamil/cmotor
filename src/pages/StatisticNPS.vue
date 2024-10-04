@@ -14,33 +14,75 @@
         <div class="table-cell">Город</div>
         <div class="table-cell" @click="sortData('averageSalonQuality')">
           Среднее качество работы салона
-          <span v-if="sortKey === 'averageSalonQuality'">{{ sortOrder === 'asc' ? '↓↑' : '↓↑' }}</span>
+          <span>
+            <span
+              v-if="sortKey === 'averageSalonQuality' && sortOrder === 'asc'"
+              >↑</span
+            >
+            <span
+              v-if="sortKey === 'averageSalonQuality' && sortOrder === 'desc'"
+              >↓</span
+            >
+          </span>
         </div>
         <div class="table-cell" @click="sortData('salonComparison')">
           Сравнение с прошлым периодом
-          <span v-if="sortKey === 'salonComparison'">{{ sortOrder === 'asc' ? '↓↑' : '↓↑' }}</span>
+          <span>
+            <span v-if="sortKey === 'salonComparison' && sortOrder === 'asc'"
+              >↑</span
+            >
+            <span v-if="sortKey === 'salonComparison' && sortOrder === 'desc'"
+              >↓</span
+            >
+          </span>
         </div>
         <div class="table-cell" @click="sortData('averageManagerQuality')">
           Среднее качество работы менеджера
-          <span v-if="sortKey === 'averageManagerQuality'">{{ sortOrder === 'asc' ? '↓↑' : '↓↑' }}</span>
+          <span>
+            <span
+              v-if="sortKey === 'averageManagerQuality' && sortOrder === 'asc'"
+              >↑</span
+            >
+            <span
+              v-if="sortKey === 'averageManagerQuality' && sortOrder === 'desc'"
+              >↓</span
+            >
+          </span>
         </div>
         <div class="table-cell" @click="sortData('managerComparison')">
           Сравнение с прошлым периодом
-          <span v-if="sortKey === 'managerComparison'">{{ sortOrder === 'asc' ? '↓↑' : '↓↑' }}</span>
+          <span>
+            <span v-if="sortKey === 'managerComparison' && sortOrder === 'asc'"
+              >↑</span
+            >
+            <span v-if="sortKey === 'managerComparison' && sortOrder === 'desc'"
+              >↓</span
+            >
+          </span>
         </div>
         <div class="table-cell" @click="sortData('nps')">
           Среднее значение NPS
-          <span v-if="sortKey === 'nps'">{{ sortOrder === 'asc' ? '↓↑' : '↓↑' }}</span>
+          <span>
+            <span v-if="sortKey === 'nps' && sortOrder === 'asc'">↑</span>
+            <span v-if="sortKey === 'nps' && sortOrder === 'desc'">↓</span>
+          </span>
         </div>
         <div class="table-cell" @click="sortData('averageNPSPrevious')">
           Сравнение с прошлым периодом
-          <span v-if="sortKey === 'averageNPSPrevious'">{{ sortOrder === 'asc' ? '↓↑' : '↓↑' }}</span>
+          <span>
+            <span v-if="sortKey === 'averageNPSPrevious' && sortOrder === 'asc'"
+              >↑</span
+            >
+            <span
+              v-if="sortKey === 'averageNPSPrevious' && sortOrder === 'desc'"
+              >↓</span
+            >
+          </span>
         </div>
       </div>
       <!-- Filtered Table Rows -->
-
       <div
-        v-for="(name, index) in filteredData"
+        v-for="(name, index) in sortedData"
         :key="index"
         class="table-row"
         v-if="filteredData.length > 0"
@@ -62,14 +104,17 @@
         </div>
       </div>
       <div class="table-row" v-else>
-        <div class="table-cell">Ничего не найдено</div>
+        <div class="table-cell">Ничего не найдено</div>
       </div>
-
       <!-- Table Footer -->
       <div class="table-row footer">
         <div class="table-cell">Общие значения:</div>
         <div class="table-cell">
-          {{ overallAverageSalonQuality ? overallAverageSalonQuality.toFixed(2) : "" }}
+          {{
+            overallAverageSalonQuality
+              ? overallAverageSalonQuality.toFixed(2)
+              : ""
+          }}
         </div>
         <div class="table-cell">
           {{ overallComparison ? overallComparison : "" }}
@@ -92,12 +137,11 @@
         <div class="table-cell">{{ overallNPSComparison }}</div>
       </div>
     </div>
-
+    <!-- Навигация -->
     <div class="table-nav">
       <div class="table-nav__header">
         <p>Выберите статистику:</p>
       </div>
-
       <div class="table-nav__btns">
         <button
           :class="{ active: currentDataSet === '' }"
@@ -136,47 +180,32 @@ const selectedRegion = ref("");
 const selectedCity = ref("");
 
 const sortKey = ref('');
-// Установим начальное значение для сортировки
-const sortKeys = ref({
-  averageSalonQuality: 'asc',
-  salonComparison: 'asc',
-  averageManagerQuality: 'asc',
-  managerComparison: 'asc',
-  nps: 'asc',
-  averageNPSPrevious: 'asc',
-});
 const sortOrder = ref('asc');
 
 // Вычисляемое свойство для сортировки данных
 const sortedData = computed(() => {
-  return [...filteredData.value].sort((a, b) => {
-    for (const key in sortKeys.value) {
-      if (sortKeys.value[key]) {
-        const aValue = a[key];
-        const bValue = b[key];
+  const data = [...filteredData.value];
+  return data.sort((a, b) => {
+    const aValue = a[sortKey.value];
+    const bValue = b[sortKey.value];
+    
+    console.log(`Ключ "${sortKey.value}" не найден в одном из объектов:`, a, b);
 
-        if (sortKeys.value[key] === 'asc') {
-          if (aValue < bValue) return -1;
-          if (aValue > bValue) return 1;
-        } else {
-          if (aValue > bValue) return -1;
-          if (aValue < bValue) return 1;
-        }
-      }
+    if (sortOrder.value === 'asc') {
+      return aValue > bValue ? 1 : -1;
+    } else {
+      return aValue < bValue ? 1 : -1;
     }
-    return 0; // Если нет сортировки
   });
 });
 
 // Метод для сортировки данных при нажатии на заголовок колонки
 const sortData = (key) => {
-  // Сбросить сортировку для всех колонок
-  for (const k in sortKeys.value) {
-    if (k === key) {
-      sortKeys.value[k] = sortKeys.value[k] === 'asc' ? 'desc' : 'asc'; // Меняем порядок для нажатой колонки
-    } else {
-      sortKeys.value[k] = 'asc'; // Сбросить другие колонки
-    }
+  if (sortKey.value === key) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortKey.value = key;
+    sortOrder.value = 'asc';
   }
 };
 
@@ -266,7 +295,7 @@ const cities = ref({
     "Красноярск ПЖ",
     "Красноярск Брянка",
     "Омск",
-    "Томск",
+    "Томск"
   ],
   Юг: ["Тюмень", "Сургут", "Сургут_ГИ", "Пермь", "Самара", "Челябинск"]
 });
@@ -404,9 +433,10 @@ const fetchData = async () => {
 
       const salonComparison =
         totalQualityPrevious !== 0
-          ? (averageSalonQuality - totalQualityPrevious / totalCountPrevious).toFixed(
-              2
-            ) + " %"
+          ? (
+              averageSalonQuality -
+              totalQualityPrevious / totalCountPrevious
+            ).toFixed(2) + " %"
           : "";
 
       const averageManagerQuality =
@@ -533,7 +563,7 @@ onMounted(() => {
 }
 
 .table {
-  max-width: 1000px;
+  max-width: 1200px;
   display: flex;
   flex-direction: column;
   border-collapse: collapse;
@@ -557,6 +587,10 @@ onMounted(() => {
   border-top-right-radius: 8px;
   position: sticky;
   top: 0;
+
+  .table-cell{
+    gap: 6px;
+  }
 }
 
 .table-row.footer {
