@@ -1,3 +1,4 @@
+<!-- TODO динамика по регионам и городам -->
 <template>
   <h1>Сводная по городам</h1>
 
@@ -161,7 +162,6 @@ const cityRegionMap = {
   Томск: "Север"
 };
 
-
 // Вычисляемое свойство для сортировки данных
 const sortedData = computed(() => {
   const data = [...citiesData.value];
@@ -171,10 +171,10 @@ const sortedData = computed(() => {
     const aValue = a[sortKey.value];
     const bValue = b[sortKey.value];
 
-    if (aValue === undefined || bValue === undefined) {
-      console.error(`Ключ "${sortKey.value}" не найден в одном из объектов:`, a, b);
-      return 0; // Не сортировать, если ключ не найден
-    }
+    // if (aValue === undefined || bValue === undefined) {
+    //   console.error(`Ключ "${sortKey.value}" не найден в одном из объектов:`, a, b);
+    //   return 0; // Не сортировать, если ключ не найден
+    // }
     
     
     if (sortOrder.value === 'asc') {
