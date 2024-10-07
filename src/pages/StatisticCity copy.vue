@@ -1,3 +1,4 @@
+<!-- TODO динамика по регионам и городам -->
 <template>
   <h1>Сводная по городам</h1>
 
@@ -11,11 +12,66 @@
       <div ref="table" class="table">
         <!-- Table Header -->
         <div class="table-row header">
-          <div class="table-cell">По регионам</div>
-          <div class="table-cell">Кол-во звонков</div>
-          <div class="table-cell">Динамика от прошлого периода</div>
-          <div class="table-cell">Среднее значение качества звонка</div>
-          <div class="table-cell">Динамика от прошлого периода</div>
+          <div class="table-cell" @click="sortData('city')">По регионам
+            <span>
+            <span
+              v-if="sortKey === 'city' && sortOrder === 'asc'"
+              >↑</span
+            >
+            <span
+              v-if="sortKey === 'city' && sortOrder === 'desc'"
+              >↓</span
+            >
+          </span>
+          </div>
+          <div class="table-cell" @click="sortData('cityTotalCalls')">Кол-во звонков
+            <span>
+            <span
+              v-if="sortKey === 'cityTotalCalls' && sortOrder === 'asc'"
+              >↑</span
+            >
+            <span
+              v-if="sortKey === 'cityTotalCalls' && sortOrder === 'desc'"
+              >↓</span
+            >
+          </span>
+          </div>
+          <div class="table-cell" @click="sortData('cityCallsDynamic')">Динамика от прошлого периода
+            <span>
+            <span
+              v-if="sortKey === 'cityCallsDynamic' && sortOrder === 'asc'"
+              >↑</span
+            >
+            <span
+              v-if="sortKey === 'cityCallsDynamic' && sortOrder === 'desc'"
+              >↓</span
+            >
+          </span>
+          </div>
+          <div class="table-cell" @click="sortData('cityAverageCallQuality')">Среднее значение качества звонка
+            <span>
+            <span
+              v-if="sortKey === 'cityAverageCallQuality' && sortOrder === 'asc'"
+              >↑</span
+            >
+            <span
+              v-if="sortKey === 'cityAverageCallQuality' && sortOrder === 'desc'"
+              >↓</span
+            >
+          </span>
+          </div>
+          <div class="table-cell" @click="sortData('cityPreviousPeriodDynamic')">Динамика от прошлого периода
+            <span>
+            <span
+              v-if="sortKey === 'cityPreviousPeriodDynamic' && sortOrder === 'asc'"
+              >↑</span
+            >
+            <span
+              v-if="sortKey === 'cityPreviousPeriodDynamic' && sortOrder === 'desc'"
+              >↓</span
+            >
+          </span>
+          </div>
         </div>
         <!-- Filtered Table Rows -->
         <div
@@ -37,7 +93,7 @@
         <!-- Filtered City Rows -->
         <div
           class="table-row"
-          v-for="(city, index) in filteredCitiesData"
+          v-for="(city, index) in sortedData"
           :key="'city-' + index"
         >
           <div class="table-cell">{{ city.city }}</div>
@@ -62,6 +118,9 @@ const table = ref(null);
 const selectedRegion = ref("");
 const selectedCity = ref("");
 const filteredTableData = ref([]);
+
+const sortKey = ref('');
+const sortOrder = ref('asc');
 
 const tableData = ref([]);
 
@@ -102,6 +161,41 @@ const cityRegionMap = {
   Омск: "Север",
   Томск: "Север"
 };
+
+// Вычисляемое свойство для сортировки данных
+const sortedData = computed(() => {
+  const data = [...citiesData.value];
+  console.log("data:", data);
+  
+  return data.sort((a, b) => {
+    const aValue = a[sortKey.value];
+    const bValue = b[sortKey.value];
+
+    // if (aValue === undefined || bValue === undefined) {
+    //   console.error(`Ключ "${sortKey.value}" не найден в одном из объектов:`, a, b);
+    //   return 0; // Не сортировать, если ключ не найден
+    // }
+    
+    
+    if (sortOrder.value === 'asc') {
+      return aValue > bValue ? 1 : -1;
+    } else {
+      return aValue < bValue ? 1 : -1;
+    }
+  });
+});
+
+// Метод для сортировки данных при нажатии на заголовок колонки
+const sortData = (key) => {
+  if (sortKey.value === key) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortKey.value = key;
+    sortOrder.value = 'asc';
+  }
+  console.log(`sortKey: ${sortKey.value}, sortOrder: ${sortOrder.value}`);
+};
+
 
 // Функция для расчета общего значения
 const calculateTotal = (formData) => {
@@ -191,53 +285,6 @@ function getPreviousMonth() {
 }
 
 // Функция для расчета динамики от прошлого периода
-// function calculateDynamicFromLastPeriod(cityEntries) {
-//   console.log("calculateDynamicFromLastPeriod вызван", cityEntries);
-
-//   const currentMonth = new Date();
-//   const previousMonth = getPreviousMonth();
-
-//   const filteredEntries = filterDataByDate(
-//     cityEntries,
-//     filters.value.startDate,
-//     filters.value.endDate
-//   );
-
-//   console.log("filteredEntries вызван", filteredEntries);
-
-//   // Данные за текущий месяц
-//   let currentMonthEntries = filterByMonth(filteredEntries, currentMonth);
-//   console.log("currentMonthEntries вызван", currentMonthEntries);
-
-//   // Если нет данных за текущий месяц, ищем за предыдущий месяц
-//   if (currentMonthEntries.length === 0) {
-//     currentMonthEntries = filterByMonth(filteredEntries, previousMonth);
-//   }
-
-//   // Данные за прошлый месяц
-//   const previousMonthEntries = filterByMonth(filteredEntries, previousMonth);
-
-//   // Если нет данных за прошлый месяц, динамику не рассчитываем
-//   if (previousMonthEntries.length === 0) return "";
-
-//   // Считаем среднее качество звонков за текущий и прошлый месяц
-//   const currentMonthQuality =
-//     currentMonthEntries.reduce((sum, entry) => sum + calculateTotal(entry), 0) /
-//     (currentMonthEntries.length || 1); // Избегаем деления на 0
-
-//   const previousMonthQuality =
-//     previousMonthEntries.reduce(
-//       (sum, entry) => sum + calculateTotal(entry),
-//       0
-//     ) / (previousMonthEntries.length || 1); // Избегаем деления на 0
-
-//   // Рассчитываем динамику ((текущий - прошлый) / прошлый) * 100
-//   const dynamic =
-//     ((currentMonthQuality - previousMonthQuality) / previousMonthQuality) * 100;
-
-//   return dynamic.toFixed(2) + "%";
-// }
-
 function calculateDynamicFromLastPeriod(cityEntries) {
   const currentMonth = new Date();
   const previousMonth = getPreviousMonth();
@@ -275,37 +322,6 @@ function calculateDynamicFromLastPeriod(cityEntries) {
 }
 
 // Функция для расчета динамики от прошлого периода для общего количества звонков
-
-// function calculateCallsDynamicFromLastPeriod(cityEntries) {
-//   const filteredEntries = filterDataByDate(
-//     cityEntries,
-//     filters.value.startDate,
-//     filters.value.endDate
-//   );
-
-//   const currentMonthEntries = getCurrentMonthEntries(filteredEntries);
-//   const previousMonthEntries = getPreviousMonthEntries(filteredEntries);
-
-//   if (previousMonthEntries.length === 0 || currentMonthEntries.length === 0) return "";
-
-//   const totalCurrentCalls = currentMonthEntries.reduce(
-//     (sum, entry) => sum + Number(entry.fact),
-//     0
-//   );
-//   const totalPreviousCalls = previousMonthEntries.reduce(
-//     (sum, entry) => sum + Number(entry.fact),
-//     0
-//   );
-
-//   // Проверяем, чтобы избежать деления на ноль
-//   if (totalPreviousCalls === 0) return ""; // или можете вернуть 0%
-
-//   const dynamic =
-//     ((totalCurrentCalls - totalPreviousCalls) / totalPreviousCalls) * 100;
-
-//   return dynamic.toFixed(2) + "%";
-// }
-
 function calculateCallsDynamicFromLastPeriod(cityEntries) {
   const currentMonth = new Date();
   const previousMonth = getPreviousMonth();
@@ -337,250 +353,7 @@ function calculateCallsDynamicFromLastPeriod(cityEntries) {
   return dynamic.toFixed(2) + "%";
 }
 
-// const filterDataByDate = (data, startDate, endDate) => {
-//   if (!startDate || !endDate) {
-//     console.log("No dates provided, returning all data");
-//     return data; // Если даты не выбраны, возвращаем все данные
-//   }
-
-//   const start = new Date(startDate);
-//   const end = new Date(endDate);
-//   end.setHours(23, 59, 59, 999); // Конец дня
-
-//   return data.filter((item) => {
-//     if (!item.date) return false; // Пропускаем записи без даты
-//     const itemDate = new Date(item.date.split(".").reverse().join("-"));
-//     // console.log("itemDate:", itemDate, "start:", start, "end:", end);
-
-//     return itemDate >= start && itemDate <= end;
-//   });
-// };
-
-// const fetchFactsOnly = async () => {
-//   try {
-//     const response = await fetchTotalItems();
-//     const factsData = response.items;
-
-//     // Группируем данные по городам
-//     const citiesGrouped = factsData.reduce((acc, item) => {
-//       if (!acc[item.city]) {
-//         acc[item.city] = [];
-//       }
-//       acc[item.city].push(item);
-//       return acc;
-//     }, {});
-
-//     // Фильтрация данных по выбранным датам
-//     const filteredFacts = filterDataByDate(
-//       factsData,
-//       filters.value.startDate,
-//       filters.value.endDate
-//     );
-
-//     // Определяем текущую дату
-//     const now = new Date();
-//     const currentYear = now.getFullYear();
-//     const currentMonth = now.getMonth();
-
-//     // Устанавливаем даты для текущего и предыдущего месяцев
-//     const currentPeriodStartDate = new Date(currentYear, currentMonth, 1);
-//     const currentPeriodEndDate = new Date(currentYear, currentMonth + 1, 0);
-
-//     const previousPeriodStartDate = new Date(filters.value.startDate);
-//     previousPeriodStartDate.setMonth(previousPeriodStartDate.getMonth() - 1);
-
-//     const previousPeriodEndDate = new Date(filters.value.endDate);
-//     previousPeriodEndDate.setMonth(previousPeriodEndDate.getMonth() - 1);
-
-//     // Вычисляем среднее значение качества звонков, динамику и формируем структуру данных для таблицы
-//     citiesData.value = Object.keys(citiesGrouped).map((cityName) => {
-//       const cityEntries = citiesGrouped[cityName];
-
-//       // Фильтруем данные по датам
-//       const currentCityEntries = filterDataByDate(
-//         cityEntries,
-//         filters.value.startDate,
-//         filters.value.endDate
-//       );
-
-//       // Суммируем значения для расчета среднего качества звонков
-//       const totalQuality = currentCityEntries.reduce(
-//         (sum, entry) => sum + calculateTotal(entry),
-//         0
-//       );
-
-//       const resultAvaregeCallQuality = Math.floor((totalQuality / 14) * 100);
-//       const averageCallQuality =
-//         (resultAvaregeCallQuality / currentCityEntries.length).toFixed(2) +
-//         " %";
-
-//       const previousCityEntries = filterDataByDate(
-//         cityEntries,
-//         previousPeriodStartDate.toISOString().split("T")[0],
-//         previousPeriodEndDate.toISOString().split("T")[0]
-//       );
-
-//       // Общее количество звонков
-//       const totalCalls = currentCityEntries.reduce(
-//         (sum, entry) => sum + Number(entry.fact),
-//         0
-//       );
-
-//       // Рассчитываем динамику от прошлого периода
-//       const dynamicFromLastPeriod =
-//         calculateDynamicFromLastPeriod(currentCityEntries);
-//       const callsDynamicFromLastPeriod =
-//         calculateCallsDynamicFromLastPeriod(currentCityEntries);
-
-//       // console.log(
-//       //   "dynamicFromLastPeriod:",
-//       //   dynamicFromLastPeriod,
-//       //   "callsDynamicFromLastPeriod:",
-//       //   callsDynamicFromLastPeriod
-//       // );
-
-//       return {
-//         city: cityName,
-//         cityAverageCallQuality: averageCallQuality || "",
-//         cityPreviousPeriodDynamic: dynamicFromLastPeriod || "",
-//         cityTotalCalls: totalCalls || "",
-//         cityCallsDynamic: callsDynamicFromLastPeriod || ""
-//       };
-//     });
-
-//     return filteredFacts;
-//   } catch (error) {
-//     console.error("Ошибка при получении данных (fact):", error);
-//     return [];
-//   }
-// };
-
-// const fetchFactsOnly = async () => {
-//   try {
-//     const response = await fetchTotalItems();
-//     const factsData = response.items;
-
-//     // Группируем данные по городам
-//     const citiesGrouped = factsData.reduce((acc, item) => {
-//       if (!acc[item.city]) {
-//         acc[item.city] = [];
-//       }
-//       acc[item.city].push(item);
-//       return acc;
-//     }, {});
-
-//     // Фильтрация данных по выбранным датам
-//     const filteredFacts = filterDataByDate(
-//       factsData,
-//       filters.value.startDate,
-//       filters.value.endDate
-//     );
-
-//     // Определяем текущую дату
-//     const now = new Date();
-//     const currentYear = now.getFullYear();
-//     const currentMonth = now.getMonth();
-
-//     // Устанавливаем даты для текущего и предыдущего месяцев
-//     const currentPeriodStartDate = new Date(currentYear, currentMonth, 1);
-//     const currentPeriodEndDate = new Date(currentYear, currentMonth + 1, 0);
-
-//     const previousPeriodStartDate = new Date(filters.value.startDate);
-//     previousPeriodStartDate.setMonth(previousPeriodStartDate.getMonth() - 1);
-
-//     const previousPeriodEndDate = new Date(filters.value.endDate);
-//     previousPeriodEndDate.setMonth(previousPeriodEndDate.getMonth() - 1);
-
-//     // Функция для расчета динамики по сравнению с предыдущим периодом
-//     const calculateCityDynamic = (currentCityEntries, previousCityEntries) => {
-//       // Суммируем фактические звонки для текущего периода
-//       const currentCalls = currentCityEntries.reduce((sum, entry) => {
-//         const fact = Number(entry.fact); // Преобразуем фактические данные в числа
-//         return sum + (isNaN(fact) ? 0 : fact); // Если данные не числа, считаем их как 0
-//       }, 0);
-
-//       // Суммируем фактические звонки для предыдущего периода
-//       const previousCalls = previousCityEntries.reduce((sum, entry) => {
-//         const fact = Number(entry.fact); // Преобразуем фактические данные в числа
-//         return sum + (isNaN(fact) ? 0 : fact); // Если данные не числа, считаем их как 0
-//       }, 0);
-
-//       // Рассчитываем динамику звонков
-//       let callsDynamic = 0;
-//       if (previousCalls > 0) {
-//         callsDynamic = ((currentCalls - previousCalls) / previousCalls) * 100; // Вычисляем динамику
-//       } else if (currentCalls > 0) {
-//         callsDynamic = 100; // Если в предыдущем периоде не было звонков, а в текущем есть, динамика - 100%
-//       } else {
-//         callsDynamic = 0; // Если в обоих периодах нет звонков, динамика - 0%
-//       }
-
-//       // Возвращаем динамику с округлением до целых чисел и добавлением знака процента
-//       return callsDynamic.toFixed(0) + " %";
-//     };
-
-//     // Вычисляем среднее качество звонков и динамику по каждому городу
-//     citiesData.value = Object.keys(citiesGrouped).map((cityName) => {
-//       const cityEntries = citiesGrouped[cityName];
-
-//       // Фильтруем данные по выбранным датам
-//       const currentCityEntries = filterDataByDate(
-//         cityEntries,
-//         filters.value.startDate,
-//         filters.value.endDate
-//       );
-
-//       // Если нет фильтра, берем все данные
-//       const previousCityEntries =
-//         filters.value.startDate && filters.value.endDate
-//           ? filterDataByDate(
-//               cityEntries,
-//               previousPeriodStartDate.toISOString().split("T")[0],
-//               previousPeriodEndDate.toISOString().split("T")[0]
-//             )
-//           : cityEntries;
-
-//       // Суммируем значения для расчета среднего качества звонков
-//       const totalQuality = currentCityEntries.reduce(
-//         (sum, entry) => sum + calculateTotal(entry),
-//         0
-//       );
-//       const resultAvaregeCallQuality = Math.floor((totalQuality / 14) * 100);
-//       const averageCallQuality =
-//         (resultAvaregeCallQuality / currentCityEntries.length).toFixed(2) +
-//         " %";
-
-//       // Общее количество звонков
-//       const totalCalls = currentCityEntries.reduce(
-//         (sum, entry) => sum + Number(entry.fact),
-//         0
-//       );
-
-//       // Рассчитываем динамику от прошлого периода
-//       const callsDynamicFromLastPeriod = calculateCityDynamic(
-//         currentCityEntries,
-//         previousCityEntries
-//       );
-
-//       return {
-//         city: cityName,
-//         cityAverageCallQuality: averageCallQuality || "",
-//         cityPreviousPeriodDynamic: callsDynamicFromLastPeriod || "",
-//         cityTotalCalls: totalCalls || "",
-//         cityCallsDynamic: callsDynamicFromLastPeriod || ""
-//       };
-//     });
-
-//     return filteredFacts;
-//   } catch (error) {
-//     console.error("Ошибка при получении данных (fact):", error);
-//     return [];
-//   }
-// };
-
 const filterDataByDate = (data, startDate, endDate) => {
-  console.log("filterDataByDate", data, startDate, endDate);
-
   if (!startDate || !endDate) {
     console.log("No dates provided, returning all data");
     return data; // Если даты не выбраны, возвращаем все данные
@@ -1276,8 +1049,9 @@ const getPreviousMonthData = (data) => {
 //   });
 // };
 
+// number #2
+
 const calculateRegionAverages = async (startDate, endDate) => {
-  // Проверяем, что данные - это массив
   if (!Array.isArray(tableData.value)) {
     console.error("tableData.value не является массивом:", tableData.value);
     return;
@@ -1290,13 +1064,11 @@ const calculateRegionAverages = async (startDate, endDate) => {
   // Фильтруем данные по датам
   const filteredData = filterDataByDate(tableData.value, startDate, endDate);
 
-  // Проверяем, если после фильтрации данных нет
   if (filteredData.length === 0) {
     alert("Нет данных для выбранного диапазона дат.");
     return;
   }
 
-  // Получаем текущую дату для расчета месяца и года
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
@@ -1312,39 +1084,26 @@ const calculateRegionAverages = async (startDate, endDate) => {
     });
   };
 
-  // Определяем предыдущий месяц
   const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
   const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear;
 
-  // Получаем данные за текущий и предыдущий месяц
-  const currentMonthData = getDataForMonth(filteredData, currentMonth, currentYear);
-  const previousMonthData = getDataForMonth(filteredData, previousMonth, previousYear);
-
-  // Подготовка для сбора данных по регионам
   const regionData = {
     Юг: [],
     Север: []
   };
 
-  // Получаем фактические данные звонков
-  const response = await fetchTotalItems();
-  const factsData = response.items;
-
   // Подсчитываем общее количество звонков для каждого региона (с нуля)
   filteredData.forEach((entry) => {
     const city = entry.city;
-    const fact = parseInt(entry.fact) || 0;
+    const fact = parseInt(entry.fact) || 0; // Получаем фактическое значение звонка
     const region = cityRegionMap[city];
 
     if (region === "Юг") {
-      totalCallsSouth += fact;
+      totalCallsSouth += fact; // Суммируем только звонки из фильтрованных данных
     } else if (region === "Север") {
-      totalCallsNorth += fact;
+      totalCallsNorth += fact; // Суммируем только звонки из фильтрованных данных
     }
   });
-
-  console.log("Total calls South (after filtering):", totalCallsSouth);
-  console.log("Total calls North (after filtering):", totalCallsNorth);
 
   // Заполняем regionData с расчетом качества звонков
   filteredData.forEach((client) => {
@@ -1356,8 +1115,6 @@ const calculateRegionAverages = async (startDate, endDate) => {
         date: client.date,
         value: parseFloat(averageCallQuality.toFixed(2))
       });
-    } else {
-      console.warn(`Неизвестный город или регион не найден: ${client.city}`);
     }
   });
 
@@ -1365,77 +1122,44 @@ const calculateRegionAverages = async (startDate, endDate) => {
   filteredTableData.value = Object.keys(regionData).map((region) => {
     const regionCities = regionData[region];
 
-    // Получаем данные для текущего и предыдущего месяцев
     const currentRegionData = getDataForMonth(regionCities, currentMonth, currentYear);
     const previousRegionData = getDataForMonth(regionCities, previousMonth, previousYear);
 
-    // Подсчитываем общее количество звонков для региона
-    const totalCurrentCalls =
-      region === "Юг" ? totalCallsSouth : totalCallsNorth;
+    const totalCurrentCalls = region === "Юг" ? totalCallsSouth : totalCallsNorth;
 
-    // Логируем для отладки
-    console.log(`previousRegionData for region ${region}:`, previousRegionData);
-
-    // Суммируем звонки за предыдущий месяц
     const totalPreviousCalls = previousRegionData.reduce(
       (sum, item) => sum + (parseInt(item.fact) || 0),
       0
     );
-    console.log(`totalPreviousCalls for region ${region}:`, totalPreviousCalls);
 
-    // Считаем среднее качество звонков для региона
-    const totalQuality = regionCities.reduce(
-      (sum, quality) => sum + quality.value,
-      0
-    );
-    const averageQuality =
-      regionCities.length > 0
-        ? (totalQuality / regionCities.length).toFixed(2)
-        : 0;
+    const averageQuality = regionCities.length > 0
+      ? (regionCities.reduce((sum, quality) => sum + quality.value, 0) / regionCities.length).toFixed(2)
+      : 0;
 
-    // Среднее качество звонков за текущий месяц
-    const averageCurrentQuality =
-      currentRegionData.length > 0
-        ? (
-            currentRegionData.reduce((sum, item) => sum + item.value, 0) /
-            currentRegionData.length
-          ).toFixed(2)
-        : 0;
+    const averageCurrentQuality = currentRegionData.length > 0
+      ? (currentRegionData.reduce((sum, item) => sum + item.value, 0) / currentRegionData.length).toFixed(2)
+      : 0;
 
-    // Среднее качество звонков за предыдущий месяц
-    const averagePreviousQuality =
-      previousRegionData.length > 0
-        ? (
-            previousRegionData.reduce((sum, item) => sum + item.value, 0) /
-            previousRegionData.length
-          ).toFixed(2)
-        : 0;
+    const averagePreviousQuality = previousRegionData.length > 0
+      ? (previousRegionData.reduce((sum, item) => sum + item.value, 0) / previousRegionData.length).toFixed(2)
+      : 0;
 
-    // Динамика по качеству звонков
     const previousPeriodDynamic = calculatePreviousPeriodDynamic(
       averageCurrentQuality,
       averagePreviousQuality
     );
 
-    // Динамика звонков по периодам
-    const previousPeriodDyn =
-      startDate && endDate
-        ? (averagePreviousQuality > 0
-            ? ((averageCurrentQuality - averagePreviousQuality) /
-                averagePreviousQuality) *
-              100
-            : 0
-          ).toFixed(0) + " %"
-        : " ";
+    const previousPeriodDyn = startDate && endDate
+      ? (totalPreviousCalls > 0
+          ? ((totalCurrentCalls - totalPreviousCalls) / totalPreviousCalls) * 100
+          : 0).toFixed(0) + " %"
+      : " ";
 
-    // Динамика по звонкам
-    const callsDynamic =
-      startDate && endDate
-        ? (totalPreviousCalls > 0
-            ? (totalCurrentCalls * 100) / totalPreviousCalls - 100
-            : 0
-          ).toFixed(0) + " %"
-        : " ";
+    const callsDynamic = startDate && endDate
+      ? (totalPreviousCalls > 0
+          ? ((totalCurrentCalls * 100) / totalPreviousCalls - 100).toFixed(0) + " %"
+          : 0)
+      : " ";
 
     return {
       region,
@@ -1571,7 +1295,7 @@ onMounted(async () => {
 });
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .filters-statis-city {
   display: flex;
   justify-content: space-between;
@@ -1604,6 +1328,10 @@ onMounted(async () => {
   text-align: center;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
+
+  .table-cell {
+    gap: 6px;
+  }
 }
 
 .table-row.header-2 {

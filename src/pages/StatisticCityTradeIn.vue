@@ -211,7 +211,7 @@ const fetchData = async (offset = 0, resetData = false) => {
 
 // Вычисляемое свойство для сортировки данных
 const sortedData = computed(() => {
-  const data = [...citiesData.value];
+  const data = [...filteredCitiesData.value];
   console.log("data:", data);
   
   return data.sort((a, b) => {
