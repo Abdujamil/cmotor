@@ -1113,7 +1113,7 @@ input {
 }
 
 .not-processed {
-  background: #b30000a3; /* Цвет для статуса "Не отработан" */
+  background: #b30000a3 !important; /* Цвет для статуса "Не отработан" */
 }
 
 .processed {
