@@ -456,7 +456,7 @@
             }
           ]"
         >
-          <div class="table-cell">{{ index + 1 }}</div>
+          <div class="table-cell">{{ city.id }}</div>
           <div class="table-cell">{{ city.city }}</div>
           <div class="table-cell">{{ city.salon_quality }}</div>
           <div class="table-cell">{{ city.manager_quality }}</div>

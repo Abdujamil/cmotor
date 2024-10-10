@@ -82,7 +82,7 @@
           </div>
         </div>
         <!-- Filtered Table Rows -->
-        <!-- <div
+        <div
           class="table-row"
           v-for="(row, index) in filteredTableData"
           :key="index"
@@ -92,7 +92,7 @@
           <div class="table-cell">{{ row.callsDynamic }}</div>
           <div class="table-cell">{{ row.averageCallQuality }}</div>
           <div class="table-cell">{{ row.previousPeriodDynamic }}</div>
-        </div> -->
+        </div>
 
         <div class="table-row header header-2">
           <div class="table-cell">По городам</div>
@@ -108,7 +108,13 @@
           <div class="table-cell">{{ city.cityTotalCalls }}</div>
           <div class="table-cell">{{ city.cityCallsDynamic }}</div>
           <div class="table-cell">{{ city.cityAverageCallQuality }}</div>
-          <div class="table-cell">{{ city.cityPreviousPeriodDynamic ? city.cityPreviousPeriodDynamic : " " }}</div>
+          <div class="table-cell">
+            {{
+              city.cityPreviousPeriodDynamic
+                ? city.cityPreviousPeriodDynamic
+                : " "
+            }}
+          </div>
         </div>
       </div>
     </div>
@@ -884,13 +890,19 @@ const getPreviousMonthData = (data) => {
 //   });
 // };
 
+
+
 const calculateRegionAverages = async (startDate, endDate) => {
   if (!Array.isArray(tableData.value)) {
     console.error("tableData.value не является массивом:", tableData.value);
     return;
   }
 
+  // const startDate = new Date(filters.value.startDate);
+  // const endDate = new Date(filters.value.endDate);
+
   const filteredData = filterDataByDate(tableData.value, startDate, endDate);
+  // console.warn("filteredData:", filteredData);
 
   if (filteredData.length === 0) {
     alert("Нет данных для выбранного диапазона дат.");
@@ -943,31 +955,33 @@ const calculateRegionAverages = async (startDate, endDate) => {
     return { start: previousWeekStart, end: previousWeekEnd };
   };
 
-  const { start: previousWeekStart, end: previousWeekEnd } =
-    getPreviousWeek(startDate);
+  // const { start: previousWeekStart, end: previousWeekEnd } =
+  //   getPreviousWeek(startDate);
 
   // Получаем данные за текущий и предыдущий месяц
   const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
   const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear;
 
-  const currentMonthData = getDataForMonth(
-    filteredData,
-    currentMonth,
-    currentYear
-  );
+  // const currentMonthData = getDataForMonth(
+  //   filteredData,
+  //   currentMonth,
+  //   currentYear
+  // );
   const previousMonthData = getDataForMonth(
     filteredData,
     previousMonth,
     previousYear
   );
 
+  // console.warn("previousMonthData:", previousMonthData);
+  
   const regionData = {
     Юг: [],
     Север: []
   };
 
-  const response = await fetchTotalItems();
-  const factsData = response.items;
+  // const response = await fetchTotalItems();
+  // const factsData = response.items;
   let totalCallsSouth = 0;
   let totalCallsNorth = 0;
 
@@ -999,6 +1013,8 @@ const calculateRegionAverages = async (startDate, endDate) => {
 
   filteredTableData.value = Object.keys(regionData).map((region) => {
     const regionCities = regionData[region];
+
+    console.log("regionCities", regionCities.length, "region", region);
 
     const currentRegionData = getDataForMonth(
       regionCities,
