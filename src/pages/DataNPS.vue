@@ -875,27 +875,6 @@ const filteredCities = computed(() => {
 });
 
 // Функция для сохранения rop_comment
-// const saveComment = async (index) => {
-//   const comment = editedComments.value[index];
-
-//   // Отправка данных на сервер
-//   try {
-//     await axios.get("https://crystal-motors.ru/method.editSending", {
-//       id: cities.value[index].id,
-//       rop_comment: comment
-//     });
-//     // Обновляем комментарий в локальном состоянии
-//     cities.value[index].editedRopComment = comment;
-
-//     console.log("Комментарий успешно обновлены:", comment);
-
-//     editingIndex.value = null; // Завершаем редактирование
-//   } catch (error) {
-//     console.error("Ошибка при обновлении комментария:", error);
-//   }
-// };
-
-// Функция для сохранения rop_comment
 const saveComment = async (index) => {
   // Получаем текущий текст комментария для отправки
   const comment = editedComments.value[index];

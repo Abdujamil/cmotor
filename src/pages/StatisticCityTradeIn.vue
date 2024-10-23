@@ -578,7 +578,6 @@ const calculateRegionAverages = async (startDate, endDate) => {
     }
   });
   
-
   // Заполняем regionData с данными, включая дату
   factsData.forEach((client) => {
     const region = cityRegionMap[client.city];

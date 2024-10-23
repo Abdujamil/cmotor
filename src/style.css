@@ -51,6 +51,10 @@ body {
   }
 }
 
+#app{
+  height: 100vh;
+}
+
 /* Calendar */
 
 #app

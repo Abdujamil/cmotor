@@ -20,13 +20,19 @@ import Navbar from "./components/navbar/Navbar.vue";
 
 <style lang="scss" scoped>
 header {
-  height: 64px;
+  // height: 64px;
 }
 
 .main {
   width: 100%;
-}
+  height: 100%;
 
+  
+  background-image: url(./assets/rating.svg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
 .navbar {
   width: 100%;
   max-width: 20%;
@@ -46,9 +52,11 @@ header {
   align-items: start;
   margin: 0 auto;
   gap: 32px;
+
+  padding: 64px 0 64px 0;
 }
 
 footer {
-  height: 100px;
+  // height: 100px;
 }
 </style>
