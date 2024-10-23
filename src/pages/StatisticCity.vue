@@ -108,13 +108,7 @@
           <div class="table-cell">{{ city.cityTotalCalls }}</div>
           <div class="table-cell">{{ city.cityCallsDynamic }}</div>
           <div class="table-cell">{{ city.cityAverageCallQuality }}</div>
-          <div class="table-cell">
-            {{
-              city.cityPreviousPeriodDynamic
-                ? city.cityPreviousPeriodDynamic
-                : " "
-            }}
-          </div>
+          <div class="table-cell">{{ city.cityPreviousPeriodDynamic }}</div>
         </div>
       </div>
     </div>
@@ -372,7 +366,9 @@ const fetchFactsOnly = async (startDate, endDate) => {
 
     const calculateQualityDynamic = (
       currentCityEntries,
-      previousCityEntries
+      previousCityEntries,
+      startDate,
+      endDate
     ) => {
       const currentQuality = currentCityEntries.reduce(
         (sum, entry) => sum + calculateTotal(entry),
@@ -442,9 +438,9 @@ const fetchFactsOnly = async (startDate, endDate) => {
 
       const resultAvaregeCallQuality = Math.floor((totalQuality / 14) * 100);
 
-      const averageCallQuality =
-        (resultAvaregeCallQuality / currentCityEntries.length).toFixed(2) +
-        " %";
+      const averageCallQuality = startDate && endDate
+      ? (resultAvaregeCallQuality / currentCityEntries.length).toFixed(2) +
+        " %" : " ";
 
       // Общее количество звонков
       const totalCalls = currentCityEntries.reduce(
@@ -718,13 +714,6 @@ const calculateRegionAverages = async (startDate, endDate) => {
     previousEndDate
   );
 
-  // Получаем данные за предыдущий месяц
-  // const previousMonthData = getDataForMonth(
-  //   filteredData,
-  //   previousMonth,
-  //   previousYear
-  // );
-
   const regionData = {
     Юг: [],
     Север: []
@@ -823,7 +812,7 @@ const calculateRegionAverages = async (startDate, endDate) => {
         : 0;
 
     const previousPeriodDyn =
-      averagePreviousQuality > 0
+    startDate && endDate && averagePreviousQuality > 0 
         ? (
             ((averageCurrentQuality - averagePreviousQuality) /
               averagePreviousQuality) *
@@ -831,8 +820,7 @@ const calculateRegionAverages = async (startDate, endDate) => {
           ).toFixed(0) + " %"
         : " ";
 
-    const callsDynamic =
-      totalPreviousCalls > 0
+    const callsDynamic = totalPreviousCalls > 0
         ? (
             ((totalCurrentCalls - totalPreviousCalls) / totalPreviousCalls) *
             100
