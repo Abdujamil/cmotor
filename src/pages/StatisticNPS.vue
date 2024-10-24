@@ -127,9 +127,7 @@
           }}
         </div>
         <div class="table-cell">
-          {{
-            overallManagerComparison ? overallManagerComparison : " "
-          }}
+          {{ overallManagerComparison ? overallManagerComparison : " " }}
         </div>
         <div class="table-cell">
           {{ overallNPS !== null ? overallNPS.toFixed(2) : " " }}
@@ -634,8 +632,9 @@ const fetchData = async () => {
       let averageSalonQualityPrevious = 0;
 
       if (previousData) {
-        averageSalonQualityPrevious =
-          (previousData.totalSalonQuality / previousData.count).toFixed();
+        averageSalonQualityPrevious = (
+          previousData.totalSalonQuality / previousData.count
+        ).toFixed();
         console.log(
           `Average salon quality for ${city.name} for the previous period:`,
           averageSalonQualityPrevious
