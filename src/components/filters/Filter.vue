@@ -142,16 +142,32 @@ const handleDateChange = (dates) => {
 };
 
 // Функция форматирования для диапазона дат
-const format = (dates) => {
-  if (Array.isArray(dates) && dates.length === 2) {
-    const [startDate, endDate] = dates;
-    const formattedStartDate = startDate.toLocaleDateString("ru-RU");
-    const formattedEndDate = endDate.toLocaleDateString("ru-RU");
+// const format = (dates) => {
+//   if (Array.isArray(dates) && dates.length === 2) {
+//     const [startDate, endDate] = dates;
+//     const formattedStartDate = startDate.toLocaleDateString("ru-RU");
+//     const formattedEndDate = endDate.toLocaleDateString("ru-RU");
 
-    return `${formattedStartDate} - ${formattedEndDate}`;
-  } else if (dates instanceof Date) {
-    // Если диапазон не выбран, обрабатываем как одиночную дату
-    return dates.toLocaleDateString("ru-RU");
+//     return `${formattedStartDate} - ${formattedEndDate}`;
+//   } else if (dates instanceof Date) {
+//     // Если диапазон не выбран, обрабатываем как одиночную дату
+//     return dates.toLocaleDateString("ru-RU");
+//   }
+
+//   return "";
+// };
+
+const format = (dates) => {
+  if (Array.isArray(dates)) {
+    const [startDate, endDate] = dates;
+    if (startDate && endDate) {
+      const formattedStartDate = startDate.toLocaleDateString("ru-RU");
+      const formattedEndDate = endDate.toLocaleDateString("ru-RU");
+      return `${formattedStartDate} - ${formattedEndDate}`;
+    } else if (startDate) {
+      // Если только одна дата выбрана
+      return startDate.toLocaleDateString("ru-RU");
+    }
   }
 
   return "";

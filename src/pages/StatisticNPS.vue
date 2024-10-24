@@ -81,26 +81,14 @@
         </div>
       </div>
       <!-- Filtered Table Rows -->
-      <div
-        v-for="(name, index) in sortedData"
-        :key="index"
-        class="table-row"
-        v-if="filteredData.length > 0"
-      >
+      <div v-for="(name, index) in sortedData" :key="index" class="table-row" v-if="filteredData.length > 0">
         <div class="table-cell">{{ name.name }}</div>
         <div class="table-cell">{{ name.averageSalonQuality.toFixed(2) }}</div>
         <div class="table-cell">{{ name.salonComparison }}</div>
-        <div class="table-cell">
-          {{ name.averageManagerQuality.toFixed(2) }}
-        </div>
+        <div class="table-cell">{{ name.averageManagerQuality.toFixed(2) }}</div>
         <div class="table-cell">{{ name.managerComparison }}</div>
         <div class="table-cell">{{ name.nps.toFixed(2) }}</div>
-        <div class="table-cell">
-          {{
-            name.averageNPSPrevious
-              ? name.averageNPSPrevious.toFixed(2) + " %"
-              : ""
-          }}
+        <div class="table-cell">{{ name.averageNPSPrevious ? name.averageNPSPrevious.toFixed(2) + " %" : "" }}
         </div>
       </div>
       <div class="table-row" v-else>
@@ -109,30 +97,12 @@
       <!-- Table Footer -->
       <div class="table-row footer">
         <div class="table-cell">Общие значения:</div>
-        <div class="table-cell">
-          {{
-            overallAverageSalonQuality
-              ? overallAverageSalonQuality.toFixed(2)
-              : " "
-          }}
-        </div>
-        <div class="table-cell">
-          {{ overallComparison ? overallComparison : " " }}
-        </div>
-        <div class="table-cell">
-          {{
-            overallAverageManagerQuality
-              ? overallAverageManagerQuality.toFixed(2)
-              : " "
-          }}
-        </div>
-        <div class="table-cell">
-          {{ overallManagerComparison ? overallManagerComparison : " " }}
-        </div>
-        <div class="table-cell">
-          {{ overallNPS !== null ? overallNPS.toFixed(2) : " " }}
-        </div>
-        <div class="table-cell">{{ overallNPSComparison }}</div>
+        <div class="table-cell"> {{ overallAverageSalonQuality ? overallAverageSalonQuality.toFixed(2) : " " }} </div>
+        <div class="table-cell"> {{ overallComparison ? overallComparison : " " }} </div>
+        <div class="table-cell"> {{ overallAverageManagerQuality ? overallAverageManagerQuality.toFixed(2) : " " }} </div>
+        <div class="table-cell"> {{ overallManagerComparison ? overallManagerComparison : " " }} </div>
+        <div class="table-cell"> {{ overallNPS !== null ? overallNPS.toFixed(2) : " " }} </div>
+        <div class="table-cell"> {{ overallNPSComparison }} </div>
       </div>
     </div>
     <!-- Навигация -->
@@ -141,25 +111,13 @@
         <p>Выберите статистику:</p>
       </div>
       <div class="table-nav__btns">
-        <button
-          :class="{ active: currentDataSet === '' }"
-          @click="switchData('')"
-          class="table-nav__btn table-nav__btn"
-        >
+        <button :class="{ active: currentDataSet === '' }" @click="switchData('')" class="table-nav__btn table-nav__btn" >
           Общий NPS
         </button>
-        <button
-          :class="{ active: currentDataSet === 'покупка' }"
-          @click="switchData('покупка')"
-          class="table-nav__btn"
-        >
+        <button :class="{ active: currentDataSet === 'покупка' }" @click="switchData('покупка')" class="table-nav__btn" >
           Покупатели
         </button>
-        <button
-          :class="{ active: currentDataSet === 'комиссия' }"
-          @click="switchData('комиссия')"
-          class="table-nav__btn"
-        >
+        <button :class="{ active: currentDataSet === 'комиссия' }" @click="switchData('комиссия')" class="table-nav__btn" >
           Комиссия
         </button>
       </div>
@@ -304,9 +262,15 @@ const handleFilterChange = ({
 }) => {
   selectedRegion.value = newRegion;
   selectedCity.value = newCity;
+
+  // Проверяем, если startDate и endDate одинаковы
+  if (startDate && !endDate) {
+    endDate = startDate; // Устанавливаем endDate равным startDate
+  }
+
   selectedStartDate.value = startDate;
   selectedEndDate.value = endDate;
-  fetchData(); // вызовем fetchData, чтобы обновить данные при смене фильтра
+  fetchData(); // Обновляем данные при смене фильтра
 };
 
 // Состояние текущих данных
@@ -515,16 +479,16 @@ const fetchData = async () => {
     const currentStartDate = new Date(selectedStartDate.value);
     const currentEndDate = new Date(selectedEndDate.value);
 
+    // Проверка, если пользователь выбрал только один день
+    if (currentStartDate && !currentEndDate) {
+      currentEndDate.setDate(currentStartDate.getDate() + 1); // Устанавливаем endDate на следующий день
+    }
+
     // Количество дней для предыдущего периода
     const timeDiff = currentEndDate - currentStartDate; // Разница в миллисекундах
     const selectedDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1; // Количество дней
 
-    console.log(
-      "currentStartDate",
-      currentStartDate,
-      "currentEndDate",
-      currentEndDate
-    );
+    console.log("currentStartDate", currentStartDate, "currentEndDate", currentEndDate);
 
     // Даты для предыдущего периода
     const previousStartDate = new Date(currentStartDate);
@@ -532,32 +496,22 @@ const fetchData = async () => {
     const previousEndDate = new Date(currentStartDate);
     previousEndDate.setDate(previousEndDate.getDate() - 1); // Один день до начала текущего диапазона
 
-    console.log(
-      "previousStartDate",
-      previousStartDate,
-      "previousEndDate",
-      previousEndDate
-    );
+    console.log("previousStartDate", previousStartDate, "previousEndDate", previousEndDate);
 
     const previousPeriodMap = {};
+    
 
     data.forEach((item) => {
       const cityName = item.city;
 
-      if (
-        currentDataSet !== "" &&
-        item.transaction_type.toLowerCase() !== currentDataSet.value
-      ) {
+      if (currentDataSet !== "" &&item.transaction_type.toLowerCase() !== currentDataSet.value) {
         return;
       }
 
-      const surveyDate = new Date(
-        item.survey_date.split(".").reverse().join("-")
-      );
+      const surveyDate = new Date(item.survey_date.split(".").reverse().join("-"));
 
       // Фильтрация по дате
-      const isCurrentPeriod =
-        !selectedStartDate.value ||
+      const isCurrentPeriod = !selectedStartDate.value ||
         (surveyDate >= currentStartDate && surveyDate <= currentEndDate);
       const isPreviousPeriod =
         surveyDate >= previousStartDate && surveyDate <= previousEndDate;
@@ -567,10 +521,7 @@ const fetchData = async () => {
       }
 
       // Фильтрация по региону
-      if (
-        selectedRegion.value &&
-        !cities.value[selectedRegion.value].includes(cityName)
-      ) {
+      if (selectedRegion.value && !cities.value[selectedRegion.value].includes(cityName)) {
         return;
       }
 
@@ -644,8 +595,8 @@ const fetchData = async () => {
       }
 
       // const salonComparison = averageSalonQualityPrevious !== 0
-      //   ? ((averageSalonQuality * 100) / averageSalonQualityPrevious - 100).toFixed(2) + " %"
-      //   : " "; Пермь
+      // ? ((averageSalonQuality * 100) / averageSalonQualityPrevious - 100).toFixed(2) + " %"
+      // : " "; Пермь
 
       const salonComparison =
         averageSalonQualityPrevious !== 0
