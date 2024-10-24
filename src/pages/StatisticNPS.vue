@@ -629,12 +629,14 @@ const fetchData = async () => {
       const averageSalonQuality = city.totalQuality / city.count;
 
       const previousData = previousPeriodMap[city.name];
+      console.log("previousData", previousData);
+      
       let averageSalonQualityPrevious = 0;
 
       if (previousData) {
         averageSalonQualityPrevious = (
           previousData.totalSalonQuality / previousData.count
-        ).toFixed();
+        ).toFixed(2);
         console.log(
           `Average salon quality for ${city.name} for the previous period:`,
           averageSalonQualityPrevious
