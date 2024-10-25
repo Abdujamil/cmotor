@@ -134,6 +134,12 @@ const tableData = ref([]);
 
 const citiesData = ref([]);
 
+new ResizeObserver((event) => {
+  const width = document.documentElement.scrollWidth || 0;
+  const height = document.documentElement.scrollHeight || 0;
+  parent.postMessage({ width, height }, "*");
+}).observe(document.documentElement);
+
 const cities = ref({
   Север: [
     "Кемерово",

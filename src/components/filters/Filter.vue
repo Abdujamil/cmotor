@@ -119,7 +119,7 @@ const showCityDropdown = ref(false);
 const selectedRegion = ref("");
 const selectedCity = ref("");
 
-const dateRange = ref([new Date(), null]); // [startDate, endDate]
+const dateRange = ref(['', '']); // [startDate, endDate]
 
 
 const handleDateChange = (dates) => {

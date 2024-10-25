@@ -125,6 +125,12 @@ const cities = ref({
   Юг: ["Тюмень", "Сургут", "Пермь", "Самара", "Челябинск", "Тюмень_Республики"]
 });
 
+new ResizeObserver((event) => {
+  const width = document.documentElement.scrollWidth || 0;
+  const height = document.documentElement.scrollHeight || 0;
+  parent.postMessage({ width, height }, "*");
+}).observe(document.documentElement);
+
 const filters = ref({
   selectedRegion: "",
   selectedCity: "",

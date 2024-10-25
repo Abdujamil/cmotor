@@ -296,25 +296,33 @@ const fetchData = async () => {
     const currentStartDate = new Date(selectedStartDate.value);
     const currentEndDate = new Date(selectedEndDate.value);
 
-   // Проверка, если пользователь выбрал только один день
-    if (currentStartDate && !currentEndDate) {
-      currentEndDate.setDate(currentStartDate.getDate()); // Устанавливаем endDate на тот же день
-      console.log("стоп");
+    
+    // Установка даты для одного дня
+    if (currentStartDate && !selectedEndDate.value) {
+      currentEndDate.setDate(currentStartDate.getDate()); // Ставим на тот же день
+      console.log("currentStartDate", currentStartDate, "currentEndDate", currentEndDate);
     }
-
-
     // Количество дней для предыдущего периода
     const timeDiff = currentEndDate - currentStartDate; // Разница в миллисекундах
     const selectedDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1; // Количество дней
-
+    
     console.log("currentStartDate", currentStartDate, "currentEndDate", currentEndDate);
 
-    // Даты для предыдущего периода
-    const previousStartDate = new Date(currentStartDate);
-    previousStartDate.setDate(previousStartDate.getDate() - selectedDays); // Убираем количество дней
-    const previousEndDate = new Date(currentStartDate);
-    previousEndDate.setDate(previousEndDate.getDate() - 1); // Один день до начала текущего диапазона
+    // Проверка на выбор одного дня
+    const isSingleDay = selectedStartDate.value && selectedEndDate.value && 
+                    selectedStartDate.value.getTime() === selectedEndDate.value.getTime();
 
+    // Даты для предыдущего периода
+    // Установка дат для предыдущего периода с учётом выбора одного дня
+    const previousStartDate = new Date(currentStartDate);
+    const previousEndDate = new Date(currentStartDate);
+    if (isSingleDay) {
+      previousStartDate.setDate(currentStartDate.getDate() - 1); // Один день назад
+      previousEndDate.setDate(currentStartDate.getDate() - 1);
+    } else {
+      previousStartDate.setDate(currentStartDate.getDate() - selectedDays);
+      previousEndDate.setDate(currentStartDate.getDate() - 1);
+    }
     console.log("previousStartDate", previousStartDate, "previousEndDate", previousEndDate);
 
     const previousPeriodMap = {};
@@ -330,8 +338,9 @@ const fetchData = async () => {
       const surveyDate = new Date(item.survey_date.split(".").reverse().join("-"));
 
       // Фильтрация по дате
-      const isCurrentPeriod = !selectedStartDate.value ||
+      const isCurrentPeriod = !selectedStartDate.value || 
         (surveyDate >= currentStartDate && surveyDate <= currentEndDate);
+
       // const isCurrentPeriod = surveyDate >= currentStartDate && surveyDate < currentEndDate; // Изменили условие для одного дня
       const isPreviousPeriod =
         surveyDate >= previousStartDate && surveyDate <= previousEndDate;
@@ -394,6 +403,7 @@ const fetchData = async () => {
         totalCountPrevious += 1;
       }
     });
+
 
     // Формируем массив для отображения
     filteredData.value = Object.values(cityMap).map((city) => {

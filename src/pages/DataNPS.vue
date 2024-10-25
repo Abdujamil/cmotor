@@ -617,6 +617,13 @@ const filters = ref({
   endDate: null // Конечная дата
 }); // Дефолтные значения фильтров
 
+
+new ResizeObserver((event) => {
+  const width = document.documentElement.scrollWidth || 0;
+  const height = document.documentElement.scrollHeight || 0;
+  parent.postMessage({ width, height }, "*");
+}).observe(document.documentElement);
+
 const cities = ref([]); // Массив для хранения данных
 
 const citiess = [

@@ -800,6 +800,12 @@ import { MaskInput } from "vue-3-mask";
 import axios from "axios";
 import "@vuepic/vue-datepicker/dist/main.css";
 
+new ResizeObserver((event) => {
+  const width = document.documentElement.scrollWidth || 0;
+  const height = document.documentElement.scrollHeight || 0;
+  parent.postMessage({ width, height }, "*");
+}).observe(document.documentElement);
+
 const cities = [
   "Тюмень",
   "Сургут",
