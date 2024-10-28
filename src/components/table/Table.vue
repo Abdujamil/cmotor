@@ -1581,7 +1581,7 @@
     <h2>Все города</h2>
     <div class="filters">
       <div class="filters__btns">
-        <button @click="toggleForm" class="btn btn-green">
+        <button v-if="!isAdd" @click="toggleForm" class="btn btn-green">
           <img src="/add-iconn.svg" alt="icon" /> Добавить поле
         </button>
 
@@ -1621,7 +1621,7 @@
             <th>Итог</th>
             <th>План, %</th>
             <th>Комментарии</th>
-            <th>Ред.</th>
+            <th v-if="!isEdit" >Ред.</th>
           </tr>
         </thead>
         <!-- Table body -->
@@ -1654,7 +1654,7 @@
             <td :title="client.comment || 'нет коммента'">
               {{ client.comment }}
             </td>
-            <td style="display: flex; align-items: center">
+            <td v-if="!isEdit" style="display: flex; align-items: center">
               <div @click="editClient(client)" class="edit-icon-block">
                 <svg
                   title="Редактирование"
@@ -1743,6 +1743,13 @@ const downloadTable = () => {
     XLSX.writeFile(wb, "table.xlsx");
   }
 };
+
+const permissions = Object.fromEntries(new URLSearchParams(location.search))?.permissions?.split(',') || [];
+
+const isView = ref(permissions.includes("tables_clients_auditions_view"));
+const isAdd = ref(permissions.includes("tables_clients_auditions_add"));
+const isEdit = ref(permissions.includes("tables_clients_auditions_edit"));
+const isDelete = ref(permissions.includes("tables_clients_auditions_delete"));
 
 const showForm = ref(false);
 const showFormEdit = ref(false);

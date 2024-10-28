@@ -417,7 +417,7 @@
     </div>
     <div class="filters filters-statis-city">
       <div class="filters__btns">
-        <button v-if="!isAdminLink"  @click="toggleForm" class="btn btn-green">
+        <button v-if="!isAdd"  @click="toggleForm" class="btn btn-green">
           <img src="/add-iconn.svg" alt="icon" /> Добавить поле
         </button>
         <IButton @click="downloadTable" />
@@ -439,8 +439,8 @@
           <div class="table-cell">Комментарий</div>
           <div class="table-cell">Комментарий РОПа</div>
           <div class="table-cell">Статус</div>
-          <div v-if="!isAdminLink" class="table-cell">Редактировать</div>
-          <div v-if="!isAdminLink" class="table-cell">Удалить</div>
+          <div v-if="!isEdit" class="table-cell">Редактировать</div>
+          <div v-if="!isDelete" class="table-cell">Удалить</div>
         </div>
         <!-- Filtered Table Rows -->
         <div
@@ -474,7 +474,7 @@
           >
             <svg
               title="Редактирование"
-              v-if="editingIndex !== index"
+              v-if="editingIndex !== index && !isComment"
               xmlns="http://www.w3.org/2000/svg"
               width="18"
               height="18"
@@ -487,7 +487,7 @@
                 fill="currentColor"
               ></path>
             </svg>
-            <div v-if="editingIndex === index">
+            <div v-if="editingIndex === index && !isComment">
               <textarea
                 id="edit-input-{{ index }}"
                 class="comment-input"
@@ -522,7 +522,7 @@
                 </span>
               </div>
               <div
-                v-if="showStatusDropdowns[index]"
+                v-if="showStatusDropdowns[index] && !isStatus"
                 class="dropdown-menu"
                 style="width: 110px"
               >
@@ -537,7 +537,7 @@
               </div>
             </div>
           </div>
-          <div v-if="!isAdminLink"  class="table-cell" style="max-width: 90px">
+          <div v-if="!isEdit"  class="table-cell" style="max-width: 90px">
             <div @click="editClient(city)" class="edit-icon-block">
               <svg
                 title="Редактирование"
@@ -555,7 +555,7 @@
               </svg>
             </div>
           </div>
-          <div v-if="!isAdminLink"  class="table-cell" style="max-width: 90px">
+          <div v-if="!isDelete"  class="table-cell" style="max-width: 90px">
             <td
               style="
                 display: flex;
@@ -594,10 +594,29 @@ const link = 'https://crystal-motors.ru/cabinet/tables/clients/user';
 
 const isAdminLink = ref(false);
 
+const queryString = window.location.search;
+console.log(queryString);
+
+const urlParams = new URLSearchParams(queryString);
+console.log(urlParams);
+
+const permissions = Object.fromEntries(new URLSearchParams(location.search))?.permissions?.split(',') || [];
+
+
+const isView = ref(permissions.includes("tables_clients_nps_statistics_view"));
+const isEdit = ref(permissions.includes("tables_clients_nps_data_edit"));
+const isDelete = ref(permissions.includes("tables_clients_nps_data_delete"));
+const isAdd = ref(permissions.includes("tables_clients_nps_data_add"));
+const isComment = ref(permissions.includes("tables_clients_nps_data_comment"));
+const isStatus = ref(permissions.includes("tables_clients_nps_data_status"));
+
+
+
 onMounted(() => {
   const currentUrl = window.location.href;
   isAdminLink.value = currentUrl === 'https://crystal-motors.ru/cabinet/tables/clients/user';
 });
+
 const table = ref();
 
 const selectedStatus = ref("Не отработан"); // По умолчанию "Не отработан"
