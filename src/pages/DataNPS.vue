@@ -417,7 +417,7 @@
     </div>
     <div class="filters filters-statis-city">
       <div class="filters__btns">
-        <button v-if="!isAdd"  @click="toggleForm" class="btn btn-green">
+        <button v-if="isAdd"  @click="toggleForm" class="btn btn-green">
           <img src="/add-iconn.svg" alt="icon" /> Добавить поле
         </button>
         <IButton @click="downloadTable" />
@@ -439,8 +439,8 @@
           <div class="table-cell">Комментарий</div>
           <div class="table-cell">Комментарий РОПа</div>
           <div class="table-cell">Статус</div>
-          <div v-if="!isEdit" class="table-cell">Редактировать</div>
-          <div v-if="!isDelete" class="table-cell">Удалить</div>
+          <div v-if="isEdit" class="table-cell">Редактировать</div>
+          <div v-if="isDelete" class="table-cell">Удалить</div>
         </div>
         <!-- Filtered Table Rows -->
         <div
@@ -474,7 +474,7 @@
           >
             <svg
               title="Редактирование"
-              v-if="editingIndex !== index && !isComment"
+              v-if="editingIndex !== index && isComment"
               xmlns="http://www.w3.org/2000/svg"
               width="18"
               height="18"
@@ -487,7 +487,7 @@
                 fill="currentColor"
               ></path>
             </svg>
-            <div v-if="editingIndex === index && !isComment">
+            <div v-if="editingIndex === index && isComment">
               <textarea
                 id="edit-input-{{ index }}"
                 class="comment-input"
@@ -522,7 +522,7 @@
                 </span>
               </div>
               <div
-                v-if="showStatusDropdowns[index] && !isStatus"
+                v-if="showStatusDropdowns[index] && isStatus"
                 class="dropdown-menu"
                 style="width: 110px"
               >
@@ -537,7 +537,7 @@
               </div>
             </div>
           </div>
-          <div v-if="!isEdit"  class="table-cell" style="max-width: 90px">
+          <div v-if="isEdit"  class="table-cell" style="max-width: 90px">
             <div @click="editClient(city)" class="edit-icon-block">
               <svg
                 title="Редактирование"
@@ -555,7 +555,7 @@
               </svg>
             </div>
           </div>
-          <div v-if="!isDelete"  class="table-cell" style="max-width: 90px">
+          <div v-if="isDelete"  class="table-cell" style="max-width: 90px">
             <td
               style="
                 display: flex;
@@ -915,8 +915,8 @@ const saveComment = async (index) => {
   const comment = editedComments.value[index];
 
   // Проверка на пустой комментарий
-  if (comment.trim() === "") {
-    console.warn("Комментарий не может быть пустым.");
+  if (!comment || comment.trim() === "") {
+    console.warn("Комментарий не может быть пустым.", comment);
     return; // Не отправляем пустые комментарии
   }
 

@@ -1581,7 +1581,7 @@
     <h2>Все города</h2>
     <div class="filters">
       <div class="filters__btns">
-        <button v-if="!isAdd" @click="toggleForm" class="btn btn-green">
+        <button v-if="isAdd" @click="toggleForm" class="btn btn-green">
           <img src="/add-iconn.svg" alt="icon" /> Добавить поле
         </button>
 
@@ -1621,7 +1621,7 @@
             <th>Итог</th>
             <th>План, %</th>
             <th>Комментарии</th>
-            <th v-if="!isEdit" >Ред.</th>
+            <th v-if="isEdit" >Ред.</th>
           </tr>
         </thead>
         <!-- Table body -->
@@ -1654,7 +1654,7 @@
             <td :title="client.comment || 'нет коммента'">
               {{ client.comment }}
             </td>
-            <td v-if="!isEdit" style="display: flex; align-items: center">
+            <td v-if="isEdit" style="display: flex; align-items: center">
               <div @click="editClient(client)" class="edit-icon-block">
                 <svg
                   title="Редактирование"
@@ -2052,7 +2052,7 @@ onUnmounted(() => {
 const tableData2 = ref([]); // Все данные с сервера
 const tableData3 = ref([]);
 const loadedData = ref([]); // Отображаемые данные (загружаются постепенно)
-const itemsPerPage = 20; // Количество записей для загрузки за раз
+const itemsPerPage = 500; // Количество записей для загрузки за раз
 const currentPage = ref(0); // Текущая страница данных
 const totalItems = ref(0); // Общее количество записей
 const totalItems2 = ref(0);
@@ -2092,18 +2092,25 @@ const calculateAveragePlan = () => {
   totalItems3.value = (totalPlan / tableData3.value.length).toFixed(2); // Средний процент, округленный до двух знаков после запятой
 };
 
+const formatToDDMMYYYY = (date) => {
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${day}.${month}.${year}`;
+};
+
 const handleDateChange = (newFilters) => {
   const { startDate, endDate } = newFilters;
 
   filters.value = {
     ...newFilters,
-    startDate: startDate ? new Date(startDate).toISOString() : null, // Преобразуем строку или null в дату
-    endDate: endDate ? new Date(endDate).toISOString() : null // Преобразуем строку или null в дату
+    startDate: startDate ? formatToDDMMYYYY(startDate) : null,
+    endDate: endDate ? formatToDDMMYYYY(endDate) : null
   };
 
   console.log("Новые фильтры:", filters.value);
-
-  fetchClients(0, true); // Сброс данных и запрос с фильтрами
+  fetchClients(0, true);
 };
 
 // Функция для получения общего количества записей
@@ -2114,6 +2121,9 @@ const fetchTotalItems = async () => {
     );
     totalItems2.value = response.data.answer.count;
     tableData3.value = response.data.answer.items;
+
+    console.log("Общее количество записей:", response.data.answer.items);
+    
 
     calculateAveragePlan();
   } catch (error) {
@@ -2130,22 +2140,14 @@ const fetchTotalItems = async () => {
 const fetchClients = async (offset = 0, resetData = false) => {
   try {
     const filterParams = {
-      count: 100000, // Максимальное количество записей
       count: itemsPerPage,
       offset,
       order: "id_desc",
       region: filters.value.selectedRegion || "", // Добавляем регион
       city: filters.value.selectedCity || "", // Добавляем город
 
-      startDate:
-        filters.value.startDate instanceof Date
-          ? filters.value.startDate.toISOString()
-          : filters.value.startDate || "",
-
-      endDate:
-        filters.value.endDate instanceof Date
-          ? filters.value.endDate.toISOString()
-          : filters.value.endDate || ""
+      startDate: filters.value.startDate || "",
+      endDate: filters.value.endDate || ""
     };
 
     const response = await axios.get(
@@ -2157,6 +2159,8 @@ const fetchClients = async (offset = 0, resetData = false) => {
     console.log("Запрос с фильтрами:", filterParams);
 
     const newData = response.data.answer.items;
+    console.log("Новые данные:", newData)
+    
 
     if (resetData) {
       tableData2.value = newData;

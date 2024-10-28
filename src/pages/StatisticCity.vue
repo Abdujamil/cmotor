@@ -134,8 +134,13 @@ const tableData = ref([]);
 
 const citiesData = ref([]);
 
-const permissions = Object.fromEntries(new URLSearchParams(location.search))?.permissions?.split(',') || [];
-const isShowTable = ref(permissions.includes("tables_clients_analytics_cities_view"));
+const permissions =
+  Object.fromEntries(new URLSearchParams(location.search))?.permissions?.split(
+    ","
+  ) || [];
+const isShowTable = ref(
+  permissions.includes("tables_clients_analytics_cities_view")
+);
 
 new ResizeObserver((event) => {
   const width = document.documentElement.scrollWidth || 0;
@@ -447,9 +452,11 @@ const fetchFactsOnly = async (startDate, endDate) => {
 
       const resultAvaregeCallQuality = Math.floor((totalQuality / 14) * 100);
 
-      const averageCallQuality = startDate && endDate
-      ? (resultAvaregeCallQuality / currentCityEntries.length).toFixed(2) +
-        " %" : " ";
+      const averageCallQuality =
+        startDate && endDate
+          ? (resultAvaregeCallQuality / currentCityEntries.length).toFixed(2) +
+            " %"
+          : " ";
 
       // Общее количество звонков
       const totalCalls = currentCityEntries.reduce(
@@ -821,7 +828,7 @@ const calculateRegionAverages = async (startDate, endDate) => {
         : 0;
 
     const previousPeriodDyn =
-    startDate && endDate && averagePreviousQuality > 0 
+      startDate && endDate && averagePreviousQuality > 0
         ? (
             ((averageCurrentQuality - averagePreviousQuality) /
               averagePreviousQuality) *
@@ -829,7 +836,8 @@ const calculateRegionAverages = async (startDate, endDate) => {
           ).toFixed(0) + " %"
         : " ";
 
-    const callsDynamic = totalPreviousCalls > 0
+    const callsDynamic =
+      totalPreviousCalls > 0
         ? (
             ((totalCurrentCalls - totalPreviousCalls) / totalPreviousCalls) *
             100
