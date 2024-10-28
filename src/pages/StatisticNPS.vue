@@ -302,6 +302,7 @@ const fetchData = async () => {
       currentEndDate.setDate(currentStartDate.getDate()); // Ставим на тот же день
       console.log("currentStartDate", currentStartDate, "currentEndDate", currentEndDate);
     }
+
     // Количество дней для предыдущего периода
     const timeDiff = currentEndDate - currentStartDate; // Разница в миллисекундах
     const selectedDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1; // Количество дней
@@ -330,8 +331,8 @@ const fetchData = async () => {
 
     data.forEach((item) => {
       const cityName = item.city;
-
-      if (currentDataSet !== "" &&item.transaction_type.toLowerCase() !== currentDataSet.value) {
+      
+      if (currentDataSet !== " " && item.transaction_type.toLowerCase() !== currentDataSet.value) {
         return;
       }
 
@@ -343,7 +344,7 @@ const fetchData = async () => {
 
       // const isCurrentPeriod = surveyDate >= currentStartDate && surveyDate < currentEndDate; // Изменили условие для одного дня
       const isPreviousPeriod =
-        surveyDate >= previousStartDate && surveyDate <= previousEndDate;
+        surveyDate >= previousStartDate && surveyDate <= previousEndDate;        
 
       if (!isCurrentPeriod && !isPreviousPeriod) {
         return; // Пропускаем, если дата не попадает ни в один из периодов
@@ -385,7 +386,7 @@ const fetchData = async () => {
       // Обработка данных для предыдущего периода
       if (isPreviousPeriod) {
         totalQualityPrevious += salonQuality;
-
+        
         if (!previousPeriodMap[cityName]) {
           previousPeriodMap[cityName] = {
             totalManagerQuality: managerQuality,
@@ -393,6 +394,9 @@ const fetchData = async () => {
             totalSalonQuality: salonQuality,
             count: 1
           };
+
+          console.log("previousPeriodMap[cityName] 1", previousPeriodMap[cityName]);
+          
         } else {
           previousPeriodMap[cityName].totalManagerQuality += managerQuality;
           previousPeriodMap[cityName].managerCount += 1;
@@ -408,6 +412,10 @@ const fetchData = async () => {
     // Формируем массив для отображения
     filteredData.value = Object.values(cityMap).map((city) => {
       const averageSalonQuality = city.totalQuality / city.count;
+      console.log(
+        `Average salon quality for ${city.name}:`, "totalQuality", city.totalQuality, "count", city.count.toFixed(2),
+        averageSalonQuality);
+      
 
       const previousData = previousPeriodMap[city.name];
       console.log("previousData", previousData);
@@ -489,11 +497,6 @@ const fetchData = async () => {
   } catch (error) {
     console.error("Ошибка при получении данных:", error.message);
   }
-};
-
-const switchData2 = (dataSet) => {
-  currentDataSet.value = dataSet;
-  fetchData(); // Переопределите или измените этот вызов в зависимости от вашей логики
 };
 
 const switchData = (type) => {

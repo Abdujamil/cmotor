@@ -417,7 +417,7 @@
     </div>
     <div class="filters filters-statis-city">
       <div class="filters__btns">
-        <button @click="toggleForm" class="btn btn-green">
+        <button v-if="!isAdminLink"  @click="toggleForm" class="btn btn-green">
           <img src="/add-iconn.svg" alt="icon" /> Добавить поле
         </button>
         <IButton @click="downloadTable" />
@@ -439,8 +439,8 @@
           <div class="table-cell">Комментарий</div>
           <div class="table-cell">Комментарий РОПа</div>
           <div class="table-cell">Статус</div>
-          <div class="table-cell">Редактировать</div>
-          <div class="table-cell">Удалить</div>
+          <div v-if="!isAdminLink" class="table-cell">Редактировать</div>
+          <div v-if="!isAdminLink" class="table-cell">Удалить</div>
         </div>
         <!-- Filtered Table Rows -->
         <div
@@ -537,7 +537,7 @@
               </div>
             </div>
           </div>
-          <div class="table-cell" style="max-width: 90px">
+          <div v-if="!isAdminLink"  class="table-cell" style="max-width: 90px">
             <div @click="editClient(city)" class="edit-icon-block">
               <svg
                 title="Редактирование"
@@ -555,7 +555,7 @@
               </svg>
             </div>
           </div>
-          <div class="table-cell" style="max-width: 90px">
+          <div v-if="!isAdminLink"  class="table-cell" style="max-width: 90px">
             <td
               style="
                 display: flex;
@@ -589,6 +589,15 @@ import { ref, nextTick, onMounted, onBeforeUnmount, computed } from "vue";
 import axios from "axios";
 import * as XLSX from "xlsx";
 
+
+const link = 'https://crystal-motors.ru/cabinet/tables/clients/user';
+
+const isAdminLink = ref(false);
+
+onMounted(() => {
+  const currentUrl = window.location.href;
+  isAdminLink.value = currentUrl === 'https://crystal-motors.ru/cabinet/tables/clients/user';
+});
 const table = ref();
 
 const selectedStatus = ref("Не отработан"); // По умолчанию "Не отработан"
