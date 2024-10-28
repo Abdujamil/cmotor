@@ -73,6 +73,7 @@
 
       <div v-if="showStatsSubmenu" class="nav__submenu">
         <div
+          v-if="isCityTable"
           class="nav__item"
           :class="{ 'nav__item--active': activeSubmenu === 'statisticCity' }"
           @click="setActiveSubmenu('statisticCity')"
@@ -83,6 +84,7 @@
         </div>
 
         <div
+          v-if="isTradeinTable"
           class="nav__item"
           :class="{
             'nav__item--active': activeSubmenu === 'statisticCityTradeIn'
@@ -94,6 +96,7 @@
           >
         </div>
         <div
+          v-if="isManagersTable"
           class="nav__item"
           :class="{ 'nav__item--active': activeSubmenu === 'statisticManager' }"
           @click="setActiveSubmenu('statisticManager')"
@@ -165,6 +168,13 @@
 
 <script setup>
 import { ref } from "vue";
+
+
+const permissions = Object.fromEntries(new URLSearchParams(location.search))?.permissions?.split(",") || [];
+const isCityTable = ref(permissions.includes("tables_clients_analytics_cities_view"));
+const isTradeinTable = ref(permissions.includes("tables_clients_analytics_tradein_view"));
+const isManagersTable = ref(permissions.includes("tables_clients_analytics_managers_view"));
+
 
 // Переменные для управления видимостью подменю и отслеживания активных пунктов меню
 const showCallsSubmenu = ref(false);

@@ -1,4 +1,4 @@
-<template v-if="!isShowTable">
+<template>
   <h1>Сводная по городам трейд-ин</h1>
 
   <div class="statis-city">
@@ -99,9 +99,6 @@ import IButton from "../components/installButton/IButton.vue";
 import { fetchTotalItems } from "../api-service/apiService";
 import { ref, computed, onMounted } from "vue";
 import * as XLSX from "xlsx";
-
-const permissions = Object.fromEntries(new URLSearchParams(location.search))?.permissions?.split(',') || [];
-const isShowTable = ref(permissions.includes("tables_clients_analytics_tradein_view"));
 
 const table = ref(null);
 const selectedRegion = ref("");

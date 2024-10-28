@@ -1,5 +1,5 @@
 <!-- TODO динамика по регионам и городам -->
-<template v-if="isShowTable">
+<template>
   <h1>Сводная по городам</h1>
 
   <div class="statis-city">
@@ -133,14 +133,6 @@ const sortOrder = ref("asc");
 const tableData = ref([]);
 
 const citiesData = ref([]);
-
-const permissions =
-  Object.fromEntries(new URLSearchParams(location.search))?.permissions?.split(
-    ","
-  ) || [];
-const isShowTable = ref(
-  permissions.includes("tables_clients_analytics_cities_view")
-);
 
 new ResizeObserver((event) => {
   const width = document.documentElement.scrollWidth || 0;

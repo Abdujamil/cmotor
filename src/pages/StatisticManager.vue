@@ -94,9 +94,6 @@ const cities = {
   Юг: ["Тюмень", "Сургут", "Пермь", "Самара", "Челябинск", "Тюмень_Республики"]
 };
 
-const permissions = Object.fromEntries(new URLSearchParams(location.search))?.permissions?.split(',') || [];
-const isShowTable = ref(permissions.includes("tables_clients_analytics_managers_view"));
-
 new ResizeObserver((event) => {
   const width = document.documentElement.scrollWidth || 0;
   const height = document.documentElement.scrollHeight || 0;
