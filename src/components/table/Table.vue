@@ -2052,7 +2052,7 @@ onUnmounted(() => {
 const tableData2 = ref([]); // Все данные с сервера
 const tableData3 = ref([]);
 const loadedData = ref([]); // Отображаемые данные (загружаются постепенно)
-const itemsPerPage = 40; // Количество записей для загрузки за раз
+const itemsPerPage = 100; // Количество записей для загрузки за раз
 const currentPage = ref(0); // Текущая страница данных
 const totalItems = ref(0); // Общее количество записей
 const totalItems2 = ref(0);
@@ -2109,7 +2109,7 @@ const handleDateChange = (newFilters) => {
     endDate: endDate ? formatToDDMMYYYY(endDate) : null
   };
 
-  console.log("Новые фильтры:", filters.value);
+  console.log("Новые фильтры (отформатированные):", filters.value);
   fetchClients(0, true);
 };
 
@@ -2140,7 +2140,7 @@ const fetchTotalItems = async () => {
 const fetchClients = async (offset = 0, resetData = false) => {
   try {
     const filterParams = {
-      count: itemsPerPage,
+      count: "all",
       offset,
       order: "id_desc",
       region: filters.value.selectedRegion || "", // Добавляем регион
@@ -2186,39 +2186,71 @@ const fetchClients = async (offset = 0, resetData = false) => {
 
 const filteredData = computed(() => {
   return loadedData.value.filter((client) => {
-    // Преобразуем строку даты клиента в объект Date
+    // Преобразуем дату клиента в объект Date
     const [day, month, year] = client.date.split(".").map(Number);
-    const clientDate = new Date(year, month - 1, day); // месяц на 1 меньше
-    clientDate.setHours(0, 0, 0, 0);
+    const clientDate = new Date(year, month - 1, day); // месяц - 1, т.к. Date в JS начинается с 0
 
-    // Преобразуем начальную и конечную даты фильтра
-    const startDate = filters.value.startDate
-      ? new Date(filters.value.startDate)
-      : null;
-    const endDate = filters.value.endDate
-      ? new Date(filters.value.endDate)
-      : null;
+    // Преобразуем начальную и конечную даты фильтра из строки в объект Date
+    const [startDay, startMonth, startYear] = filters.value.startDate
+      ? filters.value.startDate.split(".").map(Number)
+      : [null, null, null];
+    const startDate = startDay ? new Date(startYear, startMonth - 1, startDay) : null;
 
-    if (startDate) startDate.setHours(0, 0, 0, 0); // Сброс времени для начальной даты
-    if (endDate) endDate.setHours(23, 59, 59, 999); // Сброс времени для конечной даты, чтобы включить последний день
+    const [endDay, endMonth, endYear] = filters.value.endDate
+      ? filters.value.endDate.split(".").map(Number)
+      : [null, null, null];
+    const endDate = endDay ? new Date(endYear, endMonth - 1, endDay) : null;
+
+    if (startDate) startDate.setHours(0, 0, 0, 0); // Сброс времени начальной даты
+    if (endDate) endDate.setHours(23, 59, 59, 999); // Сброс времени конечной даты
 
     // Логика фильтрации по городам и регионам
-    const cityMatch =
-      !filters.value.selectedCity || client.city === filters.value.selectedCity;
-
-    // Фильтрация по выбранному региону
-    const regionMatch =
-      !filters.value.selectedRegion ||
-      regions[filters.value.selectedRegion]?.includes(client.city);
+    const cityMatch = !filters.value.selectedCity || client.city === filters.value.selectedCity;
+    const regionMatch = !filters.value.selectedRegion || regions[filters.value.selectedRegion]?.includes(client.city);
 
     // Фильтрация по диапазону дат
-    const dateMatch =
-      (!startDate || clientDate >= startDate) &&
-      (!endDate || clientDate <= endDate);
+    const dateMatch = (!startDate || clientDate >= startDate) && (!endDate || clientDate <= endDate);
 
     return cityMatch && regionMatch && dateMatch;
   });
 });
+
+
+// const filteredData = computed(() => {
+//   return loadedData.value.filter((client) => {
+//     // Преобразуем строку даты клиента в объект Date
+//     const [day, month, year] = client.date.split(".").map(Number);
+//     const clientDate = new Date(year, month - 1, day); // месяц на 1 меньше
+//     clientDate.setHours(0, 0, 0, 0);
+
+//     // Преобразуем начальную и конечную даты фильтра
+//     const startDate = filters.value.startDate
+//       ? new Date(filters.value.startDate)
+//       : null;
+//     const endDate = filters.value.endDate
+//       ? new Date(filters.value.endDate)
+//       : null;
+
+//     if (startDate) startDate.setHours(0, 0, 0, 0); // Сброс времени для начальной даты
+//     if (endDate) endDate.setHours(23, 59, 59, 999); // Сброс времени для конечной даты, чтобы включить последний день
+
+//     // Логика фильтрации по городам и регионам
+//     const cityMatch =
+//       !filters.value.selectedCity || client.city === filters.value.selectedCity;
+
+//     // Фильтрация по выбранному региону
+//     const regionMatch =
+//       !filters.value.selectedRegion ||
+//       regions[filters.value.selectedRegion]?.includes(client.city);
+
+//     // Фильтрация по диапазону дат
+//     const dateMatch =
+//       (!startDate || clientDate >= startDate) &&
+//       (!endDate || clientDate <= endDate);
+
+//     return cityMatch && regionMatch && dateMatch;
+//   });
+// });
 
 // Функция для загрузки данных при скролле
 const loadMoreData = () => {
