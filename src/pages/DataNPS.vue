@@ -347,7 +347,7 @@
             <label for="manager">Дата опроса</label>
             <div class="my-calendar">
               <VueDatePicker
-                v-model="formData.survey_date"
+                v-model="selectedDate"
                 :format="format2"
                 dark
                 placeholder="За всё время"
@@ -355,6 +355,7 @@
                 select-text="Выбрать"
                 cancel-text="Отменить"
                 :enable-time-picker="false"
+                @update:model-value="updatedataRange"
               >
               </VueDatePicker>
             </div>
@@ -724,29 +725,28 @@ const handleDateChange = (newFilters) => {
   fetchCities(0, true); // Сброс данных и запрос с фильтрами
 };
 
+const selectedDate = ref(null);
+
 const format2 = (date) => {
   const day = String(date.getDate()).padStart(2, "0"); // Добавляем ведущий ноль для дня
   const month = String(date.getMonth() + 1).padStart(2, "0"); // Добавляем ведущий ноль для месяца
   const year = date.getFullYear();
 
-  console.log("Форматированная дата:", `${day}.${month}.${year}`);
-
   return `${day}.${month}.${year}`;
 };
 
 const updatedataRange = (dates) => {
-
-  console.log("Дата пришла", dates);
+  console.log("Дата пришла:", dates);
   
   if (dates instanceof Date) {
-    formData.value.survey_date = format2(dates); // Форматируем дату перед сохранением
-    console.log("Форматированная дата1:", formData.value.survey_date);
-    
+    // Сохраняем отформатированную дату в formData
+    formData.value.survey_date = format2(dates);
+    console.log("Форматированная дата сохранена:", formData.value.survey_date);
   } else {
-    formData.value.survey_date = ""; // Если это не дата, обнуляем
-    console.log("Это не дата фууу", formData.value.survey_date);
+    // Если дата не выбрана, сбрасываем значение
+    formData.value.survey_date = "";
+    console.log("Дата сброшена:", formData.value.survey_date);
   }
-  console.log("Updated formData2.date:", formData.value.survey_date);
 };
 
 const toggleForm = () => {
@@ -991,14 +991,6 @@ const handleOutsideClick = (event) => {
   }
 };
 
-watch(
-  () => formData.value.survey_date,
-  (newDate) => {
-    if (newDate instanceof Date) {
-      formData.value.survey_date = format2(newDate); // Convert to formatted string
-    }
-  }
-);
 
 const addCity = async () => {
   try {
