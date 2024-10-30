@@ -1651,13 +1651,13 @@
             <img src="/add-iconn.svg" alt="icon" /> Добавить поле
           </button>
 
-          <button
+          <!-- <button
             v-if="isAdd"
             @click="toggleFormManager"
             class="btn btn-manager"
           >
             <img src="/add-iconn.svg" alt="icon" /> Добавить менеджера
-          </button>
+          </button> -->
         </div>
 
         <button @click="downloadTable" class="btn btn-blue">
@@ -1889,7 +1889,8 @@ const cities = [
   "Омск",
   "Томск",
   "Сургут_ГИ",
-  "Тюмень_Республики"
+  "Тюмень_Республики",
+  "Оренбург"
 ];
 
 const cities2 = [
@@ -1917,7 +1918,8 @@ const regions = {
     "Самара",
     "Челябинск",
     "Сургут_ГИ",
-    "Тюмень_Республики"
+    "Тюмень_Республики", 
+    "Оренбург"
   ],
   Север: [
     "Кемерово",
