@@ -600,13 +600,13 @@ console.log(queryString);
 const urlParams = new URLSearchParams(queryString);
 console.log(urlParams);
 
-const permissions = Object.fromEntries(new URLSearchParams(location.search))?.permissions?.split(',') || [];
+// const permissions = Object.fromEntries(new URLSearchParams(location.search))?.permissions?.split(',') || [];
 
-const isAdd = ref(permissions.includes("tables_clients_nps_data_add"));
-const isEdit = ref(permissions.includes("tables_clients_nps_data_edit"));
-const isDelete = ref(permissions.includes("tables_clients_nps_data_delete"));
-const isComment = ref(permissions.includes("tables_clients_nps_data_comment"));
-const isStatus = ref(permissions.includes("tables_clients_nps_data_status"));
+const isAdd = ref(window.permissions.includes("tables_clients_nps_data_add"));
+const isEdit = ref(window.permissions.includes("tables_clients_nps_data_edit"));
+const isDelete = ref(window.permissions.includes("tables_clients_nps_data_delete"));
+const isComment = ref(window.permissions.includes("tables_clients_nps_data_comment"));
+const isStatus = ref(window.permissions.includes("tables_clients_nps_data_status"));
 
 onMounted(() => {
   const currentUrl = window.location.href;

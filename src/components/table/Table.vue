@@ -1744,11 +1744,10 @@ const downloadTable = () => {
   }
 };
 
-const permissions = Object.fromEntries(new URLSearchParams(location.search))?.permissions?.split(',') || [];
-
-const isAdd = ref(permissions.includes("tables_clients_auditions_add"));
-const isEdit = ref(permissions.includes("tables_clients_auditions_edit"));
-const isDelete = ref(permissions.includes("tables_clients_auditions_delete"));
+const isAdd = ref(window.permissions.includes("tables_clients_auditions_add"));
+const isEdit = ref(window.permissions.includes("tables_clients_auditions_edit"));
+const isDelete = ref(window.permissions.includes("tables_clients_auditions_delete"));
+// console.warn(window.permissions);
 
 const showForm = ref(false);
 const showFormEdit = ref(false);

@@ -1,7 +1,3 @@
-<script setup>
-import Navbar from "./components/navbar/Navbar.vue";
-</script>
-
 <template>
   <header></header>
   <div class="main">
@@ -17,6 +13,16 @@ import Navbar from "./components/navbar/Navbar.vue";
 
   <footer></footer>
 </template>
+
+<script setup>
+import Navbar from "./components/navbar/Navbar.vue";
+
+window.permissions = Object.fromEntries(new URLSearchParams(location.search))?.permissions?.split(',') || [];
+
+console.log("permissions", window.permissions);
+
+
+</script>
 
 <style lang="scss" scoped>
 header {
