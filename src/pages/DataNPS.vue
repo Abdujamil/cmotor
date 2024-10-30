@@ -602,15 +602,11 @@ console.log(urlParams);
 
 const permissions = Object.fromEntries(new URLSearchParams(location.search))?.permissions?.split(',') || [];
 
-
-const isView = ref(permissions.includes("tables_clients_nps_statistics_view"));
+const isAdd = ref(permissions.includes("tables_clients_nps_data_add"));
 const isEdit = ref(permissions.includes("tables_clients_nps_data_edit"));
 const isDelete = ref(permissions.includes("tables_clients_nps_data_delete"));
-const isAdd = ref(permissions.includes("tables_clients_nps_data_add"));
 const isComment = ref(permissions.includes("tables_clients_nps_data_comment"));
 const isStatus = ref(permissions.includes("tables_clients_nps_data_status"));
-
-
 
 onMounted(() => {
   const currentUrl = window.location.href;

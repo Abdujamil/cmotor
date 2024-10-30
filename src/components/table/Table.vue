@@ -1746,7 +1746,6 @@ const downloadTable = () => {
 
 const permissions = Object.fromEntries(new URLSearchParams(location.search))?.permissions?.split(',') || [];
 
-const isView = ref(permissions.includes("tables_clients_auditions_view"));
 const isAdd = ref(permissions.includes("tables_clients_auditions_add"));
 const isEdit = ref(permissions.includes("tables_clients_auditions_edit"));
 const isDelete = ref(permissions.includes("tables_clients_auditions_delete"));
@@ -2052,7 +2051,7 @@ onUnmounted(() => {
 const tableData2 = ref([]); // Все данные с сервера
 const tableData3 = ref([]);
 const loadedData = ref([]); // Отображаемые данные (загружаются постепенно)
-const itemsPerPage = 40; // Количество записей для загрузки за раз
+const itemsPerPage = 100; // Количество записей для загрузки за раз
 const currentPage = ref(0); // Текущая страница данных
 const totalItems = ref(0); // Общее количество записей
 const totalItems2 = ref(0);
@@ -2109,7 +2108,7 @@ const handleDateChange = (newFilters) => {
     endDate: endDate ? formatToDDMMYYYY(endDate) : null
   };
 
-  console.log("Новые фильтры (отформатированные):", filters.value);
+  // console.log("Новые фильтры (отформатированные):", filters.value);
   fetchClients(0, true);
 };
 
@@ -2122,7 +2121,7 @@ const fetchTotalItems = async () => {
     totalItems2.value = response.data.answer.count;
     tableData3.value = response.data.answer.items;
 
-    console.log("Общее количество записей:", response.data.answer.items);
+    // console.log("Общее количество записей:", response.data.answer.items);
     
 
     calculateAveragePlan();
@@ -2159,7 +2158,7 @@ const fetchClients = async (offset = 0, resetData = false) => {
     console.log("Запрос с фильтрами:", filterParams);
 
     const newData = response.data.answer.items;
-    console.log("Новые данные:", newData)
+    // console.log("Новые данные:", newData)
     
 
     if (resetData) {
