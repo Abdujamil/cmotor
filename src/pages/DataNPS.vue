@@ -146,7 +146,6 @@
                 :format="format2"
                 dark
                 placeholder="За всё время"
-                @update:model-value="updatedataRange"
                 locale="ru-RU"
                 select-text="Выбрать"
                 cancel-text="Отменить"
@@ -352,7 +351,6 @@
                 :format="format2"
                 dark
                 placeholder="За всё время"
-                @update:model-value="updatedataRange"
                 locale="ru-RU"
                 select-text="Выбрать"
                 cancel-text="Отменить"
@@ -737,10 +735,16 @@ const format2 = (date) => {
 };
 
 const updatedataRange = (dates) => {
+
+  console.log("Дата пришла", dates);
+  
   if (dates instanceof Date) {
     formData.value.survey_date = format2(dates); // Форматируем дату перед сохранением
+    console.log("Форматированная дата1:", formData.value.survey_date);
+    
   } else {
     formData.value.survey_date = ""; // Если это не дата, обнуляем
+    console.log("Это не дата фууу", formData.value.survey_date);
   }
   console.log("Updated formData2.date:", formData.value.survey_date);
 };
