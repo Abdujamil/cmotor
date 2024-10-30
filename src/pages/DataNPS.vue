@@ -583,7 +583,7 @@
 <script setup>
 import Filter from "../components/filters/Filter.vue";
 import IButton from "../components/installButton/IButton.vue";
-import { ref, nextTick, onMounted, onBeforeUnmount, computed } from "vue";
+import { ref, nextTick, onMounted, onBeforeUnmount, computed, watch } from "vue";
 import axios from "axios";
 import * as XLSX from "xlsx";
 
@@ -990,6 +990,15 @@ const handleOutsideClick = (event) => {
     saveComment(editingIndex.value);
   }
 };
+
+watch(
+  () => formData.value.survey_date,
+  (newDate) => {
+    if (newDate instanceof Date) {
+      formData.value.survey_date = format2(newDate); // Convert to formatted string
+    }
+  }
+);
 
 const addCity = async () => {
   try {
