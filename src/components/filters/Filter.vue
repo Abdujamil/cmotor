@@ -141,21 +141,6 @@ const handleDateChange = (dates) => {
   emit("filterChange", { startDate, endDate }); // Эмитим событие с объектами дат
 };
 
-// Функция форматирования для диапазона дат
-// const format = (dates) => {
-//   if (Array.isArray(dates) && dates.length === 2) {
-//     const [startDate, endDate] = dates;
-//     const formattedStartDate = startDate.toLocaleDateString("ru-RU");
-//     const formattedEndDate = endDate.toLocaleDateString("ru-RU");
-
-//     return `${formattedStartDate} - ${formattedEndDate}`;
-//   } else if (dates instanceof Date) {
-//     // Если диапазон не выбран, обрабатываем как одиночную дату
-//     return dates.toLocaleDateString("ru-RU");
-//   }
-
-//   return "";
-// };
 
 const format = (dates) => {
   if (Array.isArray(dates)) {
@@ -179,11 +164,12 @@ const cities = ref({
     "Кемерово",
     "Новокузнецк",
     "Барнаул",
-    "Красноярск (Брянка)",
+    "Красноярск Брянка",
+    "Красноярск ПЖ",
     "Томск"
   ],
   Юг: ["Тюмень", "Сургут", "Пермь", "Самара", "Челябинск",
-  "Сургут_ГИ"]
+  "Сургут_ГИ", "Оренбург"]
 });
 
 // Функция для обновления фильтров

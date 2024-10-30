@@ -1577,13 +1577,88 @@
   </div>
   <!-- END edit form -->
 
+  <!-- Form new manager -->
+  <div v-else-if="showFormManager" class="form-fields">
+    <form @submit.prevent="addManager">
+      <div class="form-fields__title">
+        <h2>Добавление нового менеджера</h2>
+        <div class="form-fields__title-btns">
+          <button type="submit" class="btn btn-green">Сохранить</button>
+          <button @click="cancelForm" class="btn btn-red">Отменить</button>
+        </div>
+      </div>
+
+      <div class="add__manager form-fields__selects">
+        <div
+          class="form-fields__select form-fields__selects-city"
+          ref="cityDropdown"
+        >
+          <label for="city">Город:</label>
+          <div class="dropdown">
+            <div class="dropdown-toggle" @click="() => toggleDropdown('city')">
+              <span>{{ selectedCity || "Выберите город" }}</span>
+              <span class="dropdown-arrow">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M16.0299 7.42016C16.3234 7.71345 16.3234 8.18897 16.0299 8.48226L10.5283 13.9802C10.3873 14.1211 10.1962 14.2002 9.99685 14.2002C9.79754 14.2002 9.60638 14.1211 9.46545 13.9802L3.97011 8.48856C3.67663 8.19526 3.67663 7.71975 3.97012 7.42645C4.2636 7.13316 4.73944 7.13316 5.03292 7.42645L9.99685 12.3871L14.9671 7.42016C15.2606 7.12687 15.7364 7.12687 16.0299 7.42016Z"
+                    fill="white"
+                  />
+                </svg>
+              </span>
+            </div>
+            <div class="dropdown-menu" v-if="showCityDropdown">
+              <div
+                class="dropdown-item"
+                v-for="cityy in cities2"
+                :key="cityy"
+                @click="selectCity(cityy)"
+              >
+                {{ cityy }}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="form-fields__select form-fields__selects-city"
+          ref="managerDropdown"
+        >
+          <label for="manager">ФИО менеджера:</label>
+          <input
+            type="text"
+            placeholder="Введите ФИО"
+            v-model="formData2.fio"
+          />
+        </div>
+      </div>
+    </form>
+  </div>
+  <!-- END form new manager -->
+
   <div v-else class="table-container">
     <h2>Все города</h2>
     <div class="filters">
       <div class="filters__btns">
-        <button v-if="isAdd" @click="toggleForm" class="btn btn-green">
-          <img src="/add-iconn.svg" alt="icon" /> Добавить поле
-        </button>
+        <div class="filters__btns-btns">
+          <button v-if="isAdd" @click="toggleForm" class="btn btn-green">
+            <img src="/add-iconn.svg" alt="icon" /> Добавить поле
+          </button>
+
+          <button
+            v-if="isAdd"
+            @click="toggleFormManager"
+            class="btn btn-manager"
+          >
+            <img src="/add-iconn.svg" alt="icon" /> Добавить менеджера
+          </button>
+        </div>
 
         <button @click="downloadTable" class="btn btn-blue">
           <img src="/add-iconn.svg" alt="icon" /> Скачать таблицу
@@ -1621,7 +1696,7 @@
             <th>Итог</th>
             <th>План, %</th>
             <th>Комментарии</th>
-            <th v-if="isEdit" >Ред.</th>
+            <th v-if="isEdit">Ред.</th>
           </tr>
         </thead>
         <!-- Table body -->
@@ -1745,27 +1820,79 @@ const downloadTable = () => {
 };
 
 const isAdd = ref(window.permissions.includes("tables_clients_auditions_add"));
-const isEdit = ref(window.permissions.includes("tables_clients_auditions_edit"));
-const isDelete = ref(window.permissions.includes("tables_clients_auditions_delete"));
+const isEdit = ref(
+  window.permissions.includes("tables_clients_auditions_edit")
+);
+const isDelete = ref(
+  window.permissions.includes("tables_clients_auditions_delete")
+);
 // console.warn(window.permissions);
 
 const showForm = ref(false);
 const showFormEdit = ref(false);
+const showFormManager = ref(false);
+
+const selectedCity2 = ref(""); // Выбранный город
+const newManager = ref(""); // ФИО нового менеджера
 
 const toggleForm = () => {
   showForm.value = !showForm.value;
   showFormEdit.value = !showFormEdit.value;
+  showFormManager.value = !showFormManager.value;
 
   formData2.value = {
     name: "",
     phone: "",
     email: "",
     city: "",
-    avto: "",
+    avto: ""
+  };
+};
+
+const toggleFormManager = () => {
+  showFormManager.value = !showFormManager.value;
+
+  formData2.value = {
+    name: "",
+    phone: "",
+    email: "",
+    city: "",
+    avto: ""
+  };
+};
+
+const cancelForm = () => {
+  showForm.value = false;
+  showFormEdit.value = false;
+  showFormManager.value = false;
+
+  formData2.value = {
+    name: "",
+    phone: "",
+    email: "",
+    city: "",
+    avto: ""
   };
 };
 
 const cities = [
+  "Тюмень",
+  "Сургут",
+  "Пермь",
+  "Самара",
+  "Челябинск",
+  "Кемерово",
+  "Новокузнецк",
+  "Барнаул",
+  "Красноярск ПЖ",
+  "Красноярск Брянка",
+  "Омск",
+  "Томск",
+  "Сургут_ГИ",
+  "Тюмень_Республики"
+];
+
+const cities2 = [
   "Тюмень",
   "Сургут",
   "Пермь",
@@ -1925,19 +2052,20 @@ const managersByCity = {
   ]
 };
 
-const cancelForm = () => {
-  showForm.value = false;
-  showFormEdit.value = false;
-
-  formData2.value = {
-    name: "",
-    phone: "",
-    email: "",
-    city: "",
-    avto: "",
-  };
-};
-
+// Функция для добавления менеджера
+function addManager() {
+  if (selectedCity.value && newManager.value) {
+    if (!managersByCity.value[selectedCity.value]) {
+      managersByCity.value[selectedCity.value] = [];
+    }
+    managersByCity.value[selectedCity.value].push(newManager.value);
+    newManager.value = "";
+    selectedCity.value = "";
+    showFormManager.value = false;
+  } else {
+    alert("Пожалуйста, выберите город и введите ФИО менеджера.");
+  }
+}
 // Состояние дропдаунов
 const showBrandDropdown = ref(false);
 const showModelDropdown = ref(false);
@@ -2121,7 +2249,6 @@ const fetchTotalItems = async () => {
     tableData3.value = response.data.answer.items;
 
     // console.log("Общее количество записей:", response.data.answer.items);
-    
 
     calculateAveragePlan();
   } catch (error) {
@@ -2158,7 +2285,6 @@ const fetchClients = async (offset = 0, resetData = false) => {
 
     const newData = response.data.answer.items;
     // console.log("Новые данные:", newData)
-    
 
     if (resetData) {
       tableData2.value = newData;
@@ -2192,7 +2318,9 @@ const filteredData = computed(() => {
     const [startDay, startMonth, startYear] = filters.value.startDate
       ? filters.value.startDate.split(".").map(Number)
       : [null, null, null];
-    const startDate = startDay ? new Date(startYear, startMonth - 1, startDay) : null;
+    const startDate = startDay
+      ? new Date(startYear, startMonth - 1, startDay)
+      : null;
 
     const [endDay, endMonth, endYear] = filters.value.endDate
       ? filters.value.endDate.split(".").map(Number)
@@ -2203,16 +2331,20 @@ const filteredData = computed(() => {
     if (endDate) endDate.setHours(23, 59, 59, 999); // Сброс времени конечной даты
 
     // Логика фильтрации по городам и регионам
-    const cityMatch = !filters.value.selectedCity || client.city === filters.value.selectedCity;
-    const regionMatch = !filters.value.selectedRegion || regions[filters.value.selectedRegion]?.includes(client.city);
+    const cityMatch =
+      !filters.value.selectedCity || client.city === filters.value.selectedCity;
+    const regionMatch =
+      !filters.value.selectedRegion ||
+      regions[filters.value.selectedRegion]?.includes(client.city);
 
     // Фильтрация по диапазону дат
-    const dateMatch = (!startDate || clientDate >= startDate) && (!endDate || clientDate <= endDate);
+    const dateMatch =
+      (!startDate || clientDate >= startDate) &&
+      (!endDate || clientDate <= endDate);
 
     return cityMatch && regionMatch && dateMatch;
   });
 });
-
 
 // const filteredData = computed(() => {
 //   return loadedData.value.filter((client) => {
@@ -2345,7 +2477,7 @@ const addClient = async () => {
     }
 
     // Преобразуем значения в числа и вычисляем сумму
-    itogg += 
+    itogg +=
       Number(formData2.value.obrashenie) +
       Number(formData2.value.salon) +
       Number(formData2.value.cred_nal) +
@@ -2356,7 +2488,7 @@ const addClient = async () => {
       Number(formData2.value.obrash_imeni) +
       Number(formData2.value.bodr_son) +
       Number(formData2.value.otpr_viz) +
-      (Number(formData2.value.vizit) * 3) +
+      Number(formData2.value.vizit) * 3 +
       Number(formData2.value.prod_company) +
       Number(formData2.value.zdatok);
 
@@ -2490,7 +2622,7 @@ const updateClient = async () => {
     }
 
     // Преобразуем значения в числа и вычисляем сумму
-    itogg += 
+    itogg +=
       Number(formData2.value.obrashenie) +
       Number(formData2.value.salon) +
       Number(formData2.value.cred_nal) +
@@ -2501,7 +2633,7 @@ const updateClient = async () => {
       Number(formData2.value.obrash_imeni) +
       Number(formData2.value.bodr_son) +
       Number(formData2.value.otpr_viz) +
-      (Number(formData2.value.vizit) * 3) +
+      Number(formData2.value.vizit) * 3 +
       Number(formData2.value.prod_company) +
       Number(formData2.value.zdatok);
 
@@ -2511,11 +2643,12 @@ const updateClient = async () => {
 
     // Убедитесь, что URL и метод правильно настроены на сервере
     await axios.get(
-      `https://crystal-motors.ru/method.editClient?id=${currentClientId.value}&${new URLSearchParams(formData2.value).toString()}`
+      `https://crystal-motors.ru/method.editClient?id=${
+        currentClientId.value
+      }&${new URLSearchParams(formData2.value).toString()}`
     );
 
     alert("Данные успешно обновлены!");
-
 
     // Очищение текущие данные таблицы перед обновлением
     formData2.value = [];
@@ -2531,6 +2664,14 @@ const updateClient = async () => {
     isEditing.value = false; // Закрыть форму редактирования
   } catch (error) {
     console.error("Ошибка при обновлении данных клиента:", error);
+  }
+};
+
+const updateManager = async () => {
+  try {
+    console.log("Обновление менеджера с ID:", selectedManager.value);
+  } catch (error) {
+    console.error("Ошибка при обновлении менеджера:", error);
   }
 };
 
@@ -2627,10 +2768,29 @@ body {
   border-radius: 4px;
 }
 
-.fact-checkbox{
+.filters__btns-btns,
+.fact-checkbox {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.btn-manager {
+  background: #425793;
+  color: #fff;
+  transition: background-color 0.3s ease-in-out;
+  &:hover {
+    background-color: #34467a;
+  }
+}
+
+.add__manager {
+  width: 100%;
+  max-width: 768px;
+
+  .form-fields__select {
+    width: 100%;
+  }
 }
 
 @import url("./table.scss");

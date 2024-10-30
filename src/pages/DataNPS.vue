@@ -142,7 +142,7 @@
             <label for="manager">Дата опроса</label>
             <div class="my-calendar">
               <VueDatePicker
-                v-model="formData.survey_date"
+                v-model="selectedDate"
                 :format="format2"
                 dark
                 placeholder="За всё время"
@@ -150,6 +150,7 @@
                 select-text="Выбрать"
                 cancel-text="Отменить"
                 :enable-time-picker="false"
+                @update:model-value="updatedataRange"
               >
               </VueDatePicker>
             </div>
@@ -863,8 +864,14 @@ const fetchCities = async (offset = 0, resetData = false) => {
     cities.value = response.data.answer.items.map((item) => ({
       ...item,
       editedRopComment: item.rop_comment || "", // Сохраняем rop_comment для редактирования
-      editedStatus: item.status || "Не отработан"
+      editedStatus:
+        item.salon_quality === "5" && item.manager_quality === "5"
+          ? "Отработан"
+          : item.status || "Не отработан"
     }));
+
+    console.log("cities.value:", cities.value);
+    
 
     showStatusDropdowns.value = cities.value.map(() => false); // Инициализация после загрузки
   } catch (error) {
@@ -1014,6 +1021,13 @@ const addCity = async () => {
       transaction_type: "",
       comment: ""
     };
+
+    selectedCity.value = null;
+
+    selectedSlQuality.value = null;
+    selectedManagerWork.value = null;
+    selectedDealsType.value = null;
+
     showForm.value = !showForm.value;
 
     // Перезагрузка данных
@@ -1031,6 +1045,23 @@ const updateClient = async () => {
     await axios.get(`https://crystal-motors.ru/method.editSending?${params}`);
 
     alert("Данные успешно обновлены!");
+
+     // Очистка формы после добавления
+     formData.value = {
+      city: "",
+      salon_quality: "",
+      manager_quality: "",
+      phone_number: "",
+      survey_date: "",
+      transaction_type: "",
+      comment: ""
+    };
+
+    selectedCity.value = null;
+
+    selectedSlQuality.value = null;
+    selectedManagerWork.value = null;
+    selectedDealsType.value = null;
 
     showFormEdit.value = false;
 
