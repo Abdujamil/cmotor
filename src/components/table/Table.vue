@@ -278,7 +278,7 @@
                 id="test1"
                 name="fact-call"
                 value="1"
-                checked
+                
               />
               <label for="test3">1</label>
             </p>
@@ -288,7 +288,7 @@
                 id="test2"
                 v-model="formData2.fact"
                 name="fact-call"
-                value="0"
+                value=""
               />
               <label for="test2">Не учитывать в расчетах</label>
             </p>
@@ -304,7 +304,6 @@
                 id="test4"
                 v-model="formData2.obrashenie"
                 name="obrashenie"
-                checked
                 value="0"
               />
               <label for="test4">0</label>
@@ -341,7 +340,6 @@
                 id="test7"
                 v-model="formData2.salon"
                 name="salon"
-                checked
                 value="0"
               />
               <label for="test7">0</label>
@@ -380,7 +378,7 @@
                 id="test10"
                 v-model="formData2.cred_nal"
                 name="cred_nal"
-                checked
+                
                 value="0"
               />
               <label for="test10">0</label>
@@ -417,7 +415,7 @@
                 id="test13"
                 v-model="formData2.prodan"
                 name="prodan"
-                checked
+                
                 value="0"
               />
               <label for="test13">0</label>
@@ -454,7 +452,7 @@
                 id="test16"
                 v-model="formData2.city2"
                 name="city2"
-                checked
+                
                 value="0"
               />
               <label for="test16">0</label>
@@ -493,7 +491,7 @@
                 id="test19"
                 v-model="formData2.otpr_viz"
                 name="otpr_viz"
-                checked
+                
                 value="0"
               />
               <label for="test19">0</label>
@@ -530,7 +528,7 @@
                 id="test22"
                 v-model="formData2.data_visit"
                 name="data_visit"
-                checked
+                
                 value="0"
               />
               <label for="test22">0</label>
@@ -567,7 +565,7 @@
                 id="test25"
                 v-model="formData2.vizit"
                 name="vizit"
-                checked
+                
                 value="0"
               />
               <label for="test25">0</label>
@@ -604,7 +602,7 @@
                 id="test28"
                 v-model="formData2.garantiya"
                 name="garantiya"
-                checked
+                
                 value="0"
               />
               <label for="test28">0</label>
@@ -641,7 +639,7 @@
                 id="test31"
                 v-model="formData2.prod_company"
                 name="prod_company"
-                checked
+                
                 value="0"
               />
               <label for="test31">0</label>
@@ -678,7 +676,7 @@
                 id="test34"
                 v-model="formData2.obrash_imeni"
                 name="obrash_imeni"
-                checked
+                
                 value="0"
               />
               <label for="test34">0</label>
@@ -715,7 +713,7 @@
                 id="test37"
                 v-model="formData2.zdatok"
                 name="zdatok"
-                checked
+                
                 value="0"
               />
               <label for="test37">0</label>
@@ -755,7 +753,7 @@
                 id="test40"
                 v-model="formData2.bodr_son"
                 name="bodr_son"
-                checked
+                
                 value="0"
               />
               <label for="test40">0</label>
@@ -1064,7 +1062,7 @@
                 id="test1"
                 name="fact-call"
                 value="1"
-                checked
+                
               />
               <label for="test3">1</label>
             </p>
@@ -1090,7 +1088,7 @@
                 id="test4"
                 v-model="formData2.obrashenie"
                 name="obrashenie"
-                checked
+                
                 value="0"
               />
               <label for="test4">0</label>
@@ -1127,7 +1125,7 @@
                 id="test7"
                 v-model="formData2.salon"
                 name="salon"
-                checked
+                
                 value="0"
               />
               <label for="test7">0</label>
@@ -1166,7 +1164,7 @@
                 id="test10"
                 v-model="formData2.cred_nal"
                 name="cred_nal"
-                checked
+                
                 value="0"
               />
               <label for="test10">0</label>
@@ -1203,7 +1201,7 @@
                 id="test13"
                 v-model="formData2.prodan"
                 name="prodan"
-                checked
+                
                 value="0"
               />
               <label for="test13">0</label>
@@ -1240,7 +1238,7 @@
                 id="test16"
                 v-model="formData2.city2"
                 name="city"
-                checked
+                
                 value="0"
               />
               <label for="test16">0</label>
@@ -1279,7 +1277,7 @@
                 id="test19"
                 v-model="formData2.otpr_viz"
                 name="otpr_viz"
-                checked
+                
                 value="0"
               />
               <label for="test19">0</label>
@@ -1316,7 +1314,7 @@
                 id="test22"
                 v-model="formData2.data_visit"
                 name="data_visit"
-                checked
+                
                 value="0"
               />
               <label for="test22">0</label>
@@ -1353,7 +1351,7 @@
                 id="test25"
                 v-model="formData2.vizit"
                 name="vizit"
-                checked
+                
                 value="0"
               />
               <label for="test25">0</label>
@@ -1390,7 +1388,7 @@
                 id="test28"
                 v-model="formData2.garantiya"
                 name="garantiya"
-                checked
+                
                 value="0"
               />
               <label for="test28">0</label>
@@ -1427,7 +1425,7 @@
                 id="test31"
                 v-model="formData2.prod_company"
                 name="prod_company"
-                checked
+                
                 value="0"
               />
               <label for="test31">0</label>
@@ -1464,7 +1462,7 @@
                 id="test34"
                 v-model="formData2.obrash_imeni"
                 name="obrash_imeni"
-                checked
+                
                 value="0"
               />
               <label for="test34">0</label>
@@ -1501,7 +1499,7 @@
                 id="test37"
                 v-model="formData2.zdatok"
                 name="zdatok"
-                checked
+                
                 value="0"
               />
               <label for="test37">0</label>
@@ -1541,7 +1539,7 @@
                 id="test40"
                 v-model="formData2.bodr_son"
                 name="bodr_son"
-                checked
+                
                 value="0"
               />
               <label for="test40">0</label>
@@ -1596,7 +1594,7 @@
           <label for="city">Город:</label>
           <div class="dropdown">
             <div class="dropdown-toggle" @click="() => toggleDropdown('city')">
-              <span>{{ selectedCity || "Выберите город" }}</span>
+              <span>{{ selectedCity2 || "Выберите город" }}</span>
               <span class="dropdown-arrow">
                 <svg
                   width="20"
@@ -1619,7 +1617,7 @@
                 class="dropdown-item"
                 v-for="cityy in cities2"
                 :key="cityy"
-                @click="selectCity(cityy)"
+                @click="selectCity2(cityy)"
               >
                 {{ cityy }}
               </div>
@@ -1634,7 +1632,7 @@
           <input
             type="text"
             placeholder="Введите ФИО"
-            v-model="formData2.fio"
+            v-model="newManager"
           />
         </div>
       </div>
@@ -1820,12 +1818,8 @@ const downloadTable = () => {
 };
 
 const isAdd = ref(window.permissions.includes("tables_clients_auditions_add"));
-const isEdit = ref(
-  window.permissions.includes("tables_clients_auditions_edit")
-);
-const isDelete = ref(
-  window.permissions.includes("tables_clients_auditions_delete")
-);
+const isEdit = ref(window.permissions.includes("tables_clients_auditions_edit"));
+const isDelete = ref(window.permissions.includes("tables_clients_auditions_delete"));
 // console.warn(window.permissions);
 
 const showForm = ref(false);
@@ -1834,6 +1828,14 @@ const showFormManager = ref(false);
 
 const selectedCity2 = ref(""); // Выбранный город
 const newManager = ref(""); // ФИО нового менеджера
+
+// Обработчик выбора города
+const selectCity2 = (cityy) => {
+  console.log("Выбран город:", cityy);
+  
+  selectedCity2.value = cityy;
+  showCityDropdown.value = false;
+};
 
 const toggleForm = () => {
   showForm.value = !showForm.value;
@@ -1932,7 +1934,7 @@ const regions = {
   ]
 };
 
-const managersByCity = {
+const managersByCity = JSON.parse(localStorage.getItem("managersByCity")) || {
   Сургут: [
     "Эдуард Мукин",
     "Турал Мамедли",
@@ -2054,20 +2056,162 @@ const managersByCity = {
   ]
 };
 
+
+const managersByCity2 = JSON.parse(localStorage.getItem("managersByCity2")) || ref( {
+  Сургут: [
+    "Эдуард Мукин",
+    "Турал Мамедли",
+    "Алексей Шевчук",
+    "Армен Мкртчян",
+    "Не представился",
+    "Вадим Гусейнов",
+    "Роман Мкртчян"
+  ],
+  Тюмень: [
+    "Алексей Краюхин",
+    "Павел Дацюк",
+    "Данил Проценко",
+    "Алексей Гостев",
+    "Станислав Питулин"
+  ],
+  Пермь: [
+    "Антон Терлецкий",
+    "Радик Салахов",
+    "Егор Марчук",
+    "Арсений Камерер",
+    "Владислав Бубнов",
+    "Павел Зрячиков",
+    "Артемий Ефимов",
+    "Константин управляющий",
+    "Сергей Казымов",
+    "Антон Тупицын"
+  ],
+  Самара: [
+    "Антон Швалев",
+    "Не представился",
+    "Роман Шералиев",
+    "Артем Чигарьков",
+    "Дамир Шаймерденов",
+    "Никита Гришихин",
+    "Андрей Григорьев"
+  ],
+  Челябинск: [
+    "Ринат Юсупов",
+    "Илья Пятыгин",
+    "Данил Тагиев",
+    "Данил Кучин",
+    "Диннур Фасхутдинов",
+    "Илья Васкевич",
+    "Кирилл Кривцов"
+  ],
+  Кемерово: [
+    "Денис Илюхин",
+    "Кирилл Келлер",
+    "Федор Асадов",
+    "Дмитрий Маник",
+    "Владимир РОП"
+  ],
+  Барнаул: [
+    "Василий Дианов",
+    "Илья Кошман",
+    "Леонид Фотин",
+    "Николай Васильев",
+    "Алексей Ощепков",
+    "Михаил РОП",
+    "Сергей Карпенко",
+    "Не представился",
+    "Оскар Курмакаев"
+  ],
+  Новокузнецк: [
+    "Никита Аксёнов",
+    "Владислав Петров",
+    "Иван Манцеленко",
+    "Денис Лисин",
+    "Филипп Козырев",
+    "Александр Кузнецов",
+    "Михаил Вахонин",
+    "Данил Королев",
+    "Алексей Бухтияров"
+  ],
+  "Красноярск ПЖ": [
+    "Данил Гриневич",
+    "Алексей Лихачев",
+    "Алексей Ямщиков",
+    "Георгий Сироткин",
+    "Артем Васюков",
+    "Глеб Каменский",
+    "Ярослав Дорошенко",
+    "Турдали Эрназаров"
+  ],
+  "Красноярск Брянка": [
+    "Кирил Макеев",
+    "Илья Гологузов",
+    "Ян Лалетин",
+    "Захар Русанов",
+    "Павел Мымрин",
+    "Вадим Олексенко"
+  ],
+  Омск: [
+    "Дмитрий Гаврилюк",
+    "Вадим Николаев",
+    "Дмитрий Вебер",
+    "Савелий Власов",
+    "Владимир Камагоров",
+    "Юрий Капустинский",
+    "Александр Аносов",
+    "Антон РОП",
+    "Виктор Баханский",
+    "Илья Долженок",
+    "Никита Карепов",
+    "Михаил Гусейнов",
+    "Данил Арнаутов",
+    "Илья Катков"
+  ],
+  Томск: [
+    "Владимир Полещук",
+    "Илья Бушмелев",
+    "Леонид Шушарин",
+    "Алексей Фроликов",
+    "Роман Касымов",
+    "Анатолий Саранцев",
+    "Александр Тюрин",
+    "Вячеслав Глазунов"
+  ]
+});
+
+
+// Функция для сохранения данных в localStorage
+function saveToLocalStorage() {
+  localStorage.setItem("managersByCity", JSON.stringify(managersByCity2));
+}
+
 // Функция для добавления менеджера
 function addManager() {
-  if (selectedCity.value && newManager.value) {
-    if (!managersByCity.value[selectedCity.value]) {
-      managersByCity.value[selectedCity.value] = [];
+  if (selectedCity2.value && newManager.value) {
+    if (!managersByCity2.value[selectedCity2.value]) {
+      managersByCity2.value[selectedCity2.value] = [];
     }
-    managersByCity.value[selectedCity.value].push(newManager.value);
+    managersByCity2.value[selectedCity2.value].push(newManager.value);
+    console.log("Менеджер добавлен:", managersByCity2.value[selectedCity2.value]);
+    
+    saveToLocalStorage();
+
     newManager.value = "";
     selectedCity.value = "";
     showFormManager.value = false;
+
   } else {
     alert("Пожалуйста, выберите город и введите ФИО менеджера.");
   }
 }
+
+onMounted(() => {
+  // Проверка загрузки данных из localStorage при монтировании
+  if (localStorage.getItem("managersByCity2")) {
+    managersByCity = JSON.parse(localStorage.getItem("managersByCity2"));
+  }
+});
+
 // Состояние дропдаунов
 const showBrandDropdown = ref(false);
 const showModelDropdown = ref(false);

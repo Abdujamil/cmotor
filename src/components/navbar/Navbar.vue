@@ -172,12 +172,12 @@ import { ref } from "vue";
 
 
 const permissions = Object.fromEntries(new URLSearchParams(location.search))?.permissions?.split(",") || [];
-const isCityTable = ref(permissions.includes("tables_clients_analytics_cities_view"));
-const isTradeinTable = ref(permissions.includes("tables_clients_analytics_tradein_view"));
-const isManagersTable = ref(permissions.includes("tables_clients_analytics_managers_view"));
+const isCityTable = ref(window.permissions.includes("tables_clients_analytics_cities_view"));
+const isTradeinTable = ref(window.permissions.includes("tables_clients_analytics_tradein_view"));
+const isManagersTable = ref(window.permissions.includes("tables_clients_analytics_managers_view"));
 
-const isNpsStatisticsTable = ref(permissions.includes("tables_clients_nps_statistics_view"));
-const isNpsDataTable = ref(permissions.includes("tables_clients_nps_data_view"));
+const isNpsStatisticsTable = ref(window.permissions.includes("tables_clients_nps_statistics_view"));
+const isNpsDataTable = ref(window.permissions.includes("tables_clients_nps_data_view"));
 
 
 // Переменные для управления видимостью подменю и отслеживания активных пунктов меню
