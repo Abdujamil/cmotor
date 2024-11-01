@@ -2738,7 +2738,7 @@ const addClient = async () => {
 
 const editClient = (client) => {
   if (client) {
-    console.log("Клиент для редактирования: client", client);
+    // console.log("Клиент для редактирования: client", client);
 
     showFormEdit.value = !showFormEdit.value;
     formData2.value = { ...client }; // Клонируем данные клиента в formData2
@@ -2748,7 +2748,6 @@ const editClient = (client) => {
 
     // Форматируем номер телефона
     formData2.value.phone = getNumber(client.phone);
-    console.log("Форматированный номер телефона:", formData2.value.phone);
 
     // Устанавливаем выбранный город из данных клиента
     selectedCity.value = client.city || "";
@@ -2761,12 +2760,10 @@ const editClient = (client) => {
     // Устанавливаем выбранную марку автомобиля
     const brand = carsData.value.find((b) => b.name === brandName);
     selectedBrand.value = brand || null;
-    console.log("carsData.value", carsData.value);
 
     // Устанавливаем выбранную модель автомобиля (если есть модель)
     const model = brand?.models.find((m) => m.name === modelName);
     selectedModel.value = model || null;
-    console.log("Selected model:", selectedModel.value);
 
     selectManager.value = client.manager || "";
 
