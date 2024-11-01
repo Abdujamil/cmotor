@@ -1695,7 +1695,10 @@
           <img src="/add-iconn.svg" alt="icon" /> Скачать таблицу
         </button>
       </div>
-      <Filter @filterChange="handleDateChange" />
+      <div class="filter-block">
+        <Filter @filterChange="handleDateChange" />
+        <input type="search" name="search" id="search" v-model="filters.manager" placeholder="Поиск по менеджеру" />
+      </div>
     </div>
 
     <div @scroll="handleScroll" class="tablee">
@@ -1867,7 +1870,8 @@ const filters = ref({
   selectedRegion: "",
   selectedCity: "",
   startDate: null, // Начальная дата
-  endDate: null // Конечная дата
+  endDate: null, // Конечная дата
+  manager: "",
 }); // Дефолтные значения фильтров
 
 // Состояние дропдаунов
@@ -1974,23 +1978,6 @@ const cities = [
   "Оренбург"
 ];
 
-const cities2 = [
-  "Тюмень",
-  "Сургут",
-  "Пермь",
-  "Самара",
-  "Челябинск",
-  "Кемерово",
-  "Новокузнецк",
-  "Барнаул",
-  "Красноярск ПЖ",
-  "Красноярск Брянка",
-  "Омск",
-  "Томск",
-  "Сургут_ГИ",
-  "Тюмень_Республики"
-];
-
 const regions = {
   Юг: [
     "Тюмень",
@@ -2013,135 +2000,6 @@ const regions = {
   ]
 };
 
-const managersByCity = {
-  Сургут: [
-    "Эдуард Мукин",
-    "Турал Мамедли",
-    "Алексей Шевчук",
-    "Армен Мкртчян",
-    "Не представился",
-    "Вадим Гусейнов",
-    "Роман Мкртчян"
-  ],
-  Тюмень: [
-    "Алексей Краюхин",
-    "Павел Дацюк",
-    "Данил Проценко",
-    "Алексей Гостев",
-    "Станислав Питулин"
-  ],
-  Пермь: [
-    "Антон Терлецкий",
-    "Радик Салахов",
-    "Егор Марчук",
-    "Арсений Камерер",
-    "Владислав Бубнов",
-    "Павел Зрячиков",
-    "Артемий Ефимов",
-    "Константин управляющий",
-    "Сергей Казымов",
-    "Антон Тупицын"
-  ],
-  Самара: [
-    "Антон Швалев",
-    "Не представился",
-    "Роман Шералиев",
-    "Артем Чигарьков",
-    "Дамир Шаймерденов",
-    "Никита Гришихин",
-    "Андрей Григорьев"
-  ],
-  Челябинск: [
-    "Ринат Юсупов",
-    "Илья Пятыгин",
-    "Данил Тагиев",
-    "Данил Кучин",
-    "Диннур Фасхутдинов",
-    "Илья Васкевич",
-    "Кирилл Кривцов"
-  ],
-  Кемерово: [
-    "Денис Илюхин",
-    "Кирилл Келлер",
-    "Федор Асадов",
-    "Дмитрий Маник",
-    "Владимир РОП"
-  ],
-  Барнаул: [
-    "Василий Дианов",
-    "Илья Кошман",
-    "Леонид Фотин",
-    "Николай Васильев",
-    "Алексей Ощепков",
-    "Михаил РОП",
-    "Сергей Карпенко",
-    "Не представился",
-    "Оскар Курмакаев"
-  ],
-  Новокузнецк: [
-    "Никита Аксёнов",
-    "Владислав Петров",
-    "Иван Манцеленко",
-    "Денис Лисин",
-    "Филипп Козырев",
-    "Александр Кузнецов",
-    "Михаил Вахонин",
-    "Данил Королев",
-    "Алексей Бухтияров"
-  ],
-  "Красноярск ПЖ": [
-    "Данил Гриневич",
-    "Алексей Лихачев",
-    "Алексей Ямщиков",
-    "Георгий Сироткин",
-    "Артем Васюков",
-    "Глеб Каменский",
-    "Ярослав Дорошенко",
-    "Турдали Эрназаров"
-  ],
-  "Красноярск Брянка": [
-    "Кирил Макеев",
-    "Илья Гологузов",
-    "Ян Лалетин",
-    "Захар Русанов",
-    "Павел Мымрин",
-    "Вадим Олексенко"
-  ],
-  Омск: [
-    "Дмитрий Гаврилюк",
-    "Вадим Николаев",
-    "Дмитрий Вебер",
-    "Савелий Власов",
-    "Владимир Камагоров",
-    "Юрий Капустинский",
-    "Александр Аносов",
-    "Антон РОП",
-    "Виктор Баханский",
-    "Илья Долженок",
-    "Никита Карепов",
-    "Михаил Гусейнов",
-    "Данил Арнаутов",
-    "Илья Катков"
-  ],
-  Томск: [
-    "Владимир Полещук",
-    "Илья Бушмелев",
-    "Леонид Шушарин",
-    "Алексей Фроликов",
-    "Роман Касымов",
-    "Анатолий Саранцев",
-    "Александр Тюрин",
-    "Вячеслав Глазунов"
-  ]
-};
-
-
-const managersByCity2 = JSON.parse(localStorage.getItem("managersByCity2")) || ref( {});
-
-// Функция для сохранения данных в localStorage
-function saveToLocalStorage() {
-  localStorage.setItem("managersByCity", JSON.stringify(managersByCity2));
-}
 
 const getManagers = async (offset = 0, resetData = false) => {
   try {
@@ -2433,7 +2291,7 @@ const fetchClients = async (offset = 0, resetData = false) => {
     console.log("Запрос с фильтрами:", filterParams);
 
     const newData = response.data.answer.items;
-    // console.log("Новые данные:", newData)
+    console.log("Новые данные:", newData)
 
     if (resetData) {
       tableData2.value = newData;
@@ -2450,24 +2308,6 @@ const fetchClients = async (offset = 0, resetData = false) => {
         currentPage.value++;
       }
     }
-
-    // // Уникальные города и менеджеры из данных
-    // const uniqueCities = new Set();
-    // const managerMap = {};
-
-    // newData.forEach((client) => {
-    //   if (client.city) {
-    //     uniqueCities.add(client.city);
-    //     if (!managerMap[client.city]) managerMap[client.city] = [];
-    //     if (client.manager && !managerMap[client.city].includes(client.manager)) {
-    //       managerMap[client.city].push(client.manager);
-    //     }
-    //   }
-    // });
-
-    // citiess.value = [...uniqueCities];
-    // managersByCityy.value = managerMap;
-    
 
     totalItems.value = response.data.answer.total;
   } catch (error) {
@@ -2497,19 +2337,23 @@ const filteredData = computed(() => {
     if (startDate) startDate.setHours(0, 0, 0, 0); // Сброс времени начальной даты
     if (endDate) endDate.setHours(23, 59, 59, 999); // Сброс времени конечной даты
 
-    // Логика фильтрации по городам и регионам
+     // Логика фильтрации по городам, регионам и менеджерам
     const cityMatch =
       !filters.value.selectedCity || client.city === filters.value.selectedCity;
     const regionMatch =
       !filters.value.selectedRegion ||
       regions[filters.value.selectedRegion]?.includes(client.city);
+    const managerMatch =
+      !filters.value.manager ||
+      client.manager.toLowerCase().includes(filters.value.manager.toLowerCase());
+
 
     // Фильтрация по диапазону дат
     const dateMatch =
       (!startDate || clientDate >= startDate) &&
       (!endDate || clientDate <= endDate);
 
-    return cityMatch && regionMatch && dateMatch;
+    return cityMatch && regionMatch && dateMatch && managerMatch;
   });
 });
 

@@ -141,7 +141,6 @@ const handleDateChange = (dates) => {
   emit("filterChange", { startDate, endDate }); // Эмитим событие с объектами дат
 };
 
-
 const format = (dates) => {
   if (Array.isArray(dates)) {
     const [startDate, endDate] = dates;
@@ -278,6 +277,27 @@ onUnmounted(() => {
   border-color: #fff;
 }
 
+.my-calendar :deep(.dp__input) {
+  border-color: #ffffff57;
+
+  &:hover,
+  &:focus{
+    border-color: #ffffff;
+  }
+}
+
+.my-calendar :deep(.dp__theme_dark) {
+  color: #fff;
+  &:hover,
+  &:focus{
+    --dp-text-color: #fff;
+  }
+}
+
+.my-calendar :deep(.dp__input_focus) {
+  border-color: #ffffff;
+}
+
 .calendar-container {
   position: relative;
 }
@@ -303,6 +323,7 @@ onUnmounted(() => {
     fill: #cccaca;
   }
 }
+
 
 @import url("../table/table.scss");
 </style>

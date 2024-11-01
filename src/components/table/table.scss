@@ -46,6 +46,39 @@
         -ms-flex-pack: justify;
             justify-content: space-between;
   }
+
+  .filter-block{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    input{
+      width: 100%;
+      max-width: 280px;
+      padding: 11px 14px 11px 18px;
+      border-radius: 4px;
+      border: 1px solid #ffffff57;
+      background-color: transparent;
+      outline: none;
+      color: #fff;
+      transition: all 0.3s ease-in-out;
+      cursor: text;
+
+      &:focus{
+        border: 1px solid #ffffff;
+        background-color: transparent;
+
+        &::placeholder{
+          color: #ffffff;
+        }
+      }
+
+      &::placeholder{
+        color: #ffffff9c;
+      }
+    }
+  }
 }
 
 .btn {
@@ -747,24 +780,6 @@ tfoot tr {
   color: #b3bcd4;
 }
 
-.dropdown-toggle {
-  padding: 11px 14px 11px 18px;
-  border: 1px solid #ffffff;
-  border-radius: 5px;
-  background-color: transparent;
-  cursor: pointer;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-pack: justify;
-      -ms-flex-pack: justify;
-          justify-content: space-between;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  color: #fff;
-}
-
 .dropdown-arrow {
   font-size: 14px;
 }
@@ -910,6 +925,7 @@ h2 {
   display: inline-block;
   width: 100%;
   max-width: 270px;
+  cursor: pointer;
 }
 
 #dropdown-selected {
@@ -918,7 +934,7 @@ h2 {
 
 .dropdown-toggle {
   padding: 7px 14px 7px 18px;
-  border: 1px solid #ffffff;
+  border: 1px solid #ffffff57;
   border-radius: 8px;
   background-color: transparent;
   cursor: pointer;
@@ -933,6 +949,32 @@ h2 {
           align-items: center;
   color: #fff;
   font-size: 14px;
+  transition: all 0.3s ease-in-out;
+
+  #dropdown-selected-city,
+  #dropdown-selected-region{
+    color: #ffffff57;
+  }
+
+  .dropdown-arrow{
+    opacity: .57;
+  }
+  &:hover {
+    border-color: #fff;
+
+    .dropdown-arrow {
+      opacity: 1;  
+    }
+
+    #dropdown-selected-city,
+    #dropdown-selected-region{
+      // color: #ffffff;
+    }
+  }
+
+  &:focus {
+    outline: none;
+  }
 }
 
 .dropdown-arrow {
