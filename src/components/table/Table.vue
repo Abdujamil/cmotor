@@ -44,7 +44,7 @@
                 <div class="dropdown-menu" v-if="showCityDropdown">
                   <div
                     class="dropdown-item"
-                    v-for="cityy in cities"
+                    v-for="cityy in citiess"
                     :key="cityy"
                     @click="selectCity(cityy)"
                   >
@@ -217,11 +217,7 @@
                     </svg>
                   </span>
                 </div>
-                <div
-                  v-show="showManagerDropdown"
-                  class="dropdown-menu"
-                  @click.stop
-                >
+                <div v-show="showManagerDropdown" class="dropdown-menu" @click.stop>
                   <div class="dropdown-items">
                     <div
                       v-for="(manager, index) in filteredManagers"
@@ -1586,11 +1582,10 @@
         </div>
       </div>
 
+      <!-- Должность, тел, дата труд., почта -->
+
       <div class="add__manager form-fields__selects">
-        <div
-          class="form-fields__select form-fields__selects-city"
-          ref="cityDropdown"
-        >
+        <div class="form-fields__select form-fields__selects-city" ref="cityDropdown">
           <label for="city">Город:</label>
           <div class="dropdown">
             <div class="dropdown-toggle" @click="() => toggleDropdown('city')">
@@ -1615,7 +1610,7 @@
             <div class="dropdown-menu" v-if="showCityDropdown">
               <div
                 class="dropdown-item"
-                v-for="cityy in cities2"
+                v-for="cityy in citiess"
                 :key="cityy"
                 @click="selectCity2(cityy)"
               >
@@ -1632,9 +1627,45 @@
           <input
             type="text"
             placeholder="Введите ФИО"
-            v-model="newManager"
+            v-model="managerData.manager_name"
           />
         </div>
+        <div
+          class="form-fields__select form-fields__selects-city"
+          ref="managerDropdown"
+        >
+          <label for="manager">Должность:</label>
+          <input
+            type="text"
+            placeholder="Введите должность"
+            v-model="managerData.manager_jobTitle"
+          />
+        </div>
+        <div class="form-fields__select form-fields__selects-manager">
+              <label for="manager">Дата трудоустройства :</label>
+              <div class="my-calendar">
+                <VueDatePicker
+                  v-model="managerData.manager_date"
+                  :format="format2"
+                  locale="ru-RU"
+                  dark
+                  placeholder="Дата трудоустройства"
+                  @update:model-value="updatedataRange"
+                >
+                </VueDatePicker>
+              </div>
+        </div>
+
+        <div class="form-fields__select form-fields__selects-manager">
+              <label for="manager">Телефон менеджера:</label>
+
+              <MaskInput
+                v-model="managerData.manager_phone"
+                mask="7##########"
+                placeholder="Телефон"
+              />
+        </div>
+
       </div>
     </form>
   </div>
@@ -1649,13 +1680,13 @@
             <img src="/add-iconn.svg" alt="icon" /> Добавить поле
           </button>
 
-          <!-- <button
+          <button
             v-if="isAdd"
             @click="toggleFormManager"
             class="btn btn-manager"
           >
             <img src="/add-iconn.svg" alt="icon" /> Добавить менеджера
-          </button> -->
+          </button>
         </div>
 
         <button @click="downloadTable" class="btn btn-blue">
@@ -1784,12 +1815,9 @@
 import {
   ref,
   computed,
-  reactive,
   onMounted,
   onUnmounted,
   watch,
-  defineEmits,
-  defineProps,
   watchEffect
 } from "vue";
 import * as XLSX from "xlsx";
@@ -1822,6 +1850,43 @@ const isEdit = ref(window.permissions.includes("tables_clients_auditions_edit"))
 const isDelete = ref(window.permissions.includes("tables_clients_auditions_delete"));
 // console.warn(window.permissions);
 
+// Данные и состояние
+const tableData2 = ref([]); // Все данные с сервера
+const tableData3 = ref([]);
+const loadedData = ref([]); // Отображаемые данные (загружаются постепенно)
+const itemsPerPage = 100; // Количество записей для загрузки за раз
+const currentPage = ref(0); // Текущая страница данных
+const totalItems = ref(0); // Общее количество записей
+const totalItems2 = ref(0);
+const totalItems3 = ref(0);
+const isLoading = ref(false); // Состояние загрузки
+
+const filters = ref({
+  selectedRegion: "",
+  selectedCity: "",
+  startDate: null, // Начальная дата
+  endDate: null // Конечная дата
+}); // Дефолтные значения фильтров
+
+// Состояние дропдаунов
+const showBrandDropdown = ref(false);
+const showModelDropdown = ref(false);
+const showManagerDropdown = ref(false);
+
+const showCityDropdown = ref(false);
+const selectedCity = ref("");
+const cityDropdown = ref(null);
+
+const selectedBrand = ref(null);
+const selectedModel = ref(null);
+const selectedManager = ref(null);
+
+const brandSearch = ref("");
+const carsData = ref([]);
+
+const filteredBrands = ref([]);
+const filteredModels = ref([]);
+
 const showForm = ref(false);
 const showFormEdit = ref(false);
 const showFormManager = ref(false);
@@ -1829,12 +1894,24 @@ const showFormManager = ref(false);
 const selectedCity2 = ref(""); // Выбранный город
 const newManager = ref(""); // ФИО нового менеджера
 
+const citiess = ref([]); // Список городов, заполненный из БД
+const managersByCityy = ref({}); // Список город-менеджеры из БД
+
+const managerData = ref({
+  manager_city: "",
+  manager_name: "",
+  manager_jobTitle: "",
+  manager_date: "",
+  manager_phone: "",
+})
+
 // Обработчик выбора города
 const selectCity2 = (cityy) => {
   console.log("Выбран город:", cityy);
   
   selectedCity2.value = cityy;
   showCityDropdown.value = false;
+  managerData.value.manager_city = cityy ? cityy : "";
 };
 
 const toggleForm = () => {
@@ -1934,7 +2011,7 @@ const regions = {
   ]
 };
 
-const managersByCity = JSON.parse(localStorage.getItem("managersByCity")) || {
+const managersByCity = {
   Сургут: [
     "Эдуард Мукин",
     "Турал Мамедли",
@@ -2057,153 +2134,104 @@ const managersByCity = JSON.parse(localStorage.getItem("managersByCity")) || {
 };
 
 
-const managersByCity2 = JSON.parse(localStorage.getItem("managersByCity2")) || ref( {
-  Сургут: [
-    "Эдуард Мукин",
-    "Турал Мамедли",
-    "Алексей Шевчук",
-    "Армен Мкртчян",
-    "Не представился",
-    "Вадим Гусейнов",
-    "Роман Мкртчян"
-  ],
-  Тюмень: [
-    "Алексей Краюхин",
-    "Павел Дацюк",
-    "Данил Проценко",
-    "Алексей Гостев",
-    "Станислав Питулин"
-  ],
-  Пермь: [
-    "Антон Терлецкий",
-    "Радик Салахов",
-    "Егор Марчук",
-    "Арсений Камерер",
-    "Владислав Бубнов",
-    "Павел Зрячиков",
-    "Артемий Ефимов",
-    "Константин управляющий",
-    "Сергей Казымов",
-    "Антон Тупицын"
-  ],
-  Самара: [
-    "Антон Швалев",
-    "Не представился",
-    "Роман Шералиев",
-    "Артем Чигарьков",
-    "Дамир Шаймерденов",
-    "Никита Гришихин",
-    "Андрей Григорьев"
-  ],
-  Челябинск: [
-    "Ринат Юсупов",
-    "Илья Пятыгин",
-    "Данил Тагиев",
-    "Данил Кучин",
-    "Диннур Фасхутдинов",
-    "Илья Васкевич",
-    "Кирилл Кривцов"
-  ],
-  Кемерово: [
-    "Денис Илюхин",
-    "Кирилл Келлер",
-    "Федор Асадов",
-    "Дмитрий Маник",
-    "Владимир РОП"
-  ],
-  Барнаул: [
-    "Василий Дианов",
-    "Илья Кошман",
-    "Леонид Фотин",
-    "Николай Васильев",
-    "Алексей Ощепков",
-    "Михаил РОП",
-    "Сергей Карпенко",
-    "Не представился",
-    "Оскар Курмакаев"
-  ],
-  Новокузнецк: [
-    "Никита Аксёнов",
-    "Владислав Петров",
-    "Иван Манцеленко",
-    "Денис Лисин",
-    "Филипп Козырев",
-    "Александр Кузнецов",
-    "Михаил Вахонин",
-    "Данил Королев",
-    "Алексей Бухтияров"
-  ],
-  "Красноярск ПЖ": [
-    "Данил Гриневич",
-    "Алексей Лихачев",
-    "Алексей Ямщиков",
-    "Георгий Сироткин",
-    "Артем Васюков",
-    "Глеб Каменский",
-    "Ярослав Дорошенко",
-    "Турдали Эрназаров"
-  ],
-  "Красноярск Брянка": [
-    "Кирил Макеев",
-    "Илья Гологузов",
-    "Ян Лалетин",
-    "Захар Русанов",
-    "Павел Мымрин",
-    "Вадим Олексенко"
-  ],
-  Омск: [
-    "Дмитрий Гаврилюк",
-    "Вадим Николаев",
-    "Дмитрий Вебер",
-    "Савелий Власов",
-    "Владимир Камагоров",
-    "Юрий Капустинский",
-    "Александр Аносов",
-    "Антон РОП",
-    "Виктор Баханский",
-    "Илья Долженок",
-    "Никита Карепов",
-    "Михаил Гусейнов",
-    "Данил Арнаутов",
-    "Илья Катков"
-  ],
-  Томск: [
-    "Владимир Полещук",
-    "Илья Бушмелев",
-    "Леонид Шушарин",
-    "Алексей Фроликов",
-    "Роман Касымов",
-    "Анатолий Саранцев",
-    "Александр Тюрин",
-    "Вячеслав Глазунов"
-  ]
-});
-
+const managersByCity2 = JSON.parse(localStorage.getItem("managersByCity2")) || ref( {});
 
 // Функция для сохранения данных в localStorage
 function saveToLocalStorage() {
   localStorage.setItem("managersByCity", JSON.stringify(managersByCity2));
 }
 
-// Функция для добавления менеджера
-function addManager() {
-  if (selectedCity2.value && newManager.value) {
-    if (!managersByCity2.value[selectedCity2.value]) {
-      managersByCity2.value[selectedCity2.value] = [];
-    }
-    managersByCity2.value[selectedCity2.value].push(newManager.value);
-    console.log("Менеджер добавлен:", managersByCity2.value[selectedCity2.value]);
-    
-    saveToLocalStorage();
+const getManagers = async (offset = 0, resetData = false) => {
+  try {
+    const filterParams = {
+      count: "all",
+      offset,
+      order: "id_desc",
+      region: filters.value.selectedRegion || "", // Добавляем регион
+      city: filters.value.selectedCity || "", // Добавляем город
 
-    newManager.value = "";
-    selectedCity.value = "";
+      startDate: filters.value.startDate || "",
+      endDate: filters.value.endDate || ""
+    };
+
+    const response = await axios.get(
+      "https://crystal-motors.ru/method.getManagers?count=all",
+      {
+        params: filterParams
+      }
+    );
+
+    const newData = response.data.answer.items;
+    console.log("Запрос с фильтрами менеджеров:", newData)
+
+    // Уникальные города и менеджеры из данных
+    const uniqueCities = new Set();
+    const managerMap = {};
+
+    newData.forEach((client) => {
+      if (client.city) {
+        uniqueCities.add(client.city);
+        if (!managerMap[client.city]) managerMap[client.city] = [];
+        if (client.name && !managerMap[client.city].includes(client.name)) {
+          managerMap[client.city].push(client.name);
+        }
+      }
+    });
+
+    citiess.value = [...uniqueCities];
+    managersByCityy.value = managerMap;
+    console.log("Города и менеджеры:", managersByCityy.value);
+    
+    
+
+    totalItems.value = response.data.answer.total;
+  } catch (error) {
+    console.error("Ошибка при получении данных клиентов:", error);
+  }
+};
+
+// Функция для добавления менеджера
+const addManager = async () => {
+  try {
+    console.log("Добавление нового менеджера:", managerData.value);
+
+    // Создаем строку параметров из данных формы
+    const params = new URLSearchParams({
+      city: selectedCity2.value,
+      name: managerData.value.manager_name,
+      jobTitle: managerData.value.manager_jobTitle,
+      employmentDate: managerData.value.manager_date,
+      phone: managerData.value.manager_phone
+    }).toString();
+
+    console.log("Параметры запроса:", params);
+
+    // Отправляем запрос на сервер для добавления менеджера
+    await axios.get(`https://crystal-motors.ru/method.addManager?${params}`);
+
+    console.log("Менеджер успешно добавлен!", managerData.value);
+    
+    alert("Менеджер успешно добавлен!");
+
+    getManagers();
+    
     showFormManager.value = false;
 
-  } else {
-    alert("Пожалуйста, выберите город и введите ФИО менеджера.");
+    // Очищаем форму
+    managerData.value = {
+      manager_city: "",
+      manager_name: "",
+      manager_jobTitle: "",
+      manager_date: "",
+      manager_phone: "",
+    };
+
+    selectedCity2.value = ""; // Сброс города
+
+  } catch (error) {
+    console.error("Ошибка при добавлении менеджера:", error);
   }
-}
+};
 
 onMounted(() => {
   // Проверка загрузки данных из localStorage при монтировании
@@ -2211,25 +2239,6 @@ onMounted(() => {
     managersByCity = JSON.parse(localStorage.getItem("managersByCity2"));
   }
 });
-
-// Состояние дропдаунов
-const showBrandDropdown = ref(false);
-const showModelDropdown = ref(false);
-const showManagerDropdown = ref(false);
-
-const showCityDropdown = ref(false);
-const selectedCity = ref("");
-const cityDropdown = ref(null);
-
-const selectedBrand = ref(null);
-const selectedModel = ref(null);
-const selectedManager = ref(null);
-
-const brandSearch = ref("");
-const carsData = ref([]);
-
-const filteredBrands = ref([]);
-const filteredModels = ref([]);
 
 // Фильтрация брендов
 function filterBrands() {
@@ -2262,17 +2271,34 @@ function selectModel(model) {
   showModelDropdown.value = false;
 }
 
-// Вычисляемый список менеджеров на основе выбранного города
-const filteredManagers = computed(() => {
-  return selectedCity.value ? managersByCity[selectedCity.value] || [] : [];
-});
-
 // Функция для выбора менеджера
 const selectManager = (manager) => {
   selectedManager.value = manager; // Устанавливаем выбранного менеджера
   showManagerDropdown.value = false; // Закрываем дропдаун после выбора
   formData2.value.manager = manager ? manager : "";
 };
+
+// Обработчик выбора города
+const selectCity = (cityy) => {
+  selectedCity.value = cityy;
+  selectedManager.value = null;
+  showCityDropdown.value = false;
+  formData2.value.city = cityy ? cityy : "";
+};
+
+// Вычисляемый список менеджеров на основе выбранного города
+// const filteredManagers = computed(() => {
+//   console.log("selectedCity2.value:", selectedCity.value, "managersByCityy.value:", managersByCityy.value);
+  
+//   return selectedCity.value ? managersByCityy[selectedCity.value] || [] : [];
+// });
+
+const filteredManagers = computed(() => {
+  return selectedCity.value && managersByCityy.value 
+    ? (managersByCityy.value[selectedCity.value] || []) 
+    : [];
+});
+
 
 // Переключение видимости дропдаунов
 function toggleDropdown(type) {
@@ -2296,14 +2322,6 @@ function toggleDropdown(type) {
   }
 }
 
-// Обработчик выбора города
-const selectCity = (cityy) => {
-  selectedCity.value = cityy;
-  selectedManager.value = null;
-  showCityDropdown.value = false;
-  formData2.value.city = cityy ? cityy : "";
-};
-
 // Обработчик кликов вне области дропдауна
 const handleClickOutside = (event) => {
   if (cityDropdown.value && !cityDropdown.value.contains(event.target)) {
@@ -2320,23 +2338,6 @@ onUnmounted(() => {
   document.removeEventListener("click", handleClickOutside);
 });
 
-// Данные и состояние
-const tableData2 = ref([]); // Все данные с сервера
-const tableData3 = ref([]);
-const loadedData = ref([]); // Отображаемые данные (загружаются постепенно)
-const itemsPerPage = 100; // Количество записей для загрузки за раз
-const currentPage = ref(0); // Текущая страница данных
-const totalItems = ref(0); // Общее количество записей
-const totalItems2 = ref(0);
-const totalItems3 = ref(0);
-const isLoading = ref(false); // Состояние загрузки
-
-const filters = ref({
-  selectedRegion: "",
-  selectedCity: "",
-  startDate: null, // Начальная дата
-  endDate: null // Конечная дата
-}); // Дефолтные значения фильтров
 
 const handleScroll = (event) => {
   const { scrollTop, clientHeight, scrollHeight } = event.target;
@@ -2447,6 +2448,24 @@ const fetchClients = async (offset = 0, resetData = false) => {
         currentPage.value++;
       }
     }
+
+    // // Уникальные города и менеджеры из данных
+    // const uniqueCities = new Set();
+    // const managerMap = {};
+
+    // newData.forEach((client) => {
+    //   if (client.city) {
+    //     uniqueCities.add(client.city);
+    //     if (!managerMap[client.city]) managerMap[client.city] = [];
+    //     if (client.manager && !managerMap[client.city].includes(client.manager)) {
+    //       managerMap[client.city].push(client.manager);
+    //     }
+    //   }
+    // });
+
+    // citiess.value = [...uniqueCities];
+    // managersByCityy.value = managerMap;
+    
 
     totalItems.value = response.data.answer.total;
   } catch (error) {
@@ -2711,6 +2730,7 @@ const addClient = async () => {
     // Закройте формы после обновления
     showForm.value = !showForm.value;
     showFormEdit.value = !showFormEdit.value;
+    showFormManager.value = !showFormManager.value;
   } catch (error) {
     console.error("Ошибка при добавлении данных клиента:", error);
   }
@@ -2748,6 +2768,7 @@ const editClient = (client) => {
     selectManager.value = client.manager || "";
 
     isEditing.value = true; // Открываем форму редактирования
+    showFormManager.value = !showFormManager.value;
     currentClientId.value = client.id; // Устанавливаем текущий ID клиента
   } else {
     console.error("Не удалось загрузить данные клиента.");
@@ -2808,16 +2829,9 @@ const updateClient = async () => {
 
     showFormEdit.value = false;
     isEditing.value = false; // Закрыть форму редактирования
+    showFormManager.value = !showFormManager.value;
   } catch (error) {
     console.error("Ошибка при обновлении данных клиента:", error);
-  }
-};
-
-const updateManager = async () => {
-  try {
-    console.log("Обновление менеджера с ID:", selectedManager.value);
-  } catch (error) {
-    console.error("Ошибка при обновлении менеджера:", error);
   }
 };
 
@@ -2857,6 +2871,7 @@ onMounted(async () => {
   calculateAveragePlan(); // Рассчитываем средний процент после обновления данных
   loadMoreData(); // Загружаем первую порцию данных при монтировании
   fetchClients();
+  getManagers();
 });
 </script>
 
@@ -2931,8 +2946,6 @@ body {
 }
 
 .add__manager {
-  width: 100%;
-  max-width: 768px;
 
   .form-fields__select {
     width: 100%;
