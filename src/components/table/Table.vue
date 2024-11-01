@@ -273,6 +273,7 @@
                 type="radio"
                 id="test1"
                 name="fact-call"
+                checked
                 value="1"
                 
               />
@@ -1057,6 +1058,7 @@
                 type="radio"
                 id="test1"
                 name="fact-call"
+                checked
                 value="1"
                 
               />
