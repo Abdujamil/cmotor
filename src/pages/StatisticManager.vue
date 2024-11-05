@@ -2,13 +2,17 @@
   <div>
     <h2>Сводная по менеджерам</h2>
     <div class="filters filters-statis-city">
-      <Filter
+      <!-- <Filter
         @filterChange="handleFilterChange"
         :regions="Object.keys(regions)"
         :cities="selectedRegion ? getCitiesForRegion(selectedRegion) : []"
         :selectedRegion="selectedRegion"
         :selectedCity="selectedCity"
         @regionChange="onRegionChange"
+      /> -->
+
+      <Filter
+        @filterChange="handleFilterChange"
       />
       <IButton @click="downloadTable" />
     </div>
@@ -54,6 +58,13 @@
             }}%
           </div>
           <div class="table-cell">{{ manager.totalCalls }}</div>
+        </div>
+
+        <div
+          class="table-row"
+          v-if="!filteredManagers.length"
+        >
+          <div class="table-cell">Нет данных</div>
         </div>
 
         <div class="table-row footer">
@@ -161,13 +172,13 @@ const processData = () => {
     const managerName = item.manager;
     const city = item.city;
 
+    // Правильная логика для фильтрации по региону и городу
     const cityMatch = !selectedCity.value || city === selectedCity.value;
     const regionMatch =
       !selectedRegion.value ||
-      (cities[selectedRegion.value] &&
-        cities[selectedRegion.value].includes(city));
+      (cities[selectedRegion.value] && cities[selectedRegion.value].includes(city));
 
-    if (cityMatch || regionMatch) {
+    if (cityMatch && regionMatch) { // Учитываем оба условия
       if (!managerData[managerName]) {
         managerData[managerName] = {
           name: managerName,
@@ -203,6 +214,7 @@ const processData = () => {
     }
   });
 
+  // Формируем итоговый список с расчётом среднего значения
   filteredManagers.value = Object.values(managerData).map((manager) => {
     const averagePercentage =
       manager.totalCalls === 0 ? 0 : manager.totalPlan / manager.totalCalls;
@@ -212,7 +224,7 @@ const processData = () => {
     };
   });
 
-  // Вызов для обновления значений в футере
+  // Обновляем значения в футере
   footerValues.value = calculateFooterValues();
 };
 
@@ -226,8 +238,9 @@ const handleFilterChange = ({
   selectedCity.value = newCity;
   dateFilter.value = { startDate, endDate };
 
-  processData();
+  processData(); // Вызываем для обновления данных сразу после изменения фильтра
 };
+
 
 const onRegionChange = () => {
   selectedCity.value = ""; // Сбрасываем выбранный город
@@ -275,7 +288,7 @@ const sortTable = (key) => {
   });
 };
 
-watch(dateFilter, processData, { immediate: true });
+// watch(dateFilter, processData, { immediate: true });
 
 onMounted(() => {
   fetchTotalItems();

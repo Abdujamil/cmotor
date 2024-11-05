@@ -296,7 +296,6 @@ const fetchData = async () => {
     const currentStartDate = new Date(selectedStartDate.value);
     const currentEndDate = new Date(selectedEndDate.value);
 
-    
     // Установка даты для одного дня
     if (currentStartDate && !selectedEndDate.value) {
       currentEndDate.setDate(currentStartDate.getDate()); // Ставим на тот же день

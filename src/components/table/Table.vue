@@ -2159,7 +2159,6 @@ const filteredManagers = computed(() => {
     : [];
 });
 
-
 // Переключение видимости дропдаунов
 function toggleDropdown(type) {
   if (type === "brand") {
