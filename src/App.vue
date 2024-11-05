@@ -20,6 +20,25 @@ import Navbar from "./components/navbar/Navbar.vue";
 
 window.permissions = Object.fromEntries(new URLSearchParams(location.search))?.permissions?.split(',') || [];
 
+  (async() => {
+    try {
+
+      let response = await fetch(
+        "https://crystal-motors.ru/method.getStores"
+      );
+
+      response = await response.json();
+      console.warn("response", response);
+      
+
+      window.stores = response.answer;
+      console.log("Запрос с фильтрами менеджеров:", window.stores)
+    } catch (error) {
+      console.error("Ошибка при получении данных клиентов:", error);
+    }
+  })();
+
+
 console.log("permissions", window.permissions);
 
 

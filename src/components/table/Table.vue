@@ -2024,17 +2024,19 @@ const getManagers = async (offset = 0, resetData = false) => {
     const newData = response.data.answer.items;
     console.log("Запрос с фильтрами менеджеров:", newData)
 
+
     // Уникальные города и менеджеры из данных
-    const uniqueCities = new Set();
+    const uniqueCities = new Set(window.stores.map((client) => client.title));
     const managerMap = {};
 
+
     newData.forEach((client) => {
-      if (client.city) {
-        uniqueCities.add(client.city);
-        if (!managerMap[client.city]) managerMap[client.city] = [];
-        if (client.name && !managerMap[client.city].includes(client.name)) {
-          managerMap[client.city].push(client.name);
-        }
+      client.city = window.stores.find((store) => store.id === client.city)?.title || "";
+      console.log("Город:", client.city);
+      
+      if (!managerMap[client.city]) managerMap[client.city] = [];
+      if (client.name && !managerMap[client.city].includes(client.name)) {
+        managerMap[client.city].push(client.name);
       }
     });
 
@@ -2143,7 +2145,7 @@ const selectCity = (cityy) => {
   selectedCity.value = cityy;
   selectedManager.value = null;
   showCityDropdown.value = false;
-  formData2.value.city = cityy ? cityy : "";
+  formData2.value.city = window.stores.find((store) => store.title === cityy)?.id;
 };
 
 // Вычисляемый список менеджеров на основе выбранного города
@@ -2254,7 +2256,8 @@ const fetchTotalItems = async () => {
     totalItems2.value = response.data.answer.count;
     tableData3.value = response.data.answer.items;
 
-    // console.log("Общее количество записей:", response.data.answer.items);
+
+    console.log("Общее количество записей:", response.data.answer.items);
 
     calculateAveragePlan();
   } catch (error) {
@@ -2291,6 +2294,10 @@ const fetchClients = async (offset = 0, resetData = false) => {
 
     const newData = response.data.answer.items;
     console.log("Новые данные:", newData)
+
+    for (const client of newData) {
+      client.city = window.stores.find((store) => store.id === client.city)?.title || "";
+    }
 
     if (resetData) {
       tableData2.value = newData;
