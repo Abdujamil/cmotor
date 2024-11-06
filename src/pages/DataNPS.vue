@@ -1007,7 +1007,9 @@ const addCity = async () => {
 
     console.log("Параметры запроса:", params);
 
-    await axios.get(`https://crystal-motors.ru/method.addSending?${params}`);
+    // await axios.get(`https://crystal-motors.ru/method.addSending?${params}`);
+
+    await axios.post('https://crystal-motors.ru/method.addSending', formData.value);
 
     alert("Данные успешно добавлены!");
 
@@ -1036,6 +1038,8 @@ const addCity = async () => {
     console.error("Ошибка при добавлении данных:", error);
   }
 };
+
+
 
 const updateClient = async () => {
   try {

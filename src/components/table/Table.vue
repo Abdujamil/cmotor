@@ -2032,12 +2032,13 @@ const getManagers = async (offset = 0, resetData = false) => {
 
     newData.forEach((client) => {
       client.city = window.stores.find((store) => store.id === client.city)?.title || "";
-      console.log("Город:", client.city);
       
       if (!managerMap[client.city]) managerMap[client.city] = [];
+
       if (client.name && !managerMap[client.city].includes(client.name)) {
         managerMap[client.city].push(client.name);
       }
+      
     });
 
     citiess.value = [...uniqueCities];
