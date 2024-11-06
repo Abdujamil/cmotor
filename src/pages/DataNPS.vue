@@ -1007,13 +1007,13 @@ const addCity = async () => {
 
     console.log("Параметры запроса:", params);
 
-    // await axios.get(`https://crystal-motors.ru/method.addSending?${params}`);
+    await axios.get(`https://crystal-motors.ru/method.addSending?${params}`);
 
-    await axios.post('https://crystal-motors.ru/method.addSending', formData.value, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    // await axios.post('https://crystal-motors.ru/method.addSending', formData.value, {
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   }
+    // });
 
     alert("Данные успешно добавлены!");
 
@@ -1452,3 +1452,4 @@ label {
   }
 }
 </style>
+   
