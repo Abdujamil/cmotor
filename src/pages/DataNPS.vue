@@ -16,7 +16,7 @@
             class="form-fields__select form-fields__selects-city"
             ref="cityDropdown"
           >
-            <label for="city">Город</label>
+            <label for="city">Город</ label>
             <div class="dropdown">
               <div class="dropdown-toggle" @click="toggleDropdown('city')">
                 <span>{{ selectedCity || "Выберите город" }}</span>
@@ -1452,4 +1452,3 @@ label {
   }
 }
 </style>
-   
