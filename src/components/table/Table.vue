@@ -2058,9 +2058,11 @@ const addManager = async () => {
   try {
     console.log("Добавление нового менеджера:", managerData.value);
 
+    const cityNumber = window.stores.find((store) => store.title === selectedCity2.value)?.id || 0;
+
     // Создаем строку параметров из данных формы
     const params = new URLSearchParams({
-      city: selectedCity2.value,
+      city: cityNumber,
       name: managerData.value.manager_name,
       jobTitle: managerData.value.manager_jobTitle,
       employmentDate: managerData.value.manager_date,
@@ -2077,6 +2079,7 @@ const addManager = async () => {
     alert("Менеджер успешно добавлен!");
 
     getManagers();
+    fetchClients();
     
     showFormManager.value = false;
 
