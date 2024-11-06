@@ -1009,7 +1009,11 @@ const addCity = async () => {
 
     // await axios.get(`https://crystal-motors.ru/method.addSending?${params}`);
 
-    await axios.post('https://crystal-motors.ru/method.addSending', formData.value);
+    await axios.post('https://crystal-motors.ru/method.addSending', formData.value, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
 
     alert("Данные успешно добавлены!");
 
