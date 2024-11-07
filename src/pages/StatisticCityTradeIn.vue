@@ -248,50 +248,6 @@ const sortData = (key) => {
   console.log(`sortKey: ${sortKey.value}, sortOrder: ${sortOrder.value}`);
 };
 
-const calculateTradeInDynamic = (currentMonthCalls, previousMonthCalls) => {
-  if (previousMonthCalls === 0) {
-    return currentMonthCalls > 0 ? "" : "0 %"; // Если в предыдущем месяце не было звонков
-  }
-  const dynamic =
-    ((currentMonthCalls - previousMonthCalls) / previousMonthCalls) * 100;
-  return dynamic.toFixed(2) + " %";
-};
-
-const getTradeInCallsForPeriods = (data, startDate, endDate) => {
-  const currentMonthData = filterDataByDate(data, startDate, endDate);
-
-  let currentTradeInCalls = 0;
-  let previousTradeInCalls = 0;
-
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-
-  // Определяем предыдущий месяц
-  const previousMonth = new Date(start);
-  previousMonth.setMonth(start.getMonth() - 1);
-
-  // Фильтруем данные за текущий месяц
-  currentMonthData.forEach((entry) => {
-    const tradeIn = parseInt(entry.prodan) || 0;
-    const entryDate = new Date(entry.date.split(".").reverse().join("-"));
-
-    // Сравниваем даты для определения текущего и предыдущего месяца
-    if (
-      entryDate.getMonth() === start.getMonth() &&
-      entryDate.getFullYear() === start.getFullYear()
-    ) {
-      currentTradeInCalls += tradeIn;
-    } else if (
-      entryDate.getMonth() === previousMonth.getMonth() &&
-      entryDate.getFullYear() === previousMonth.getFullYear()
-    ) {
-      previousTradeInCalls += tradeIn;
-    }
-  });
-
-  return { currentTradeInCalls, previousTradeInCalls };
-};
-
 const fetchFactsOnly = async () => {
   try {
     const response = await fetchTotalItems();
@@ -299,10 +255,11 @@ const fetchFactsOnly = async () => {
 
     // Группируем данные по городам
     const citiesGrouped = factsData.reduce((acc, item) => {
-      if (!acc[item.city]) {
-        acc[item.city] = [];
+      const cityName = window.stores.find((store) => store.id === item.city)?.title || "Неизвестный город";
+      if (!acc[cityName]) {
+        acc[cityName] = [];
       }
-      acc[item.city].push(item);
+      acc[cityName].push(item);
       return acc;
     }, {});
 
@@ -427,11 +384,14 @@ const sumCallsByRegion = async () => {
 
     // Проходим по каждому элементу данных и суммируем звонки по регионам
     factsData.forEach((entry) => {
-      const city = entry.city;
+      let city = entry.city;
+      city = window.stores.find((store) => store.id === entry.city)?.title || "Неизвестный город";
       const fact = parseInt(entry.fact) || 0; // Преобразуем fact в число
 
       // Проверяем, к какому региону относится город
       const region = cityRegionMap[city];
+      console.log("city:", city, "region:", region);
+      
 
       if (region === "Юг") {
         totalCallsSouth += fact;
@@ -563,7 +523,8 @@ const calculateRegionAverages = async (startDate, endDate) => {
 
   // Проходим по каждому элементу данных и суммируем звонки по регионам
   filteredData.forEach((entry) => {
-    const city = entry.city;
+    let city = entry.city;
+    city = window.stores.find((store) => store.id === entry.city)?.title || "Неизвестный город";
     const fact = parseInt(entry.fact) || 0; // Преобразуем fact в число
     const tradeIn = parseInt(entry.prodan) || 0; // Используем поле prodan для трейд-ин
     const region = cityRegionMap[city];
@@ -586,6 +547,7 @@ const calculateRegionAverages = async (startDate, endDate) => {
   
   // Заполняем regionData с данными, включая дату
   factsData.forEach((client) => {
+    client.city = window.stores.find((store) => store.id === client.city)?.title || "Неизвестный город";
     const region = cityRegionMap[client.city];
 
     if (region && regionData[region] !== undefined) {
@@ -636,6 +598,7 @@ const calculateRegionAverages = async (startDate, endDate) => {
 
 const filteredCitiesData = computed(() => {
   return citiesData.value.filter((city) => {
+    city.city = window.stores.find((store) => store.id === city.city)?.title || "Неизвестный город";
     if (selectedCity.value) {
       // Если выбран город, показываем только этот город
       return city.city === selectedCity.value;

@@ -111,6 +111,14 @@
           <div class="table-cell">{{ city.cityPreviousPeriodDynamic }}</div>
         </div>
       </div>
+
+      <div class="chart">
+        <LineChart
+          :chartData="chartData"
+          :options="options"
+          ref="lineChartRef"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -119,9 +127,14 @@
 import Filter from "../components/filters/Filter.vue";
 import IButton from "../components/installButton/IButton.vue";
 import { fetchTotalItems } from "../api-service/apiService";
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
+import { method, shuffle } from "lodash";
+import { LineChart } from "vue-chart-3";
+import { Chart, registerables } from "chart.js";
+import axios from "axios";
 import * as XLSX from "xlsx";
 
+const data = ref([]); // Динамические данные для графика
 const table = ref(null);
 const selectedRegion = ref("");
 const selectedCity = ref("");
@@ -287,28 +300,13 @@ const filterDataByDate = (data, startDate, endDate) => {
   });
 };
 
-const fetchFactsOnly = async (startDate, endDate) => {
+const fetchFactsOnly = async () => {
   try {
     const startDate = new Date(filters.value.startDate);
     const endDate = new Date(filters.value.endDate);
 
-    if (!startDate || !endDate) {
-      console.log("No dates selected, skipping data fetch");
-      citiesData.value = []; // Очистить данные, если даты не выбраны
-      return;
-    }
-
     const response = await fetchTotalItems();
     const factsData = response.items;
-
-    // Группируем данные по городам
-    const citiesGrouped = factsData.reduce((acc, item) => {
-      if (!acc[item.city]) {
-        acc[item.city] = [];
-      }
-      acc[item.city].push(item);
-      return acc;
-    }, {});
 
     // Фильтрация данных по выбранным датам
     const filteredFacts = filterDataByDate(
@@ -316,6 +314,44 @@ const fetchFactsOnly = async (startDate, endDate) => {
       filters.value.startDate,
       filters.value.endDate
     );
+
+    if (!startDate || !endDate) {
+      console.log("No dates selected, skipping data fetch");
+      data.value = []; // Очищаем данные, если даты не выбраны
+      return;
+    }
+
+    // Группируем данные по городам
+    // const citiesGrouped = factsData.reduce((acc, item) => {
+    //   if (!acc[item.city]) {
+    //     acc[item.city] = [];
+    //   }
+    //   acc[item.city].push(item);
+    //   return acc;
+    // }, {});
+
+    const monthlyCalls = new Array(12).fill(0);
+    factsData.forEach((item) => {
+      const date = new Date(item.date);
+      const monthIndex = date.getMonth();
+      monthlyCalls[monthIndex] += Number(item.fact);
+    });
+
+    data.value = monthlyCalls;
+
+    // Группируем данные по городам
+    const citiesGrouped = factsData.reduce((acc, item) => {
+      const cityName =
+        window.stores.find((store) => store.id === item.city)?.title ||
+        "Неизвестный город";
+
+      if (!acc[cityName]) {
+        acc[cityName] = [];
+      }
+      acc[cityName].push(item);
+
+      return acc;
+    }, {});
 
     // Определяем предыдущий период на основе разницы между startDate и endDate
     const calculatePreviousPeriod = (start, end) => {
@@ -337,12 +373,6 @@ const fetchFactsOnly = async (startDate, endDate) => {
 
     // Определяем текущую дату
     const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth();
-
-    // Устанавливаем даты для текущего и предыдущего месяцев
-    const currentPeriodStartDate = new Date(currentYear, currentMonth, 1);
-    const currentPeriodEndDate = new Date(currentYear, currentMonth + 1, 0);
 
     const previousPeriodStartDate = new Date(filters.value.startDate);
     previousPeriodStartDate.setMonth(previousPeriodStartDate.getMonth() - 1);
@@ -483,198 +513,6 @@ const fetchFactsOnly = async (startDate, endDate) => {
   }
 };
 
-// const calculateRegionAverages = async (startDate, endDate) => {
-//   if (!Array.isArray(tableData.value)) {
-//     console.error("tableData.value не является массивом:", tableData.value);
-//     return;
-//   }
-//   console.log("startDate:", startDate, "endDate:", endDate);
-
-//   // Обнуляем данные
-//   let totalCallsSouth = 0;
-//   let totalCallsNorth = 0;
-
-//   // Фильтруем данные по датам
-//   const filteredData = filterDataByDate(tableData.value, startDate, endDate);
-//   console.log("filteredData:", filteredData);
-
-//   if (filteredData.length === 0) {
-//     alert("Нет данных для выбранного диапазона дат.");
-//     return;
-//   }
-
-//   const currentDate = new Date();
-//   const currentYear = currentDate.getFullYear();
-//   const currentMonth = currentDate.getMonth();
-
-//   // Функция для получения данных за конкретный месяц
-//   const getDataForMonth = (data, targetMonth, targetYear) => {
-//     return data.filter((item) => {
-//       const itemDate = new Date(item.date);
-//       return (
-//         itemDate.getMonth() === targetMonth &&
-//         itemDate.getFullYear() === targetYear
-//       );
-//     });
-//   };
-
-//   const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-//   const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-
-//   console.log("previousMonth:", previousMonth, "previousYear:", previousYear);
-
-//   const regionData = {
-//     Юг: [],
-//     Север: []
-//   };
-
-//   // Подсчитываем общее количество звонков для каждого региона (с нуля)
-//   filteredData.forEach((entry) => {
-//     const city = entry.city;
-//     const fact = parseInt(entry.fact) || 0; // Получаем фактическое значение звонка
-//     const region = cityRegionMap[city];
-
-//     if (region === "Юг") {
-//       totalCallsSouth += fact; // Суммируем только звонки из фильтрованных данных
-//     } else if (region === "Север") {
-//       totalCallsNorth += fact; // Суммируем только звонки из фильтрованных данных
-//     }
-//   });
-
-//   // Заполняем regionData с расчетом Среднее значение качества звонков
-//   filteredData.forEach((client) => {
-//     const region = cityRegionMap[client.city];
-//     if (region && regionData[region] !== undefined) {
-//       const total = calculateTotal(client);
-//       const averageCallQuality = (total / 14) * 100;
-
-//       regionData[region].push({
-//         date: client.date,
-//         value: parseFloat(averageCallQuality.toFixed(2))
-//       });
-//     }
-//   });
-
-//   // Формируем данные для отображения в таблице
-//   filteredTableData.value = Object.keys(regionData).map((region) => {
-//     const regionCities = regionData[region];
-
-//     console.log("regionCities", regionCities);
-
-//     const currentRegionData = getDataForMonth(
-//       regionCities,
-//       currentMonth,
-//       currentYear
-//     );
-//     const previousRegionData = getDataForMonth(
-//       regionCities,
-//       previousMonth,
-//       previousYear
-//     );
-
-//     console.log("currentRegionData", currentRegionData, "previousRegionData",previousRegionData ); // вот тут
-
-//     const totalCurrentCalls =
-//       region === "Юг" ? totalCallsSouth : totalCallsNorth;
-
-//     const totalPreviousCalls = previousRegionData.reduce(
-//       (sum, item) => sum + (parseInt(item.fact) || 0),
-//       0
-//     );
-
-//     const averageQuality =
-//       regionCities.length > 0
-//         ? (
-//             regionCities.reduce((sum, quality) => sum + quality.value, 0) /
-//             regionCities.length
-//           ).toFixed(2)
-//         : 0;
-
-//     const averageCurrentQuality =
-//       currentRegionData.length > 0
-//         ? (
-//             currentRegionData.reduce((sum, item) => sum + item.value, 0) /
-//             currentRegionData.length
-//           ).toFixed(2)
-//         : 0;
-//         console.log("averageCurrentQuality", averageCurrentQuality); // averageCurrentQuality 49.25 v averagePreviousQuality 54.27
-
-//     const averagePreviousQuality =
-//       previousRegionData.length > 0
-//         ? (
-//             previousRegionData.reduce((sum, item) => sum + item.value, 0) /
-//             previousRegionData.length
-//           ).toFixed(2)
-//         : 0;
-//         console.log("averagePreviousQuality", averagePreviousQuality);  // averageCurrentQuality 60.50 v averagePreviousQuality 63.18
-
-//     const previousPeriodDynamic = calculatePreviousPeriodDynamic(
-//       averageCurrentQuality,
-//       averagePreviousQuality
-//     );
-
-//     console.log("previousPeriodDynamic", previousPeriodDynamic);
-
-//     const previousPeriodDyn =
-//       startDate && endDate
-//         ? (averagePreviousQuality > 0
-//             ? ((averageCurrentQuality - averagePreviousQuality) / averagePreviousQuality) *
-//               100
-//             : 0
-//           ).toFixed(0) + " %"
-//         : " ";
-
-//     // const callsDynamic =
-//     //   startDate && endDate
-//     //     ? previousPeriodDynamic > 0
-//     //       ? ((totalCurrentCalls * 100) / previousPeriodDynamic - 100).toFixed(
-//     //           0
-//     //         ) + " %"
-//     //       : 0
-//     //     : " ";
-
-//         const callsDynamic =
-//       startDate && endDate
-//         ? previousPeriodDynamic > 0
-//           ? (((totalCurrentCalls - totalPreviousCalls) / totalPreviousCalls) * 100).toFixed(
-//               0
-//             ) + " %"
-//           : 0
-//         : " ";
-//         console.log("callsDynamic", callsDynamic);
-
-//     return {
-//       region,
-//       totalCalls: totalCurrentCalls || "0",
-//       callsDynamic: callsDynamic || "0 %",
-//       averageCallQuality: averageQuality + " %",
-//       previousPeriodDynamic: previousPeriodDyn || " "
-//     };
-//   });
-// };
-
-// Функция для получения данных за предыдущий период (неделю или месяц)
-const getPreviousPeriodData = (data, startDate, endDate, isWeekly) => {
-  const previousStart = new Date(startDate);
-  const previousEnd = new Date(endDate);
-
-  if (isWeekly) {
-    // Если выбрана неделя, берем предыдущую неделю
-    previousStart.setDate(previousStart.getDate() - 7);
-    previousEnd.setDate(previousEnd.getDate() - 7);
-  } else {
-    // Если выбран месяц, берем предыдущий месяц (тот же диапазон дней, но в предыдущем месяце)
-    previousStart.setMonth(previousStart.getMonth() - 1);
-    previousEnd.setMonth(previousEnd.getMonth() - 1);
-  }
-
-  // Фильтруем данные за предыдущий период
-  return data.filter((item) => {
-    const itemDate = new Date(item.date);
-    return itemDate >= previousStart && itemDate <= previousEnd;
-  });
-};
-
 // Основная функция для расчета средних значений по регионам
 const calculateRegionAverages = async (startDate, endDate) => {
   if (!Array.isArray(tableData.value)) {
@@ -731,7 +569,11 @@ const calculateRegionAverages = async (startDate, endDate) => {
   let totalCallsNorth = 0;
 
   filteredData.forEach((entry) => {
-    const city = entry.city;
+    let city = entry.city;
+    city =
+      window.stores.find((store) => store.id === entry.city)?.title ||
+      "Неизвестный город";
+
     const fact = parseInt(entry.fact) || 0;
     const region = cityRegionMap[city];
 
@@ -743,6 +585,10 @@ const calculateRegionAverages = async (startDate, endDate) => {
   });
 
   filteredData.forEach((client) => {
+    client.city =
+      window.stores.find((store) => store.id === client.city)?.title ||
+      "Неизвестный город";
+
     const region = cityRegionMap[client.city];
     if (region && regionData[region] !== undefined) {
       const total = calculateTotal(client);
@@ -761,7 +607,11 @@ const calculateRegionAverages = async (startDate, endDate) => {
   let totalPreviousCallsNorth = 0;
 
   previousPeriodData.forEach((entry) => {
-    const city = entry.city;
+    let city = entry.city;
+    city =
+      window.stores.find((store) => store.id === entry.city)?.title ||
+      "Неизвестный город";
+
     const fact = parseInt(entry.fact) || 0;
     const region = cityRegionMap[city];
 
@@ -850,6 +700,7 @@ const filteredCitiesData = computed(() => {
   return citiesData.value.filter((city) => {
     if (selectedCity.value) {
       // Если выбран город, показываем только этот город
+
       return city.city === selectedCity.value;
     } else if (selectedRegion.value) {
       // Если выбран регион, фильтруем по всем городам в этом регионе
@@ -862,6 +713,142 @@ const filteredCitiesData = computed(() => {
 });
 
 let previousFilters = { startDate: null, endDate: null };
+
+// ---------------------CHART START--------------------------- //
+
+// Регистрируем компоненты Chart.js
+Chart.register(...registerables);
+
+// Создаем данные для графика, включая метки и цвет
+const chartData = ref(() => ({
+  labels: [
+    "Янв",
+    "Фев",
+    "Мар",
+    "Апр",
+    "Май",
+    "Июн",
+    "Июл",
+    "Авг",
+    "Сен",
+    "Окт",
+    "Ноя",
+    "Дек"
+  ],
+  datasets: [
+    {
+      label: "Статистика",
+      data: data.value.map((item) => item.value),
+      borderColor: "#00A067",
+      backgroundColor: "transparent",
+      borderWidth: 1,
+      fill: true
+    }
+  ]
+}));
+
+// Опции для графика
+const options = ref({
+  responsive: true,
+  plugins: {
+    legend: { display: false },
+    title: { display: true, text: "График по фильтрам" }
+  }
+});
+
+// Ссылка на элемент графика для доступа к экземпляру
+const lineChartRef = ref();
+
+// Универсальная функция для получения данных
+const fetchDataChart = async (url) => {
+  try {
+    const response = await axios.get(url);
+    return response.data.answer.items;
+  } catch (error) {
+    console.error("Ошибка при загрузке данных:", error);
+    return [];
+  }
+};
+
+// Функция получения уникальных городов с маппингом названий
+const getUniqueCities = (data) => {
+  return [...new Set(data.map((item) => {
+    item.city = window.stores.find((store) => store.id === item.city)?.title || "Неизвестный город";
+    return item.city;
+  }))];
+};
+
+// Функция подсчета общего количества звонков по городам
+const calculateTotalCallsByCity = (data, cities) => {
+  const totalCallsByCity = cities.reduce((acc, city) => {
+    acc[city] = 0;
+    return acc;
+  }, {});
+  data.forEach((item) => {
+    const city = item.city;
+    const factCity = Number(item.fact) || 0;
+    totalCallsByCity[city] += factCity;
+  });
+  return totalCallsByCity;
+};
+
+// Функция обновления данных графика
+const updateChartData = (cities, totalCallsByCity) => {
+  chartData.value = {
+    labels: cities,
+    datasets: [
+      {
+        label: "Количество звонков",
+        data: cities.map(city => totalCallsByCity[city]),
+        borderColor: "#42A5F5",
+        backgroundColor: "#42A5F5",
+        fill: false
+      }
+    ]
+  };
+};
+
+// Основная функция для загрузки данных и обновления графика по умолчанию
+const fetchAllChartData = async () => {
+  const rawData = await fetchDataChart("https://crystal-motors.ru/method.getClients?count=all");
+  const filteredData = filterDataByDate(rawData, null, null);
+  const cities = getUniqueCities(filteredData);
+  const totalCallsByCity = calculateTotalCallsByCity(filteredData, cities);
+  updateChartData(cities, totalCallsByCity);
+};
+
+// Модуль для вычисления данных, которые будут отображаться на графике с учетом региона и города
+const filteredCitiesForChart = computed(() => {
+  // Фильтруем данные по выбранным регионам и городам
+  let filteredCities = citiesData.value;
+
+  if (selectedCity.value) {
+    // Если выбран город, фильтруем только этот город
+    filteredCities = filteredCities.filter((city) => city.city === selectedCity.value);
+  } else if (selectedRegion.value) {
+    // Если выбран регион, фильтруем по всем городам в этом регионе
+    filteredCities = filteredCities.filter((city) => 
+      cities.value[selectedRegion.value].includes(city.city)
+    );
+  }
+
+  return filteredCities;
+});
+
+
+// Функция для загрузки данных и обновления графика с фильтрацией по диапазону дат
+const fetchDataAndUpdateChart = async (startDate, endDate) => {
+  const rawData = await fetchDataChart("https://crystal-motors.ru/method.getClients?count=all");
+  const filteredData = filterDataByDate(rawData, startDate, endDate);
+
+  const filteredCities = filteredCitiesForChart.value;
+  
+  const cities = getUniqueCities(filteredData);
+  const totalCallsByCity = calculateTotalCallsByCity(filteredData, cities);
+  updateChartData(cities, totalCallsByCity);
+};
+
+// ---------------------CHART END---------------------- //
 
 const handleFilterChange = async ({
   selectedRegion: newRegion,
@@ -900,6 +887,11 @@ const handleFilterChange = async ({
   // await fetchData();
   await calculateRegionAverages(filters.value.startDate, filters.value.endDate);
   await fetchFactsOnly(filters.value.startDate, filters.value.endDate);
+  await fetchDataAndUpdateChart(filters.value.startDate, filters.value.endDate);
+
+  if (lineChartRef.value) {
+    lineChartRef.value.update(); // Принудительно обновляем график
+  }
 };
 
 const downloadTable = () => {
@@ -968,6 +960,7 @@ onMounted(async () => {
   await fetchData();
   await calculateRegionAverages(filters.value.startDate, filters.value.endDate);
   await fetchFactsOnly();
+  await fetchAllChartData();
 });
 </script>
 
@@ -982,7 +975,8 @@ onMounted(async () => {
 }
 
 .table {
-  max-width: 750px;
+  // max-width: 750px;
+  max-width: 650px;
   display: flex;
   flex-direction: column;
   border-collapse: collapse;
@@ -992,6 +986,12 @@ onMounted(async () => {
     rgba(255, 255, 255, 0.4);
   border-radius: 10px;
   font-size: 12px;
+}
+
+.table-container {
+  display: flex;
+  align-items: start;
+  gap: 12px;
 }
 
 .table-row {
@@ -1042,5 +1042,14 @@ onMounted(async () => {
 
 .data-table tbody tr:nth-child(even) {
   background: none; /* Фон по умолчанию */
+}
+
+// Chart
+
+.chart {
+  width: 100%;
+  background: #fff;
+  border-radius: 8px;
+  padding: 8px;
 }
 </style>
