@@ -1,5 +1,5 @@
 <template>
-  
+
   <!-- Edit field -->
   <div v-if="showFormEdit" class="form-fields">
     <form @submit.prevent="updateClient">
@@ -609,6 +609,8 @@ const isEdit = ref(window.permissions.includes("tables_clients_nps_data_edit"));
 const isDelete = ref(window.permissions.includes("tables_clients_nps_data_delete"));
 const isComment = ref(window.permissions.includes("tables_clients_nps_data_comment"));
 const isStatus = ref(window.permissions.includes("tables_clients_nps_data_status"));
+
+// tables_clients_nps_data_add,tables_clients_nps_data_edit,tables_clients_nps_data_delete,tables_clients_nps_data_comment,tables_clients_nps_data_status
 
 onMounted(() => {
   const currentUrl = window.location.href;
@@ -1398,6 +1400,8 @@ label {
   display: flex;
   align-items: center;
   justify-content: center;
+  max-width: 100px;
+  text-wrap: wrap;
 }
 
 .table-cell-comment {

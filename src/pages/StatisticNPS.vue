@@ -411,13 +411,8 @@ const fetchData = async () => {
     // Формируем массив для отображения
     filteredData.value = Object.values(cityMap).map((city) => {
       const averageSalonQuality = city.totalQuality / city.count;
-      console.log(
-        `Average salon quality for ${city.name}:`, "totalQuality", city.totalQuality, "count", city.count.toFixed(2),
-        averageSalonQuality);
-      
 
       const previousData = previousPeriodMap[city.name];
-      console.log("previousData", previousData);
       
       let averageSalonQualityPrevious = 0;
 
@@ -425,15 +420,7 @@ const fetchData = async () => {
         averageSalonQualityPrevious = (
           previousData.totalSalonQuality / previousData.count
         ).toFixed(2);
-        console.log(
-          `Average salon quality for ${city.name} for the previous period:`,
-          averageSalonQualityPrevious
-        );
       }
-
-      // const salonComparison = averageSalonQualityPrevious !== 0
-      // ? ((averageSalonQuality * 100) / averageSalonQualityPrevious - 100).toFixed(2) + " %"
-      // : " "; Пермь
 
       const salonComparison =
         averageSalonQualityPrevious !== 0

@@ -158,13 +158,20 @@ const cities = ref({
     "Кемерово",
     "Новокузнецк",
     "Барнаул",
-    "Красноярск ПЖ",
-    "Красноярск Брянка",
+    "Красноярск, 1 салон",
+    "Красноярск, 2 салон",
     "Омск",
-    "Томск",
-    "Сургут_ГИ"
+    "Томск"
   ],
-  Юг: ["Тюмень", "Сургут", "Пермь", "Самара", "Челябинск", "Тюмень_Республики"]
+  Юг: [
+    "Тюмень",
+    "Сургут, 1 салон",
+    "Сургут, 2 салон",
+    "Пермь",
+    "Самара",
+    "Челябинск",
+    "Оренбург"
+  ]
 });
 
 const filters = ref({
@@ -177,6 +184,7 @@ const filters = ref({
 const cityRegionMap = {
   Тюмень: "Юг",
   Сургут: "Юг",
+  "Сургут, 2 салон": "Юг",
   Пермь: "Юг",
   Челябинск: "Юг",
   Самара: "Юг",
@@ -185,6 +193,7 @@ const cityRegionMap = {
   Новокузнецк: "Север",
   "Красноярск Брянка": "Север",
   "Красноярск ПЖ": "Север",
+  "Красноярск, 1 салон": "Север",
   Омск: "Север",
   Томск: "Север"
 };
@@ -269,7 +278,6 @@ const fetchData = async (offset = 0, resetData = false) => {
 
 const filterDataByDate = (data, startDate, endDate) => {
   if (!startDate || !endDate) {
-    console.log("No dates provided, returning all data");
     return data; // Если даты не выбраны, возвращаем все данные
   }
 
@@ -570,9 +578,11 @@ const calculateRegionAverages = async (startDate, endDate) => {
 
   filteredData.forEach((entry) => {
     let city = entry.city;
-    city =
-      window.stores.find((store) => store.id === entry.city)?.title ||
-      "Неизвестный город";
+    if (typeof entry.city !== "string") {
+      city =
+        window.stores.find((store) => store.id === entry.city)?.title ||
+        "Неизвестный город";
+    }
 
     const fact = parseInt(entry.fact) || 0;
     const region = cityRegionMap[city];
@@ -585,9 +595,10 @@ const calculateRegionAverages = async (startDate, endDate) => {
   });
 
   filteredData.forEach((client) => {
-    client.city =
-      window.stores.find((store) => store.id === client.city)?.title ||
-      "Неизвестный город";
+    if (typeof client.city !== "string") {
+      client.city =
+        window.stores.find((store) => store.id === client.city)?.title || "Нет";
+    }
 
     const region = cityRegionMap[client.city];
     if (region && regionData[region] !== undefined) {
@@ -607,13 +618,14 @@ const calculateRegionAverages = async (startDate, endDate) => {
   let totalPreviousCallsNorth = 0;
 
   previousPeriodData.forEach((entry) => {
-    let city = entry.city;
-    city =
-      window.stores.find((store) => store.id === entry.city)?.title ||
-      "Неизвестный город";
+    if (typeof entry.city !== "string") {
+      entry.city =
+        window.stores.find((store) => store.id === entry.city)?.title ||
+        "Неизвестный город";
+    }
 
     const fact = parseInt(entry.fact) || 0;
-    const region = cityRegionMap[city];
+    const region = cityRegionMap[entry.city];
 
     if (region === "Юг") {
       totalPreviousCallsSouth += fact;
@@ -622,8 +634,8 @@ const calculateRegionAverages = async (startDate, endDate) => {
     }
   });
 
-  console.log("totalPreviousCallsSouth:", totalPreviousCallsSouth);
-  console.log("totalPreviousCallsNorth:", totalPreviousCallsNorth);
+  // console.log("totalPreviousCallsSouth:", totalPreviousCallsSouth);
+  // console.log("totalPreviousCallsNorth:", totalPreviousCallsNorth);
 
   filteredTableData.value = Object.keys(regionData).map((region) => {
     const regionCities = regionData[region];
@@ -648,6 +660,7 @@ const calculateRegionAverages = async (startDate, endDate) => {
       currentMonth,
       currentYear
     );
+
     const averageCurrentQuality =
       currentRegionData.length > 0
         ? (
@@ -661,6 +674,7 @@ const calculateRegionAverages = async (startDate, endDate) => {
       previousMonth,
       previousYear
     );
+
     const averagePreviousQuality =
       previousRegionData.length > 0
         ? (
@@ -688,10 +702,10 @@ const calculateRegionAverages = async (startDate, endDate) => {
 
     return {
       region,
-      totalCalls: totalCurrentCalls || "0",
-      callsDynamic: callsDynamic || "0 %",
+      totalCalls: totalCurrentCalls || " ",
+      callsDynamic: callsDynamic || " %",
       averageCallQuality: averageQuality + " %",
-      previousPeriodDynamic: previousPeriodDyn || ""
+      previousPeriodDynamic: previousPeriodDyn || " "
     };
   });
 };
@@ -700,7 +714,6 @@ const filteredCitiesData = computed(() => {
   return citiesData.value.filter((city) => {
     if (selectedCity.value) {
       // Если выбран город, показываем только этот город
-
       return city.city === selectedCity.value;
     } else if (selectedRegion.value) {
       // Если выбран регион, фильтруем по всем городам в этом регионе
@@ -711,55 +724,40 @@ const filteredCitiesData = computed(() => {
     }
   });
 });
-
-let previousFilters = { startDate: null, endDate: null };
-
 // ---------------------CHART START--------------------------- //
 
 // Регистрируем компоненты Chart.js
 Chart.register(...registerables);
 
-// Создаем данные для графика, включая метки и цвет
-const chartData = ref(() => ({
-  labels: [
-    "Янв",
-    "Фев",
-    "Мар",
-    "Апр",
-    "Май",
-    "Июн",
-    "Июл",
-    "Авг",
-    "Сен",
-    "Окт",
-    "Ноя",
-    "Дек"
-  ],
+// Создаем данные для графика
+const chartData = ref({
+  labels: [],
   datasets: [
     {
-      label: "Статистика",
-      data: data.value.map((item) => item.value),
+      label: "Количество звонков",
+      data: [],
       borderColor: "#00A067",
       backgroundColor: "transparent",
       borderWidth: 1,
       fill: true
     }
   ]
-}));
+});
 
 // Опции для графика
 const options = ref({
   responsive: true,
   plugins: {
-    legend: { display: false },
-    title: { display: true, text: "График по фильтрам" }
+    legend: "top",
+    title: { display: true, text: "Количество звонков" }
   }
 });
 
-// Ссылка на элемент графика для доступа к экземпляру
 const lineChartRef = ref();
+let chartInstance = null;
 
-// Универсальная функция для получения данных
+
+// Функция получения данных
 const fetchDataChart = async (url) => {
   try {
     const response = await axios.get(url);
@@ -770,83 +768,119 @@ const fetchDataChart = async (url) => {
   }
 };
 
-// Функция получения уникальных городов с маппингом названий
-const getUniqueCities = (data) => {
-  return [...new Set(data.map((item) => {
-    item.city = window.stores.find((store) => store.id === item.city)?.title || "Неизвестный город";
-    return item.city;
-  }))];
-};
+// Функция для подсчета количества звонков по городам и группировки по выбранному периоду
+const calculateTotalCallsByCityAndPeriod = (data, groupingFunction) => {
+  const groupedData = {};
 
-// Функция подсчета общего количества звонков по городам
-const calculateTotalCallsByCity = (data, cities) => {
-  const totalCallsByCity = cities.reduce((acc, city) => {
-    acc[city] = 0;
-    return acc;
-  }, {});
   data.forEach((item) => {
-    const city = item.city;
-    const factCity = Number(item.fact) || 0;
-    totalCallsByCity[city] += factCity;
+    const date = new Date(item.date);
+    const periodKey = groupingFunction(date);
+    const cityName = window.stores.find((store) => store.id === item.city)?.title || "Неизвестный город";
+    const callCount = Number(item.fact) || 0;
+
+    if (!groupedData[periodKey]) {
+      groupedData[periodKey] = {};
+    }
+    
+    groupedData[periodKey][cityName] = (groupedData[periodKey][cityName] || 0) + callCount;
+
   });
-  return totalCallsByCity;
+
+  // console.log("Сгруппированные данные по периодам и городам:", groupedData); // Отладка
+  console.log("Группировка по периодам и городам:", JSON.stringify(groupedData, null, 2));
+  return groupedData;
 };
 
-// Функция обновления данных графика
-const updateChartData = (cities, totalCallsByCity) => {
-  chartData.value = {
-    labels: cities,
-    datasets: [
-      {
-        label: "Количество звонков",
-        data: cities.map(city => totalCallsByCity[city]),
-        borderColor: "#42A5F5",
-        backgroundColor: "#42A5F5",
-        fill: false
-      }
-    ]
-  };
+
+// Функция для группировки даты по месяцам, неделям или дням
+const formatDateKey = (date, groupingType) => {
+  // Проверка на корректность даты
+  if (isNaN(date.getTime())) {
+    return "Invalid Date"; // Возвращаем "Invalid Date" только для отладки
+  }
+
+  if (groupingType === 'month') {
+    return date.toLocaleString("default", { month: "short", year: "numeric" });
+  } else if (groupingType === 'week') {
+    const weekNumber = Math.ceil(date.getDate() / 7);
+    return `${date.getFullYear()}-W${weekNumber}`;
+  } else {
+    return date.toLocaleDateString("ru-RU");
+  }
+};
+
+// Определяем функцию группировки на основе периода
+const determineGroupingType = (startDate, endDate) => {
+  const diffTime = Math.abs(new Date(endDate) - new Date(startDate));
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays > 90 ? 'month' : diffDays > 30 ? 'week' : 'day';
+};
+
+// Обновление данных графика
+const updateChartData = (data, startDate, endDate) => {
+  // console.warn("updateChartData", data, startDate, endDate);
+  
+  const groupingType = determineGroupingType(startDate, endDate);
+  const groupingFunction = (date) => formatDateKey(date, groupingType);
+
+  const groupedData = calculateTotalCallsByCityAndPeriod(data, groupingFunction);
+
+  // Подготовка данных для графика
+  chartData.value.labels = Object.keys(groupedData); // метки времени (например, дни, недели, месяцы)
+
+  // Создаем набор данных для каждого города
+  const cityNames = new Set(data.map((item) => window.stores.find(store => store.id === item.city)?.title || "Неизвестный город"));
+  chartData.value.datasets = Array.from(cityNames).map(city => {
+    return {
+      label: city,
+      data: chartData.value.labels.map(label => groupedData[label]?.[city] || 0),
+      borderColor: getRandomColor(), // функция для случайного выбора цвета
+      backgroundColor: "transparent",
+      borderWidth: 1,
+      fill: true
+    };
+  });
+
+  console.log("Данные для графика (chartData):", chartData.value); // Отладка
+
+  if (chartInstance) {
+    chartInstance.update();
+  }
+};
+
+// Функция для генерации случайного цвета для каждого города
+const getRandomColor = () => {
+  const letters = '0123456789ABCDEF';
+  let color = '#';
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
 };
 
 // Основная функция для загрузки данных и обновления графика по умолчанию
 const fetchAllChartData = async () => {
-  const rawData = await fetchDataChart("https://crystal-motors.ru/method.getClients?count=all");
-  const filteredData = filterDataByDate(rawData, null, null);
-  const cities = getUniqueCities(filteredData);
-  const totalCallsByCity = calculateTotalCallsByCity(filteredData, cities);
-  updateChartData(cities, totalCallsByCity);
+  const rawData = await fetchDataChart(
+    "https://crystal-motors.ru/method.getClients?count=all"
+  );
+  updateChartData(rawData, null, null);
 };
-
-// Модуль для вычисления данных, которые будут отображаться на графике с учетом региона и города
-const filteredCitiesForChart = computed(() => {
-  // Фильтруем данные по выбранным регионам и городам
-  let filteredCities = citiesData.value;
-
-  if (selectedCity.value) {
-    // Если выбран город, фильтруем только этот город
-    filteredCities = filteredCities.filter((city) => city.city === selectedCity.value);
-  } else if (selectedRegion.value) {
-    // Если выбран регион, фильтруем по всем городам в этом регионе
-    filteredCities = filteredCities.filter((city) => 
-      cities.value[selectedRegion.value].includes(city.city)
-    );
-  }
-
-  return filteredCities;
-});
-
 
 // Функция для загрузки данных и обновления графика с фильтрацией по диапазону дат
 const fetchDataAndUpdateChart = async (startDate, endDate) => {
   const rawData = await fetchDataChart("https://crystal-motors.ru/method.getClients?count=all");
-  const filteredData = filterDataByDate(rawData, startDate, endDate);
-
-  const filteredCities = filteredCitiesForChart.value;
-  
-  const cities = getUniqueCities(filteredData);
-  const totalCallsByCity = calculateTotalCallsByCity(filteredData, cities);
-  updateChartData(cities, totalCallsByCity);
+  const filteredData = rawData.filter(item => {
+    const itemDate = new Date(item.date);
+    return itemDate >= new Date(startDate) && itemDate <= new Date(endDate);
+  });
+  updateChartData(filteredData, startDate, endDate);
 };
+
+watch(chartData, () => {
+  if (chartInstance) {
+    chartInstance.update();
+  }
+}, { deep: true });
 
 // ---------------------CHART END---------------------- //
 
@@ -893,6 +927,8 @@ const handleFilterChange = async ({
     lineChartRef.value.update(); // Принудительно обновляем график
   }
 };
+
+let previousFilters = { startDate: null, endDate: null };
 
 const downloadTable = () => {
   if (table.value) {

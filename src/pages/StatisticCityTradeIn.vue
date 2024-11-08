@@ -598,7 +598,8 @@ const calculateRegionAverages = async (startDate, endDate) => {
 
 const filteredCitiesData = computed(() => {
   return citiesData.value.filter((city) => {
-    city.city = window.stores.find((store) => store.id === city.city)?.title || "Неизвестный город";
+    console.log("city:", city);
+    
     if (selectedCity.value) {
       // Если выбран город, показываем только этот город
       return city.city === selectedCity.value;
