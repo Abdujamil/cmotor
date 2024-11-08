@@ -410,7 +410,8 @@ const fetchData = async () => {
 
     // Формируем массив для отображения
     filteredData.value = Object.values(cityMap).map((city) => {
-      const averageSalonQuality = city.totalQuality / city.count;
+
+      const averageSalonQuality = city.totalQuality ? (city.totalQuality / city.count) : 0;
 
       const previousData = previousPeriodMap[city.name];
       
@@ -433,8 +434,9 @@ const fetchData = async () => {
 
       console.log(`salonComparison`, salonComparison);
 
-      const averageManagerQuality =
-        city.totalManagerQuality / city.managerCount;
+      const averageManagerQuality = city.totalManagerQuality ?
+        city.totalManagerQuality / city.managerCount : 0;
+
       const nps = (averageSalonQuality + averageManagerQuality) / 2;
 
       const previousManagerAverage = previousPeriodMap[city.name]

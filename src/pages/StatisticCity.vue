@@ -113,7 +113,7 @@
       </div>
 
       <div class="chart">
-        <LineChart
+        <BarChart
           :chartData="chartData"
           :options="options"
           ref="lineChartRef"
@@ -129,7 +129,16 @@ import IButton from "../components/installButton/IButton.vue";
 import { fetchTotalItems } from "../api-service/apiService";
 import { ref, computed, onMounted, watch } from "vue";
 import { method, shuffle } from "lodash";
-import { LineChart } from "vue-chart-3";
+import {
+  LineChart,
+  BarChart,
+  DoughnutChart,
+  PieChart,
+  PolarAreaChart,
+  RadarChart,
+  BubbleChart,
+  ScatterChart
+} from "vue-chart-3";
 import { Chart, registerables } from "chart.js";
 import axios from "axios";
 import * as XLSX from "xlsx";
@@ -430,7 +439,7 @@ const fetchFactsOnly = async () => {
 
       // Проверка: если текущий период имеет данные, а предыдущий не имеет
       if (previousQuality === 0 && currentQuality > 0) {
-        return "в предыдущем периоде нет данных"; // Если в предыдущем периоде нет данных, но в текущем есть
+        return ""; // Если в предыдущем периоде нет данных, но в текущем есть
       }
 
       // Проверка: если данные за оба периода есть, рассчитываем динамику
@@ -483,7 +492,7 @@ const fetchFactsOnly = async () => {
       const resultAvaregeCallQuality = Math.floor((totalQuality / 14) * 100);
 
       const averageCallQuality =
-        startDate && endDate
+        resultAvaregeCallQuality && startDate && endDate
           ? (resultAvaregeCallQuality / currentCityEntries.length).toFixed(2) +
             " %"
           : " ";
@@ -710,20 +719,46 @@ const calculateRegionAverages = async (startDate, endDate) => {
   });
 };
 
-const filteredCitiesData = computed(() => {
-  return citiesData.value.filter((city) => {
-    if (selectedCity.value) {
+// Функция для фильтрации данных по выбранному городу и региону
+const filterDataByCityAndRegion = (data, selectedCity, selectedRegion) => {
+  return data.filter((city) => {
+    if (selectedCity) {
       // Если выбран город, показываем только этот город
-      return city.city === selectedCity.value;
-    } else if (selectedRegion.value) {
-      // Если выбран регион, фильтруем по всем городам в этом регионе
-      return cities.value[selectedRegion.value].includes(city.city);
+      return city.city === selectedCity;
+    } else if (selectedRegion) {
+      // Если выбран регион, фильтруем все города в этом регионе
+      return cities.value[selectedRegion]?.includes(city.city);
     } else {
       // Если не выбран ни регион, ни город, показываем все города
       return true;
     }
   });
+};
+
+const filteredCitiesData = computed(() => {
+  return filterDataByCityAndRegion(
+    citiesData.value,
+    selectedCity.value,
+    selectedRegion.value
+  );
 });
+
+//------------------ Chart ------------------//
+
+// const filteredCitiesData = computed(() => {
+//   return citiesData.value.filter((city) => {
+//     if (selectedCity.value) {
+//       // Если выбран город, показываем только этот город
+//       return city.city === selectedCity.value;
+//     } else if (selectedRegion.value) {
+//       // Если выбран регион, фильтруем по всем городам в этом регионе
+//       return cities.value[selectedRegion.value].includes(city.city);
+//     } else {
+//       // Если не выбран ни регион, ни город, показываем все города
+//       return true;
+//     }
+//   });
+// });
 // ---------------------CHART START--------------------------- //
 
 // Регистрируем компоненты Chart.js
@@ -756,7 +791,6 @@ const options = ref({
 const lineChartRef = ref();
 let chartInstance = null;
 
-
 // Функция получения данных
 const fetchDataChart = async (url) => {
   try {
@@ -775,33 +809,37 @@ const calculateTotalCallsByCityAndPeriod = (data, groupingFunction) => {
   data.forEach((item) => {
     const date = new Date(item.date);
     const periodKey = groupingFunction(date);
-    const cityName = window.stores.find((store) => store.id === item.city)?.title || "Неизвестный город";
+    const cityName =
+      window.stores.find((store) => store.id === item.city)?.title ||
+      "Неизвестный город";
     const callCount = Number(item.fact) || 0;
 
     if (!groupedData[periodKey]) {
       groupedData[periodKey] = {};
     }
-    
-    groupedData[periodKey][cityName] = (groupedData[periodKey][cityName] || 0) + callCount;
 
+    groupedData[periodKey][cityName] =
+      (groupedData[periodKey][cityName] || 0) + callCount;
   });
 
   // console.log("Сгруппированные данные по периодам и городам:", groupedData); // Отладка
-  console.log("Группировка по периодам и городам:", JSON.stringify(groupedData, null, 2));
+  // console.log(
+  //   "Группировка по периодам и городам:",
+  //   JSON.stringify(groupedData, null, 2)
+  // );
   return groupedData;
 };
-
 
 // Функция для группировки даты по месяцам, неделям или дням
 const formatDateKey = (date, groupingType) => {
   // Проверка на корректность даты
   if (isNaN(date.getTime())) {
-    return "Invalid Date"; // Возвращаем "Invalid Date" только для отладки
+    return " "; // Возвращаем "Invalid Date" только для отладки
   }
 
-  if (groupingType === 'month') {
+  if (groupingType === "month") {
     return date.toLocaleString("default", { month: "short", year: "numeric" });
-  } else if (groupingType === 'week') {
+  } else if (groupingType === "week") {
     const weekNumber = Math.ceil(date.getDate() / 7);
     return `${date.getFullYear()}-W${weekNumber}`;
   } else {
@@ -813,30 +851,52 @@ const formatDateKey = (date, groupingType) => {
 const determineGroupingType = (startDate, endDate) => {
   const diffTime = Math.abs(new Date(endDate) - new Date(startDate));
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays > 90 ? 'month' : diffDays > 30 ? 'week' : 'day';
+  return diffDays > 90 ? "month" : diffDays > 30 ? "week" : "day";
+};
+
+// Функция для генерации случайного цвета для каждого города
+const getRandomColor = () => {
+  const letters = "0123456789ABCDEF";
+  let color = "#";
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
 };
 
 // Обновление данных графика
 const updateChartData = (data, startDate, endDate) => {
   // console.warn("updateChartData", data, startDate, endDate);
-  
+
   const groupingType = determineGroupingType(startDate, endDate);
   const groupingFunction = (date) => formatDateKey(date, groupingType);
 
-  const groupedData = calculateTotalCallsByCityAndPeriod(data, groupingFunction);
+  const groupedData = calculateTotalCallsByCityAndPeriod(
+    data,
+    groupingFunction
+  );
 
   // Подготовка данных для графика
   chartData.value.labels = Object.keys(groupedData); // метки времени (например, дни, недели, месяцы)
 
   // Создаем набор данных для каждого города
-  const cityNames = new Set(data.map((item) => window.stores.find(store => store.id === item.city)?.title || "Неизвестный город"));
-  chartData.value.datasets = Array.from(cityNames).map(city => {
+  const cityNames = new Set(
+    data.map(
+      (item) =>
+        window.stores.find((store) => store.id === item.city)?.title ||
+        "Неизвестный город"
+    )
+  );
+  chartData.value.datasets = Array.from(cityNames).map((city) => {
+    const color = getRandomColor();
     return {
       label: city,
-      data: chartData.value.labels.map(label => groupedData[label]?.[city] || 0),
-      borderColor: getRandomColor(), // функция для случайного выбора цвета
-      backgroundColor: "transparent",
-      borderWidth: 1,
+      data: chartData.value.labels.map(
+        (label) => groupedData[label]?.[city] || 0
+      ),
+      borderColor: "transparent", // функция для случайного выбора цвета
+      backgroundColor: color,
+      borderWidth: 2,
       fill: true
     };
   });
@@ -848,14 +908,41 @@ const updateChartData = (data, startDate, endDate) => {
   }
 };
 
-// Функция для генерации случайного цвета для каждого города
-const getRandomColor = () => {
-  const letters = '0123456789ABCDEF';
-  let color = '#';
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
+// Функция для группировки данных по регионам
+const groupDataByRegion = (data) => {
+  const regionData = { Юг: 0, Север: 0 };
+
+  data.forEach((item) => {
+    const city = window.stores.find((store) => store.id === item.city)?.title;
+    const region = cityRegionMap[city] || "Неизвестный регион";
+    const callCount = Number(item.fact) || 0;
+
+    if (regionData[region] !== undefined) {
+      regionData[region] += callCount;
+    }
+  });
+
+  return regionData;
+};
+
+// Функция обновления данных графика с учетом регионов
+const updateChartDataByRegion = (data) => {
+  const regionData = groupDataByRegion(data);
+
+  chartData.value.labels = Object.keys(regionData); // Регионы: Юг, Север
+  chartData.value.datasets = [
+    {
+      label: "Количество звонков по регионам",
+      data: Object.values(regionData),
+      backgroundColor: ["#FFA07A", "#6495ED"], // Цвета для Юга и Севера
+      borderWidth: 2,
+      fill: true
+    }
+  ];
+
+  if (chartInstance) {
+    chartInstance.update();
   }
-  return color;
 };
 
 // Основная функция для загрузки данных и обновления графика по умолчанию
@@ -863,68 +950,125 @@ const fetchAllChartData = async () => {
   const rawData = await fetchDataChart(
     "https://crystal-motors.ru/method.getClients?count=all"
   );
-  updateChartData(rawData, null, null);
+
+  // Если даты не выбраны, отображаем данные по регионам
+  updateChartDataByRegion(rawData);
 };
 
 // Функция для загрузки данных и обновления графика с фильтрацией по диапазону дат
 const fetchDataAndUpdateChart = async (startDate, endDate) => {
-  const rawData = await fetchDataChart("https://crystal-motors.ru/method.getClients?count=all");
-  const filteredData = rawData.filter(item => {
-    const itemDate = new Date(item.date);
-    return itemDate >= new Date(startDate) && itemDate <= new Date(endDate);
+  const rawData = await fetchDataChart(
+    "https://crystal-motors.ru/method.getClients?count=all"
+  );
+
+  const start = new Date(startDate).setHours(0, 0, 0, 0); // Устанавливаем начало дня
+  const end = new Date(endDate).setHours(23, 59, 59, 999); // Устанавливаем конец дня
+
+  // Фильтруем данные по диапазону дат
+  const filteredData = rawData.filter((item) => {
+    const itemDate = new Date(item.date).getTime();
+    return itemDate >= start && itemDate <= end;
   });
-  updateChartData(filteredData, startDate, endDate);
+
+  // Если выбраны даты, отображаем данные по городам, иначе — по регионам
+  if (startDate && endDate) {
+    updateChartData(filteredData, start, end);
+  } else {
+    updateChartDataByRegion(rawData);
+  }
 };
 
-watch(chartData, () => {
-  if (chartInstance) {
-    chartInstance.update();
-  }
-}, { deep: true });
+// При инициализации вызываем fetchAllChartData для загрузки всех данных по умолчанию
+onMounted(async () => {
+  await fetchAllChartData();
+});
+
+watch(
+  chartData,
+  () => {
+    if (chartInstance) {
+      chartInstance.update();
+    }
+  },
+  { deep: true }
+);
 
 // ---------------------CHART END---------------------- //
 
-const handleFilterChange = async ({
-  selectedRegion: newRegion,
-  selectedCity: newCity,
-  startDate,
-  endDate
-}) => {
-  if (
-    previousFilters.startDate === startDate &&
-    previousFilters.endDate === endDate &&
-    selectedRegion.value === newRegion &&
-    selectedCity.value === newCity
-  ) {
+// const handleFilterChange = async ({
+//   selectedRegion: newRegion,
+//   selectedCity: newCity,
+//   startDate,
+//   endDate
+// }) => {
+//   if (
+//     previousFilters.startDate === startDate &&
+//     previousFilters.endDate === endDate &&
+//     selectedRegion.value === newRegion &&
+//     selectedCity.value === newCity
+//   ) {
+//     return; // Если фильтры не изменились, не выполняем функцию
+//   }
+
+//   selectedRegion.value = newRegion;
+//   selectedCity.value = newCity;
+//   filters.value.startDate = startDate
+//     ? new Date(startDate).toISOString()
+//     : null;
+//   filters.value.endDate = endDate ? new Date(endDate).toISOString() : null;
+
+//   console.log(
+//     "Selected dates:",
+//     filters.value.startDate,
+//     filters.value.endDate
+//   );
+
+//   // Запоминаем текущие фильтры
+//   previousFilters = {
+//     startDate: filters.value.startDate,
+//     endDate: filters.value.endDate
+//   };
+
+//   // await fetchData();
+//   await calculateRegionAverages(filters.value.startDate, filters.value.endDate);
+//   await fetchFactsOnly(filters.value.startDate, filters.value.endDate);
+//   await fetchDataAndUpdateChart(filters.value.startDate, filters.value.endDate);
+
+//   if (lineChartRef.value) {
+//     lineChartRef.value.update(); // Принудительно обновляем график
+//   }
+// };
+
+// Обновляем данные при изменении фильтров
+const handleFilterChange = async ({ selectedRegion: newRegion, selectedCity: newCity, startDate, endDate }) => {
+  if (previousFilters.startDate === startDate &&
+      previousFilters.endDate === endDate &&
+      selectedRegion.value === newRegion &&
+      selectedCity.value === newCity) {
     return; // Если фильтры не изменились, не выполняем функцию
   }
 
   selectedRegion.value = newRegion;
   selectedCity.value = newCity;
-  filters.value.startDate = startDate
-    ? new Date(startDate).toISOString()
-    : null;
+  filters.value.startDate = startDate ? new Date(startDate).toISOString() : null;
   filters.value.endDate = endDate ? new Date(endDate).toISOString() : null;
 
-  console.log(
-    "Selected dates:",
-    filters.value.startDate,
-    filters.value.endDate
-  );
+  console.log("Selected dates:", filters.value.startDate, filters.value.endDate);
 
-  // Запоминаем текущие фильтры
-  previousFilters = {
-    startDate: filters.value.startDate,
-    endDate: filters.value.endDate
-  };
+  previousFilters = { startDate: filters.value.startDate, endDate: filters.value.endDate };
 
-  // await fetchData();
   await calculateRegionAverages(filters.value.startDate, filters.value.endDate);
   await fetchFactsOnly(filters.value.startDate, filters.value.endDate);
-  await fetchDataAndUpdateChart(filters.value.startDate, filters.value.endDate);
+  
+  // Если даты не выбраны, загружаем все данные с фильтрацией по региону и городу
+  if (!filters.value.startDate && !filters.value.endDate) {
+    await fetchAllChartData();
+  } else {
+    await fetchDataAndUpdateChart(filters.value.startDate, filters.value.endDate);
+  }
 
   if (lineChartRef.value) {
-    lineChartRef.value.update(); // Принудительно обновляем график
+    lineChartRef.value.update();
   }
 };
 
