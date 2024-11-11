@@ -201,10 +201,16 @@ const cityRegionMap = {
   Барнаул: "Север",
   Новокузнецк: "Север",
   "Красноярск Брянка": "Север",
+  "Красноярск": "Север",
   "Красноярск ПЖ": "Север",
   "Красноярск, 1 салон": "Север",
   Омск: "Север",
   Томск: "Север"
+};
+
+const cityMapping = {
+  "Красноярск ПЖ": "Красноярск, Партизана Железняка",
+  "Красноярск Брянка": "Красноярск, Брянская"
 };
 
 // Вычисляемое свойство для сортировки данных
@@ -743,7 +749,6 @@ const filteredCitiesData = computed(() => {
   );
 });
 
-//------------------ Chart ------------------//
 
 // const filteredCitiesData = computed(() => {
 //   return citiesData.value.filter((city) => {
@@ -788,7 +793,7 @@ const options = ref({
   }
 });
 
-const lineChartRef = ref();
+const lineChartRef = ref('');
 let chartInstance = null;
 
 // Функция получения данных
@@ -827,6 +832,7 @@ const calculateTotalCallsByCityAndPeriod = (data, groupingFunction) => {
   //   "Группировка по периодам и городам:",
   //   JSON.stringify(groupedData, null, 2)
   // );
+
   return groupedData;
 };
 
@@ -908,20 +914,45 @@ const updateChartData = (data, startDate, endDate) => {
   }
 };
 
-// Функция для группировки данных по регионам
 const groupDataByRegion = (data) => {
   const regionData = { Юг: 0, Север: 0 };
+  let cityData = 0; // Для выбранного города, если он есть
 
   data.forEach((item) => {
     const city = window.stores.find((store) => store.id === item.city)?.title;
-    const region = cityRegionMap[city] || "Неизвестный регион";
+    const mappedCity = cityMapping[city] || city; // Используем cityMapping, если есть
+    const region = cityRegionMap[mappedCity] || "Неизвестный регион"; // Обрабатываем маппинг города в регион
     const callCount = Number(item.fact) || 0;
 
+    // Если выбран город, фильтруем только для этого города
+    if (selectedCity.value) {
+      const fullCityName = cityMapping[selectedCity.value] || selectedCity.value;
+      const cityKeywords = fullCityName.split(", ").map(part => part.trim()); // Разбиваем на ключевые слова
+
+      // Проверяем, что все ключевые слова присутствуют в названии города
+      if (cityKeywords.every(keyword => mappedCity.includes(keyword))) {
+        cityData += callCount; // Если все ключевые слова присутствуют, добавляем звонки для города
+      }
+      return; // Прерываем обработку, если выбран город
+    }
+
+    // Если выбран регион, фильтруем данные по этому региону
+    if (selectedRegion.value && region !== selectedRegion.value) {
+      return;
+    }
+
+    // Суммируем количество звонков для каждого региона
     if (regionData[region] !== undefined) {
       regionData[region] += callCount;
     }
   });
 
+  // Если выбран конкретный город, возвращаем данные только для города
+  if (selectedCity.value) {
+    return { [selectedCity.value]: cityData };
+  }
+
+  // Если город не выбран, возвращаем данные по регионам
   return regionData;
 };
 
@@ -929,6 +960,11 @@ const groupDataByRegion = (data) => {
 const updateChartDataByRegion = (data) => {
   const regionData = groupDataByRegion(data);
 
+  // Очищаем старые метки и данные
+  chartData.value.labels = [];
+  chartData.value.datasets = [];
+
+  // Устанавливаем новые данные
   chartData.value.labels = Object.keys(regionData); // Регионы: Юг, Север
   chartData.value.datasets = [
     {
@@ -940,10 +976,12 @@ const updateChartDataByRegion = (data) => {
     }
   ];
 
+  // Обновляем график
   if (chartInstance) {
     chartInstance.update();
   }
 };
+
 
 // Основная функция для загрузки данных и обновления графика по умолчанию
 const fetchAllChartData = async () => {
@@ -1062,14 +1100,11 @@ const handleFilterChange = async ({ selectedRegion: newRegion, selectedCity: new
   
   // Если даты не выбраны, загружаем все данные с фильтрацией по региону и городу
   if (!filters.value.startDate && !filters.value.endDate) {
-    await fetchAllChartData();
+    await fetchAllChartData(newRegion, newCity);
   } else {
     await fetchDataAndUpdateChart(filters.value.startDate, filters.value.endDate);
   }
 
-  if (lineChartRef.value) {
-    lineChartRef.value.update();
-  }
 };
 
 let previousFilters = { startDate: null, endDate: null };

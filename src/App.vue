@@ -39,7 +39,7 @@ window.permissions = Object.fromEntries(new URLSearchParams(location.search))?.p
   })();
 
 
-console.log("permissions", window.permissions);
+// console.log("permissions", window.permissions);
 
 
 </script>

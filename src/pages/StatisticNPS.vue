@@ -241,18 +241,25 @@ const overallNPSComparison = ref(null);
 const selectedStartDate = ref(null);
 const selectedEndDate = ref(null);
 
-const cities = ref({
+let cities = ref({
   Север: [
     "Кемерово",
     "Новокузнецк",
     "Барнаул",
     "Красноярск ПЖ",
+    "Красноярск, Партизана Железняка, 35А",
+    "Красноярск, 2-я Брянская улица, 4",
     "Красноярск Брянка",
     "Омск",
     "Томск"
   ],
   Юг: ["Тюмень", "Сургут", "Сургут_ГИ", "Пермь", "Самара", "Челябинск"]
 });
+
+const cityMapping = {
+  "Красноярск ПЖ": "Красноярск, Партизана Железняка",
+  "Красноярск Брянка": "Красноярск, Брянская"
+};
 
 const handleFilterChange = ({
   selectedRegion: newRegion,
@@ -263,18 +270,252 @@ const handleFilterChange = ({
   selectedRegion.value = newRegion;
   selectedCity.value = newCity;
 
-  // Проверяем, если startDate и endDate одинаковы
-  if (startDate && !endDate) {
-    endDate = startDate; // Устанавливаем endDate равным startDate
-  }
-
+  // Если endDate не задан, используем startDate как конечную дату
   selectedStartDate.value = startDate;
-  selectedEndDate.value = endDate;
+  selectedEndDate.value = endDate || startDate;
+  
   fetchData(); // Обновляем данные при смене фильтра
 };
 
 // Состояние текущих данных
 const currentDataSet = ref(""); // По умолчанию отображаем NPS
+
+// const fetchData = async () => {
+//   try {
+//     const response = await axios.get(
+//       "https://crystal-motors.ru/method.getSendings?count=all"
+//     );
+//     const data = response.data.answer.items;
+
+//     const cityMap = {};
+//     let totalQuality = 0;
+//     let totalQualityPrevious = 0;
+//     let totalManagerQuality = 0;
+//     let totalManagerQualityPrevious = 0;
+//     let totalCount = 0;
+//     let totalCountPrevious = 0;
+//     let totalNPSPrevious = 0;
+
+//     // Даты для фильтрации
+//     let currentStartDate = new Date(selectedStartDate.value);
+//     let currentEndDate = new Date(selectedEndDate.value);
+
+//      // Если выбран один день, проверим, что currentEndDate равен currentStartDate
+//      if (currentStartDate && currentStartDate.getTime() === currentEndDate.getTime()) {
+//         console.log("Фильтрация по одному дню:", currentStartDate);
+//       }
+
+      
+//     // Проверка на выбор одного дня
+//     const isSingleDay = currentStartDate.getTime() === currentEndDate.getTime();
+    
+//     // Установка времени на начало дня, если выбран один день
+//     function setToStartOfDay(date) {
+//       date.setHours(0, 0, 0, 0);
+//       return date;
+//     }
+    
+//     if (isSingleDay) {
+//       currentStartDate = setToStartOfDay(currentStartDate);
+//       currentEndDate = setToStartOfDay(currentEndDate);
+//       console.log("Фильтрация по одному дню:", currentStartDate);
+//     }
+//     // Количество дней для предыдущего периода
+//     const timeDiff = currentEndDate - currentStartDate; // Разница в миллисекундах
+//     const selectedDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1; // Количество дней
+
+//     // Даты для предыдущего периода
+//     // Установка дат для предыдущего периода с учётом выбора одного дня
+//     const previousStartDate = new Date(currentStartDate);
+//     const previousEndDate = new Date(currentStartDate);
+
+//     if (isSingleDay) {
+//       previousStartDate.setDate(currentStartDate.getDate() - 1); // Один день назад
+//       previousEndDate.setDate(currentStartDate.getDate() - 1);
+//       setToStartOfDay(previousStartDate);
+//       setToStartOfDay(previousEndDate);
+//     } else {
+//       previousStartDate.setDate(currentStartDate.getDate() - selectedDays);
+//       previousEndDate.setDate(currentStartDate.getDate() - 1);
+//     }
+
+//     const previousPeriodMap = {};
+    
+
+//     data.forEach((item) => {
+//       const cityName = item.city;
+      
+//       if (currentDataSet !== " " && item.transaction_type.toLowerCase() !== currentDataSet.value) {
+//         return;
+//       }
+
+//       const surveyDate = new Date(item.survey_date.split(".").reverse().join("-"));
+
+//       // Фильтрация по дате
+//       const isCurrentPeriod = !selectedStartDate.value || (surveyDate >= currentStartDate && surveyDate <= currentEndDate);
+
+//       // const isCurrentPeriod = surveyDate >= currentStartDate && surveyDate < currentEndDate; // Изменили условие для одного дня
+//       const isPreviousPeriod = surveyDate >= previousStartDate && surveyDate <= previousEndDate;
+
+      
+//       if (!isCurrentPeriod && !isPreviousPeriod) {
+//         return; // Пропускаем, если дата не попадает ни в один из периодов
+//       }
+
+//       // Фильтрация по региону
+//       if (selectedRegion.value && !cities.value[selectedRegion.value].includes(cityName)) {
+//         return;
+//       }
+
+//       // Фильтрация по городу с проверкой по ключевым словам
+//       if (selectedCity.value) {
+//         const fullCityName = cityMapping[selectedCity.value] || selectedCity.value;
+//         const cityKeywords = fullCityName.split(", ").map(part => part.trim());        
+
+//         // Проверяем, что все ключевые части присутствуют в `cityName`
+//         if (!cityKeywords.every(keyword => cityName.includes(keyword))) {
+//           return false;
+//         }
+//       }
+
+//       const salonQuality = parseFloat(item.salon_quality);
+//       const managerQuality = parseFloat(item.manager_quality);
+
+//       // Обработка данных по городу
+//       if (!cityMap[cityName]) {
+//         cityMap[cityName] = {
+//           name: cityName,
+//           totalQuality: salonQuality,
+//           count: 1,
+//           totalManagerQuality: managerQuality,
+//           managerCount: 1
+//         };
+
+//         // console.log("cityMap[cityName] за текущий период", cityName, cityMap[cityName]);
+
+//       } else {
+//         cityMap[cityName].totalQuality += salonQuality;
+//         cityMap[cityName].count += 1;
+//         cityMap[cityName].totalManagerQuality += managerQuality;
+//         cityMap[cityName].managerCount += 1;
+//       }
+
+//       totalQuality += salonQuality;
+//       totalManagerQuality += managerQuality;
+//       totalCount += 1;
+
+//       // Обработка данных для предыдущего периода
+//       if (isPreviousPeriod) {
+//         totalQualityPrevious += salonQuality;
+
+        
+//         if (!previousPeriodMap[cityName]) {
+//           previousPeriodMap[cityName] = {
+//             totalSalonQuality: salonQuality,
+//             count: 1,
+//             totalManagerQuality: managerQuality,
+//             managerCount: 1,
+//           };
+          
+//         // console.log("previousPeriodMap[cityName] за прошлый период", cityName, previousPeriodMap[cityName]);
+          
+//         } else {
+//           previousPeriodMap[cityName].totalManagerQuality += managerQuality;
+//           previousPeriodMap[cityName].managerCount += 1;
+//           previousPeriodMap[cityName].totalSalonQuality += salonQuality;
+//           previousPeriodMap[cityName].count += 1;
+//         }
+//         totalManagerQualityPrevious += managerQuality;
+//         totalCountPrevious += 1;
+//       }
+//     });
+
+
+//     // Формируем массив для отображения
+//     filteredData.value = Object.values(cityMap).map((city) => {
+//       // console.log("city", city);
+      
+//       let averageSalonQuality = city.totalQuality ? (city.totalQuality / city.count) : 0;
+
+//       console.log("averageSalonQuality", city.name, averageSalonQuality);
+      
+
+//       const previousData = previousPeriodMap[city.name];
+//       console.log("previousData",city.name, previousData);
+      
+      
+//       let averageSalonQualityPrevious = 0;
+
+//       if (previousData) {
+//         averageSalonQualityPrevious = (
+//           previousData.totalSalonQuality / previousData.count
+//         ).toFixed(2);
+//       }
+
+//       const salonComparison =
+//         averageSalonQualityPrevious !== 0
+//           ? (
+//               ((averageSalonQuality - averageSalonQualityPrevious) /
+//                 averageSalonQualityPrevious) *
+//               100
+//             ).toFixed(2) + " %"
+//           : " ";
+
+//       console.log(`salonComparison`, salonComparison);
+
+//       const averageManagerQuality = city.totalManagerQuality ?
+//         city.totalManagerQuality / city.managerCount : 0;
+
+//       const nps = (averageSalonQuality + averageManagerQuality) / 2;
+
+//       const previousManagerAverage = previousPeriodMap[city.name]
+//         ? previousPeriodMap[city.name].totalManagerQuality /
+//           previousPeriodMap[city.name].managerCount
+//         : null;
+
+//       const managerComparison =
+//         previousManagerAverage !== null
+//           ? (averageManagerQuality - previousManagerAverage).toFixed(2) + " %"
+//           : "";
+
+//       return {
+//         name: city.name,
+//         averageSalonQuality,
+//         salonComparison,
+//         averageManagerQuality,
+//         nps,
+//         managerComparison,
+//         averageNPSPrevious: previousData
+//           ? (previousData.totalSalonQuality +
+//               previousData.totalManagerQuality) /
+//             (previousData.managerCount * 2)
+//           : null
+//       };
+//     });
+
+//     // Рассчитываем общее среднее качества
+//     overallAverageSalonQuality.value = totalQuality / totalCount;
+//     overallAverageManagerQuality.value = totalManagerQuality / totalCount;
+
+//     // Рассчитываем общее NPS
+//     const totalNPS = filteredData.value.reduce(
+//       (sum, city) => sum + city.nps,
+//       0
+//     );
+//     overallNPS.value = totalNPS / filteredData.value.length;
+
+//     // Рассчитываем сравнение NPS с прошлым периодом
+//     const averageNPSPrevious =
+//       totalCountPrevious > 0 ? totalNPSPrevious / totalCountPrevious : null;
+//     overallNPSComparison.value =
+//       averageNPSPrevious !== null
+//         ? (overallNPS.value - averageNPSPrevious).toFixed(2) + " %"
+//         : "";
+//   } catch (error) {
+//     console.error("Ошибка при получении данных:", error.message);
+//   }
+// };
+
 
 const fetchData = async () => {
   try {
@@ -293,60 +534,70 @@ const fetchData = async () => {
     let totalNPSPrevious = 0;
 
     // Даты для фильтрации
-    const currentStartDate = new Date(selectedStartDate.value);
-    const currentEndDate = new Date(selectedEndDate.value);
+    let currentStartDate = selectedStartDate.value ? new Date(selectedStartDate.value) : null;
+    let currentEndDate = selectedEndDate.value ? new Date(selectedEndDate.value) : null;
 
-    // Установка даты для одного дня
-    if (currentStartDate && !selectedEndDate.value) {
-      currentEndDate.setDate(currentStartDate.getDate()); // Ставим на тот же день
-      console.log("currentStartDate", currentStartDate, "currentEndDate", currentEndDate);
+    // Определение, активен ли фильтр по дате
+    const isDateFilterActive = currentStartDate && currentEndDate;
+
+    // Проверка на выбор одного дня
+    const isSingleDay = isDateFilterActive && currentStartDate.getTime() === currentEndDate.getTime();
+
+    // Установка времени на начало дня, если выбран один день
+    function setToStartOfDay(date) {
+      date.setHours(0, 0, 0, 0);
+      return date;
+    }
+
+    if (isSingleDay) {
+      currentStartDate = setToStartOfDay(currentStartDate);
+      currentEndDate = setToStartOfDay(currentEndDate);
+      console.log("Фильтрация по одному дню:", currentStartDate);
     }
 
     // Количество дней для предыдущего периода
-    const timeDiff = currentEndDate - currentStartDate; // Разница в миллисекундах
-    const selectedDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1; // Количество дней
-    
-    console.log("currentStartDate", currentStartDate, "currentEndDate", currentEndDate);
-
-    // Проверка на выбор одного дня
-    const isSingleDay = selectedStartDate.value && selectedEndDate.value && 
-                    selectedStartDate.value.getTime() === selectedEndDate.value.getTime();
+    const timeDiff = isDateFilterActive ? (currentEndDate - currentStartDate) : 0;
+    const selectedDays = isDateFilterActive ? Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1 : 0;
 
     // Даты для предыдущего периода
-    // Установка дат для предыдущего периода с учётом выбора одного дня
-    const previousStartDate = new Date(currentStartDate);
-    const previousEndDate = new Date(currentStartDate);
-    if (isSingleDay) {
-      previousStartDate.setDate(currentStartDate.getDate() - 1); // Один день назад
-      previousEndDate.setDate(currentStartDate.getDate() - 1);
-    } else {
-      previousStartDate.setDate(currentStartDate.getDate() - selectedDays);
-      previousEndDate.setDate(currentStartDate.getDate() - 1);
+    const previousStartDate = isDateFilterActive ? new Date(currentStartDate) : null;
+    const previousEndDate = isDateFilterActive ? new Date(currentStartDate) : null;
+
+    if (isDateFilterActive) {
+      if (isSingleDay) {
+        previousStartDate.setDate(currentStartDate.getDate() - 1);
+        previousEndDate.setDate(currentStartDate.getDate() - 1);
+        setToStartOfDay(previousStartDate);
+        setToStartOfDay(previousEndDate);
+      } else {
+        previousStartDate.setDate(currentStartDate.getDate() - selectedDays);
+        previousEndDate.setDate(currentStartDate.getDate() - 1);
+      }
     }
+
+    console.log("currentStartDate", currentStartDate, "currentEndDate", currentEndDate);
     console.log("previousStartDate", previousStartDate, "previousEndDate", previousEndDate);
 
     const previousPeriodMap = {};
-    
 
     data.forEach((item) => {
       const cityName = item.city;
-      
+
       if (currentDataSet !== " " && item.transaction_type.toLowerCase() !== currentDataSet.value) {
         return;
       }
 
-      const surveyDate = new Date(item.survey_date.split(".").reverse().join("-"));
+      let surveyDate = new Date(item.survey_date.split(".").reverse().join("-"));
+      if (isSingleDay) {
+        surveyDate = setToStartOfDay(surveyDate);
+      }
 
-      // Фильтрация по дате
-      const isCurrentPeriod = !selectedStartDate.value || 
-        (surveyDate >= currentStartDate && surveyDate <= currentEndDate);
-
-      // const isCurrentPeriod = surveyDate >= currentStartDate && surveyDate < currentEndDate; // Изменили условие для одного дня
-      const isPreviousPeriod =
-        surveyDate >= previousStartDate && surveyDate <= previousEndDate;        
+      // Пропускаем фильтрацию по дате, если фильтр по дате не активен
+      const isCurrentPeriod = !isDateFilterActive || (surveyDate >= currentStartDate && surveyDate <= currentEndDate);
+      const isPreviousPeriod = isDateFilterActive && surveyDate >= previousStartDate && surveyDate <= previousEndDate;
 
       if (!isCurrentPeriod && !isPreviousPeriod) {
-        return; // Пропускаем, если дата не попадает ни в один из периодов
+        return;
       }
 
       // Фильтрация по региону
@@ -354,15 +605,19 @@ const fetchData = async () => {
         return;
       }
 
-      // Фильтрация по городу
-      if (selectedCity.value && cityName !== selectedCity.value) {
-        return;
+      // Фильтрация по городу с проверкой по ключевым словам
+      if (selectedCity.value) {
+        const fullCityName = cityMapping[selectedCity.value] || selectedCity.value;
+        const cityKeywords = fullCityName.split(", ").map(part => part.trim());
+
+        if (!cityKeywords.every(keyword => cityName.includes(keyword))) {
+          return;
+        }
       }
 
       const salonQuality = parseFloat(item.salon_quality);
       const managerQuality = parseFloat(item.manager_quality);
 
-      // Обработка данных по городу
       if (!cityMap[cityName]) {
         cityMap[cityName] = {
           name: cityName,
@@ -382,20 +637,16 @@ const fetchData = async () => {
       totalManagerQuality += managerQuality;
       totalCount += 1;
 
-      // Обработка данных для предыдущего периода
       if (isPreviousPeriod) {
         totalQualityPrevious += salonQuality;
-        
+
         if (!previousPeriodMap[cityName]) {
           previousPeriodMap[cityName] = {
+            totalSalonQuality: salonQuality,
+            count: 1,
             totalManagerQuality: managerQuality,
             managerCount: 1,
-            totalSalonQuality: salonQuality,
-            count: 1
           };
-
-          console.log("previousPeriodMap[cityName] 1", previousPeriodMap[cityName]);
-          
         } else {
           previousPeriodMap[cityName].totalManagerQuality += managerQuality;
           previousPeriodMap[cityName].managerCount += 1;
@@ -407,16 +658,12 @@ const fetchData = async () => {
       }
     });
 
-
-    // Формируем массив для отображения
+    // Формирование массива для отображения и расчет данных
     filteredData.value = Object.values(cityMap).map((city) => {
-
-      const averageSalonQuality = city.totalQuality ? (city.totalQuality / city.count) : 0;
-
+      let averageSalonQuality = city.totalQuality ? (city.totalQuality / city.count) : 0;
       const previousData = previousPeriodMap[city.name];
-      
-      let averageSalonQualityPrevious = 0;
 
+      let averageSalonQualityPrevious = 0;
       if (previousData) {
         averageSalonQualityPrevious = (
           previousData.totalSalonQuality / previousData.count
@@ -431,8 +678,6 @@ const fetchData = async () => {
               100
             ).toFixed(2) + " %"
           : " ";
-
-      console.log(`salonComparison`, salonComparison);
 
       const averageManagerQuality = city.totalManagerQuality ?
         city.totalManagerQuality / city.managerCount : 0;
@@ -464,18 +709,16 @@ const fetchData = async () => {
       };
     });
 
-    // Рассчитываем общее среднее качества
+    // Общий расчет показателей
     overallAverageSalonQuality.value = totalQuality / totalCount;
     overallAverageManagerQuality.value = totalManagerQuality / totalCount;
 
-    // Рассчитываем общее NPS
     const totalNPS = filteredData.value.reduce(
       (sum, city) => sum + city.nps,
       0
     );
     overallNPS.value = totalNPS / filteredData.value.length;
 
-    // Рассчитываем сравнение NPS с прошлым периодом
     const averageNPSPrevious =
       totalCountPrevious > 0 ? totalNPSPrevious / totalCountPrevious : null;
     overallNPSComparison.value =
@@ -486,6 +729,7 @@ const fetchData = async () => {
     console.error("Ошибка при получении данных:", error.message);
   }
 };
+
 
 const switchData = (type) => {
   console.log("Сменить тип данных на:", type);
@@ -613,6 +857,7 @@ onMounted(() => {
   justify-content: center;
   height: 100%;
   max-height: 485px;
+  padding: 0 20px 0 0;
 }
 
 .table-nav__btns {
