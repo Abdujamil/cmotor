@@ -6,3 +6,5 @@ export default defineConfig({
   plugins: [vue()],
   // base: '/statistics-cities/'
 })
+
+// %USERPROFILE%\AppData\Local\Microsoft\WindowsApps

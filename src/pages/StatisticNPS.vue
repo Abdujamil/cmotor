@@ -102,7 +102,8 @@
         <div class="table-cell"> {{ overallAverageManagerQuality ? overallAverageManagerQuality.toFixed(2) : " " }} </div>
         <div class="table-cell"> {{ overallManagerComparison ? overallManagerComparison : " " }} </div>
         <div class="table-cell"> {{ overallNPS ? overallNPS.toFixed(2) : " " }} </div>
-        <div class="table-cell"> {{ overallNPSComparison }} </div>
+        <div class="table-cell"></div>
+        <!-- <div class="table-cell"> {{ overallNPSComparison ? overallNPSComparison : " " }} </div> -->
       </div>
     </div>
     <!-- Навигация -->
@@ -546,13 +547,13 @@ const fetchData = async () => {
     // Установка времени на начало дня, если выбран один день
     function setToStartOfDay(date) {
       date.setHours(0, 0, 0, 0);
+      date.setMonth(date.getMonth() + 1);
       return date;
     }
 
     if (isSingleDay) {
       currentStartDate = setToStartOfDay(currentStartDate);
       currentEndDate = setToStartOfDay(currentEndDate);
-      console.log("Фильтрация по одному дню:", currentStartDate);
     }
 
     // Количество дней для предыдущего периода
@@ -574,9 +575,6 @@ const fetchData = async () => {
         previousEndDate.setDate(currentStartDate.getDate() - 1);
       }
     }
-
-    console.log("currentStartDate", currentStartDate, "currentEndDate", currentEndDate);
-    console.log("previousStartDate", previousStartDate, "previousEndDate", previousEndDate);
 
     const previousPeriodMap = {};
 
@@ -618,24 +616,28 @@ const fetchData = async () => {
       const salonQuality = parseFloat(item.salon_quality);
       const managerQuality = parseFloat(item.manager_quality);
 
-      if (!cityMap[cityName]) {
-        cityMap[cityName] = {
-          name: cityName,
-          totalQuality: salonQuality,
-          count: 1,
-          totalManagerQuality: managerQuality,
-          managerCount: 1
-        };
-      } else {
-        cityMap[cityName].totalQuality += salonQuality;
-        cityMap[cityName].count += 1;
-        cityMap[cityName].totalManagerQuality += managerQuality;
-        cityMap[cityName].managerCount += 1;
-      }
+      if (isCurrentPeriod) {
 
-      totalQuality += salonQuality;
-      totalManagerQuality += managerQuality;
-      totalCount += 1;
+        if (!cityMap[cityName]) {
+          cityMap[cityName] = {
+            name: cityName,
+            totalQuality: salonQuality,
+            count: 1,
+            totalManagerQuality: managerQuality,
+            managerCount: 1
+          };
+          
+        } else {
+          cityMap[cityName].totalQuality += salonQuality;
+          cityMap[cityName].count += 1;
+          cityMap[cityName].totalManagerQuality += managerQuality;
+          cityMap[cityName].managerCount += 1;
+        }
+        
+        totalQuality += salonQuality;
+        totalManagerQuality += managerQuality;
+        totalCount += 1;
+      }
 
       if (isPreviousPeriod) {
         totalQualityPrevious += salonQuality;
@@ -647,12 +649,15 @@ const fetchData = async () => {
             totalManagerQuality: managerQuality,
             managerCount: 1,
           };
+
+          console.log("previousPeriodMap[cityName] за прошлый период", cityName, previousPeriodMap[cityName]);
         } else {
           previousPeriodMap[cityName].totalManagerQuality += managerQuality;
           previousPeriodMap[cityName].managerCount += 1;
           previousPeriodMap[cityName].totalSalonQuality += salonQuality;
           previousPeriodMap[cityName].count += 1;
         }
+
         totalManagerQualityPrevious += managerQuality;
         totalCountPrevious += 1;
       }
@@ -660,7 +665,10 @@ const fetchData = async () => {
 
     // Формирование массива для отображения и расчет данных
     filteredData.value = Object.values(cityMap).map((city) => {
-      let averageSalonQuality = city.totalQuality ? (city.totalQuality / city.count) : 0;
+
+      let averageSalonQuality = city.totalQuality ? ((city.totalQuality / city.count)) : 0;
+      
+
       const previousData = previousPeriodMap[city.name];
 
       let averageSalonQualityPrevious = 0;
@@ -669,7 +677,6 @@ const fetchData = async () => {
           previousData.totalSalonQuality / previousData.count
         ).toFixed(2);
       }
-
       const salonComparison =
         averageSalonQualityPrevious !== 0
           ? (
@@ -710,21 +717,38 @@ const fetchData = async () => {
     });
 
     // Общий расчет показателей
-    overallAverageSalonQuality.value = totalQuality / totalCount;
-    overallAverageManagerQuality.value = totalManagerQuality / totalCount;
+    overallAverageSalonQuality.value = totalQuality ? totalQuality / totalCount : '';
+    console.log("overallAverageSalonQuality", totalQuality, totalCount, overallAverageSalonQuality.value);
+    
+    overallAverageManagerQuality.value = totalManagerQuality ? totalManagerQuality / totalCount : '';
+    console.log("overallAverageManagerQuality", totalManagerQuality, totalCount, overallAverageManagerQuality.value);
+    
 
     const totalNPS = filteredData.value.reduce(
       (sum, city) => sum + city.nps,
       0
     );
+    
+
     overallNPS.value = totalNPS / filteredData.value.length;
+    console.log("overallNPS", overallNPS.value);
+    
+
 
     const averageNPSPrevious =
       totalCountPrevious > 0 ? totalNPSPrevious / totalCountPrevious : null;
+      console.log("averageNPSPrevious", averageNPSPrevious);
+      
+
+
     overallNPSComparison.value =
       averageNPSPrevious !== null
         ? (overallNPS.value - averageNPSPrevious).toFixed(2) + " %"
         : "";
+
+        console.log("overallNPSComparison", overallNPSComparison.value);
+        
+
   } catch (error) {
     console.error("Ошибка при получении данных:", error.message);
   }
@@ -858,6 +882,9 @@ onMounted(() => {
   height: 100%;
   max-height: 485px;
   padding: 0 20px 0 0;
+
+  position: sticky;
+  top: 0;
 }
 
 .table-nav__btns {
