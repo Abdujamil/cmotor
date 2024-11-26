@@ -20,7 +20,7 @@ import Navbar from "./components/navbar/Navbar.vue";
 
 window.permissions = Object.fromEntries(new URLSearchParams(location.search))?.permissions?.split(',') || [];
 
-  (async() => {
+(async() => {
     try {
 
       let response = await fetch(
@@ -36,7 +36,7 @@ window.permissions = Object.fromEntries(new URLSearchParams(location.search))?.p
     } catch (error) {
       console.error("Ошибка при получении данных клиентов:", error);
     }
-  })();
+})();
 
 
 // console.log("permissions", window.permissions);

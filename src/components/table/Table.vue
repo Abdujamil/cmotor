@@ -1836,6 +1836,7 @@ import "@vuepic/vue-datepicker/dist/main.css";
 
 // Table to Excel
 const table = ref(null);
+
 const downloadTable = () => {
   if (table.value) {
     // Преобразуем HTML таблицу в формат рабочего листа Excel

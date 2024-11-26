@@ -626,6 +626,9 @@ const fetchData = async () => {
             totalManagerQuality: managerQuality,
             managerCount: 1
           };
+
+          console.log("cityMap[cityName] за текущий период", cityName, cityMap[cityName]);
+
           
         } else {
           cityMap[cityName].totalQuality += salonQuality;
@@ -718,27 +721,22 @@ const fetchData = async () => {
 
     // Общий расчет показателей
     overallAverageSalonQuality.value = totalQuality ? totalQuality / totalCount : '';
-    console.log("overallAverageSalonQuality", totalQuality, totalCount, overallAverageSalonQuality.value);
+        
     
-    overallAverageManagerQuality.value = totalManagerQuality ? totalManagerQuality / totalCount : '';
-    console.log("overallAverageManagerQuality", totalManagerQuality, totalCount, overallAverageManagerQuality.value);
+    overallAverageManagerQuality.value = totalManagerQuality  && totalManagerQuality > 0 ? totalManagerQuality / totalCount : '';
     
-
     const totalNPS = filteredData.value.reduce(
       (sum, city) => sum + city.nps,
       0
     );
-    
 
     overallNPS.value = totalNPS / filteredData.value.length;
     console.log("overallNPS", overallNPS.value);
     
 
-
     const averageNPSPrevious =
       totalCountPrevious > 0 ? totalNPSPrevious / totalCountPrevious : null;
-      console.log("averageNPSPrevious", averageNPSPrevious);
-      
+      console.log("averageNPSPrevious", averageNPSPrevious);      
 
 
     overallNPSComparison.value =
