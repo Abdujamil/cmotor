@@ -468,6 +468,7 @@
             <p class="comment-text" :title="city.comment || ''">
               {{ city.comment }}
             </p>
+            <div @click="showComment(city)" style="cursor: pointer">👆</div>
           </div>
           <div
             @click.stop="startEditing(index)"
@@ -645,6 +646,9 @@ const filters = ref({
   endDate: null // Конечная дата
 }); // Дефолтные значения фильтров
 
+const showComment = (city) => {
+  alert(city.comment);
+}
 
 new ResizeObserver((event) => {
   const width = document.documentElement.scrollWidth || 0;
