@@ -217,7 +217,11 @@
                     </svg>
                   </span>
                 </div>
-                <div v-show="showManagerDropdown" class="dropdown-menu" @click.stop>
+                <div
+                  v-show="showManagerDropdown"
+                  class="dropdown-menu"
+                  @click.stop
+                >
                   <div class="dropdown-items">
                     <div
                       v-for="(manager, index) in filteredManagers"
@@ -275,7 +279,6 @@
                 name="fact-call"
                 checked
                 value="1"
-                
               />
               <label for="test3">1</label>
             </p>
@@ -375,7 +378,6 @@
                 id="test10"
                 v-model="formData2.cred_nal"
                 name="cred_nal"
-                
                 value="0"
               />
               <label for="test10">0</label>
@@ -412,7 +414,6 @@
                 id="test13"
                 v-model="formData2.prodan"
                 name="prodan"
-                
                 value="0"
               />
               <label for="test13">0</label>
@@ -449,7 +450,6 @@
                 id="test16"
                 v-model="formData2.city2"
                 name="city2"
-                
                 value="0"
               />
               <label for="test16">0</label>
@@ -488,7 +488,6 @@
                 id="test19"
                 v-model="formData2.otpr_viz"
                 name="otpr_viz"
-                
                 value="0"
               />
               <label for="test19">0</label>
@@ -525,7 +524,6 @@
                 id="test22"
                 v-model="formData2.data_visit"
                 name="data_visit"
-                
                 value="0"
               />
               <label for="test22">0</label>
@@ -562,7 +560,6 @@
                 id="test25"
                 v-model="formData2.vizit"
                 name="vizit"
-                
                 value="0"
               />
               <label for="test25">0</label>
@@ -599,7 +596,6 @@
                 id="test28"
                 v-model="formData2.garantiya"
                 name="garantiya"
-                
                 value="0"
               />
               <label for="test28">0</label>
@@ -636,7 +632,6 @@
                 id="test31"
                 v-model="formData2.prod_company"
                 name="prod_company"
-                
                 value="0"
               />
               <label for="test31">0</label>
@@ -673,7 +668,6 @@
                 id="test34"
                 v-model="formData2.obrash_imeni"
                 name="obrash_imeni"
-                
                 value="0"
               />
               <label for="test34">0</label>
@@ -710,7 +704,6 @@
                 id="test37"
                 v-model="formData2.zdatok"
                 name="zdatok"
-                
                 value="0"
               />
               <label for="test37">0</label>
@@ -750,7 +743,6 @@
                 id="test40"
                 v-model="formData2.bodr_son"
                 name="bodr_son"
-                
                 value="0"
               />
               <label for="test40">0</label>
@@ -1060,7 +1052,6 @@
                 name="fact-call"
                 checked
                 value="1"
-                
               />
               <label for="test3">1</label>
             </p>
@@ -1086,7 +1077,6 @@
                 id="test4"
                 v-model="formData2.obrashenie"
                 name="obrashenie"
-                
                 value="0"
               />
               <label for="test4">0</label>
@@ -1123,7 +1113,6 @@
                 id="test7"
                 v-model="formData2.salon"
                 name="salon"
-                
                 value="0"
               />
               <label for="test7">0</label>
@@ -1162,7 +1151,6 @@
                 id="test10"
                 v-model="formData2.cred_nal"
                 name="cred_nal"
-                
                 value="0"
               />
               <label for="test10">0</label>
@@ -1199,7 +1187,6 @@
                 id="test13"
                 v-model="formData2.prodan"
                 name="prodan"
-                
                 value="0"
               />
               <label for="test13">0</label>
@@ -1236,7 +1223,6 @@
                 id="test16"
                 v-model="formData2.city2"
                 name="city"
-                
                 value="0"
               />
               <label for="test16">0</label>
@@ -1275,7 +1261,6 @@
                 id="test19"
                 v-model="formData2.otpr_viz"
                 name="otpr_viz"
-                
                 value="0"
               />
               <label for="test19">0</label>
@@ -1312,7 +1297,6 @@
                 id="test22"
                 v-model="formData2.data_visit"
                 name="data_visit"
-                
                 value="0"
               />
               <label for="test22">0</label>
@@ -1349,7 +1333,6 @@
                 id="test25"
                 v-model="formData2.vizit"
                 name="vizit"
-                
                 value="0"
               />
               <label for="test25">0</label>
@@ -1386,7 +1369,6 @@
                 id="test28"
                 v-model="formData2.garantiya"
                 name="garantiya"
-                
                 value="0"
               />
               <label for="test28">0</label>
@@ -1423,7 +1405,6 @@
                 id="test31"
                 v-model="formData2.prod_company"
                 name="prod_company"
-                
                 value="0"
               />
               <label for="test31">0</label>
@@ -1460,7 +1441,6 @@
                 id="test34"
                 v-model="formData2.obrash_imeni"
                 name="obrash_imeni"
-                
                 value="0"
               />
               <label for="test34">0</label>
@@ -1497,7 +1477,6 @@
                 id="test37"
                 v-model="formData2.zdatok"
                 name="zdatok"
-                
                 value="0"
               />
               <label for="test37">0</label>
@@ -1537,7 +1516,6 @@
                 id="test40"
                 v-model="formData2.bodr_son"
                 name="bodr_son"
-                
                 value="0"
               />
               <label for="test40">0</label>
@@ -1587,7 +1565,10 @@
       <!-- Должность, тел, дата труд., почта -->
 
       <div class="add__manager form-fields__selects">
-        <div class="form-fields__select form-fields__selects-city" ref="cityDropdown">
+        <div
+          class="form-fields__select form-fields__selects-city"
+          ref="cityDropdown"
+        >
           <label for="city">Город:</label>
           <div class="dropdown">
             <div class="dropdown-toggle" @click="() => toggleDropdown('city')">
@@ -1644,30 +1625,29 @@
           />
         </div>
         <div class="form-fields__select form-fields__selects-manager">
-              <label for="manager">Дата трудоустройства :</label>
-              <div class="my-calendar">
-                <VueDatePicker
-                  v-model="managerData.manager_date"
-                  :format="format2"
-                  locale="ru-RU"
-                  dark
-                  placeholder="Дата трудоустройства"
-                  @update:model-value="updatedataRange"
-                >
-                </VueDatePicker>
-              </div>
+          <label for="manager">Дата трудоустройства :</label>
+          <div class="my-calendar">
+            <VueDatePicker
+              v-model="managerData.manager_date"
+              :format="format2"
+              locale="ru-RU"
+              dark
+              placeholder="Дата трудоустройства"
+              @update:model-value="updatedataRange"
+            >
+            </VueDatePicker>
+          </div>
         </div>
 
         <div class="form-fields__select form-fields__selects-manager">
-              <label for="manager">Телефон менеджера:</label>
+          <label for="manager">Телефон менеджера:</label>
 
-              <MaskInput
-                v-model="managerData.manager_phone"
-                mask="7##########"
-                placeholder="Телефон"
-              />
+          <MaskInput
+            v-model="managerData.manager_phone"
+            mask="7##########"
+            placeholder="Телефон"
+          />
         </div>
-
       </div>
     </form>
   </div>
@@ -1697,7 +1677,13 @@
       </div>
       <div class="filter-block">
         <Filter @filterChange="handleDateChange" />
-        <input type="search" name="search" id="search" v-model="filters.manager" placeholder="Поиск по менеджеру" />
+        <input
+          type="search"
+          name="search"
+          id="search"
+          v-model="filters.manager"
+          placeholder="Поиск по менеджеру"
+        />
       </div>
     </div>
 
@@ -1817,14 +1803,7 @@
 </template>
 
 <script setup>
-import {
-  ref,
-  computed,
-  onMounted,
-  onUnmounted,
-  watch,
-  watchEffect
-} from "vue";
+import { ref, computed, onMounted, onUnmounted, watch, watchEffect } from "vue";
 import * as XLSX from "xlsx";
 import "@vuepic/vue-datepicker/dist/main.css";
 import "v-calendar/style.css";
@@ -1852,8 +1831,12 @@ const downloadTable = () => {
 };
 
 const isAdd = ref(window.permissions.includes("tables_clients_auditions_add"));
-const isEdit = ref(window.permissions.includes("tables_clients_auditions_edit"));
-const isDelete = ref(window.permissions.includes("tables_clients_auditions_delete"));
+const isEdit = ref(
+  window.permissions.includes("tables_clients_auditions_edit")
+);
+const isDelete = ref(
+  window.permissions.includes("tables_clients_auditions_delete")
+);
 // console.warn(window.permissions);
 
 // Данные и состояние
@@ -1899,7 +1882,6 @@ const showFormEdit = ref(false);
 const showFormManager = ref(false);
 
 const selectedCity2 = ref(""); // Выбранный город
-const newManager = ref(""); // ФИО нового менеджера
 
 const citiess = ref([]); // Список городов, заполненный из БД
 const managersByCityy = ref({}); // Список город-менеджеры из БД
@@ -1910,12 +1892,12 @@ const managerData = ref({
   manager_jobTitle: "",
   manager_date: "",
   manager_phone: "",
-})
+});
 
 // Обработчик выбора города
 const selectCity2 = (cityy) => {
   console.log("Выбран город:", cityy);
-  
+
   selectedCity2.value = cityy;
   showCityDropdown.value = false;
   managerData.value.manager_city = cityy ? cityy : "";
@@ -1931,7 +1913,7 @@ const toggleForm = () => {
     phone: "",
     email: "",
     city: "",
-    avto: ""
+    avto: "",
   };
 };
 
@@ -1943,7 +1925,7 @@ const toggleFormManager = () => {
     phone: "",
     email: "",
     city: "",
-    avto: ""
+    avto: "",
   };
 };
 
@@ -1957,7 +1939,7 @@ const cancelForm = () => {
     phone: "",
     email: "",
     city: "",
-    avto: ""
+    avto: "",
   };
 };
 
@@ -1976,7 +1958,7 @@ const cities = [
   "Томск",
   "Сургут_ГИ",
   "Тюмень_Республики",
-  "Оренбург"
+  "Оренбург",
 ];
 
 const regions = {
@@ -1987,8 +1969,8 @@ const regions = {
     "Самара",
     "Челябинск",
     "Сургут_ГИ",
-    "Тюмень_Республики", 
-    "Оренбург"
+    "Тюмень_Республики",
+    "Оренбург",
   ],
   Север: [
     "Кемерово",
@@ -1997,10 +1979,9 @@ const regions = {
     "Красноярск ПЖ",
     "Красноярск Брянка",
     "Омск",
-    "Томск"
-  ]
+    "Томск",
+  ],
 };
-
 
 const getManagers = async (offset = 0, resetData = false) => {
   try {
@@ -2012,41 +1993,37 @@ const getManagers = async (offset = 0, resetData = false) => {
       city: filters.value.selectedCity || "", // Добавляем город
 
       startDate: filters.value.startDate || "",
-      endDate: filters.value.endDate || ""
+      endDate: filters.value.endDate || "",
     };
 
     const response = await axios.get(
       "https://crystal-motors.ru/method.getManagers?count=all",
       {
-        params: filterParams
+        params: filterParams,
       }
     );
 
     const newData = response.data.answer.items;
-    console.log("Запрос с фильтрами менеджеров:", newData)
-
+    console.log("Запрос с фильтрами менеджеров:", newData);
 
     // Уникальные города и менеджеры из данных
     const uniqueCities = new Set(window.stores.map((client) => client.title));
     const managerMap = {};
 
-
     newData.forEach((client) => {
-      client.city = window.stores.find((store) => store.id === client.city)?.title || "";
-      
+      client.city =
+        window.stores.find((store) => store.id === client.city)?.title || "";
+
       if (!managerMap[client.city]) managerMap[client.city] = [];
 
       if (client.name && !managerMap[client.city].includes(client.name)) {
         managerMap[client.city].push(client.name);
       }
-      
     });
 
     citiess.value = [...uniqueCities];
     managersByCityy.value = managerMap;
     console.log("Города и менеджеры:", managersByCityy.value);
-    
-    
 
     totalItems.value = response.data.answer.total;
   } catch (error) {
@@ -2059,7 +2036,9 @@ const addManager = async () => {
   try {
     console.log("Добавление нового менеджера:", managerData.value);
 
-    const cityNumber = window.stores.find((store) => store.title === selectedCity2.value)?.id || 0;
+    const cityNumber =
+      window.stores.find((store) => store.title === selectedCity2.value)?.id ||
+      0;
 
     // Создаем строку параметров из данных формы
     const params = new URLSearchParams({
@@ -2067,7 +2046,7 @@ const addManager = async () => {
       name: managerData.value.manager_name,
       jobTitle: managerData.value.manager_jobTitle,
       employmentDate: managerData.value.manager_date,
-      phone: managerData.value.manager_phone
+      phone: managerData.value.manager_phone,
     }).toString();
 
     console.log("Параметры запроса:", params);
@@ -2076,12 +2055,12 @@ const addManager = async () => {
     await axios.get(`https://crystal-motors.ru/method.addManager?${params}`);
 
     console.log("Менеджер успешно добавлен!", managerData.value);
-    
+
     alert("Менеджер успешно добавлен!");
 
     getManagers();
     fetchClients();
-    
+
     showFormManager.value = false;
 
     // Очищаем форму
@@ -2094,7 +2073,6 @@ const addManager = async () => {
     };
 
     selectedCity2.value = ""; // Сброс города
-
   } catch (error) {
     console.error("Ошибка при добавлении менеджера:", error);
   }
@@ -2150,19 +2128,14 @@ const selectCity = (cityy) => {
   selectedCity.value = cityy;
   selectedManager.value = null;
   showCityDropdown.value = false;
-  formData2.value.city = window.stores.find((store) => store.title === cityy)?.id;
+  formData2.value.city = window.stores.find(
+    (store) => store.title === cityy
+  )?.id;
 };
 
-// Вычисляемый список менеджеров на основе выбранного города
-// const filteredManagers = computed(() => {
-//   console.log("selectedCity2.value:", selectedCity.value, "managersByCityy.value:", managersByCityy.value);
-  
-//   return selectedCity.value ? managersByCityy[selectedCity.value] || [] : [];
-// });
-
 const filteredManagers = computed(() => {
-  return selectedCity.value && managersByCityy.value 
-    ? (managersByCityy.value[selectedCity.value] || []) 
+  return selectedCity.value && managersByCityy.value
+    ? managersByCityy.value[selectedCity.value] || []
     : [];
 });
 
@@ -2204,7 +2177,6 @@ onUnmounted(() => {
   document.removeEventListener("click", handleClickOutside);
 });
 
-
 const handleScroll = (event) => {
   const { scrollTop, clientHeight, scrollHeight } = event.target;
 
@@ -2245,7 +2217,7 @@ const handleDateChange = (newFilters) => {
   filters.value = {
     ...newFilters,
     startDate: startDate ? formatToDDMMYYYY(startDate) : null,
-    endDate: endDate ? formatToDDMMYYYY(endDate) : null
+    endDate: endDate ? formatToDDMMYYYY(endDate) : null,
   };
 
   // console.log("Новые фильтры (отформатированные):", filters.value);
@@ -2260,7 +2232,6 @@ const fetchTotalItems = async () => {
     );
     totalItems2.value = response.data.answer.count;
     tableData3.value = response.data.answer.items;
-
 
     console.log("Общее количество записей:", response.data.answer.items);
 
@@ -2286,22 +2257,23 @@ const fetchClients = async (offset = 0, resetData = false) => {
       city: filters.value.selectedCity || "", // Добавляем город
 
       startDate: filters.value.startDate || "",
-      endDate: filters.value.endDate || ""
+      endDate: filters.value.endDate || "",
     };
 
     const response = await axios.get(
       "https://crystal-motors.ru/method.getClients?count=all",
       {
-        params: filterParams
+        params: filterParams,
       }
     );
     console.log("Запрос с фильтрами:", filterParams);
 
     const newData = response.data.answer.items;
-    console.log("Новые данные:", newData)
+    console.log("Новые данные:", newData);
 
     for (const client of newData) {
-      client.city = window.stores.find((store) => store.id === client.city)?.title || "";
+      client.city =
+        window.stores.find((store) => store.id === client.city)?.title || "";
     }
 
     if (resetData) {
@@ -2348,7 +2320,7 @@ const filteredData = computed(() => {
     if (startDate) startDate.setHours(0, 0, 0, 0); // Сброс времени начальной даты
     if (endDate) endDate.setHours(23, 59, 59, 999); // Сброс времени конечной даты
 
-     // Логика фильтрации по городам, регионам и менеджерам
+    // Логика фильтрации по городам, регионам и менеджерам
     const cityMatch =
       !filters.value.selectedCity || client.city === filters.value.selectedCity;
     const regionMatch =
@@ -2356,8 +2328,9 @@ const filteredData = computed(() => {
       regions[filters.value.selectedRegion]?.includes(client.city);
     const managerMatch =
       !filters.value.manager ||
-      client.manager.toLowerCase().includes(filters.value.manager.toLowerCase());
-
+      client.manager
+        .toLowerCase()
+        .includes(filters.value.manager.toLowerCase());
 
     // Фильтрация по диапазону дат
     const dateMatch =
@@ -2367,42 +2340,6 @@ const filteredData = computed(() => {
     return cityMatch && regionMatch && dateMatch && managerMatch;
   });
 });
-
-// const filteredData = computed(() => {
-//   return loadedData.value.filter((client) => {
-//     // Преобразуем строку даты клиента в объект Date
-//     const [day, month, year] = client.date.split(".").map(Number);
-//     const clientDate = new Date(year, month - 1, day); // месяц на 1 меньше
-//     clientDate.setHours(0, 0, 0, 0);
-
-//     // Преобразуем начальную и конечную даты фильтра
-//     const startDate = filters.value.startDate
-//       ? new Date(filters.value.startDate)
-//       : null;
-//     const endDate = filters.value.endDate
-//       ? new Date(filters.value.endDate)
-//       : null;
-
-//     if (startDate) startDate.setHours(0, 0, 0, 0); // Сброс времени для начальной даты
-//     if (endDate) endDate.setHours(23, 59, 59, 999); // Сброс времени для конечной даты, чтобы включить последний день
-
-//     // Логика фильтрации по городам и регионам
-//     const cityMatch =
-//       !filters.value.selectedCity || client.city === filters.value.selectedCity;
-
-//     // Фильтрация по выбранному региону
-//     const regionMatch =
-//       !filters.value.selectedRegion ||
-//       regions[filters.value.selectedRegion]?.includes(client.city);
-
-//     // Фильтрация по диапазону дат
-//     const dateMatch =
-//       (!startDate || clientDate >= startDate) &&
-//       (!endDate || clientDate <= endDate);
-
-//     return cityMatch && regionMatch && dateMatch;
-//   });
-// });
 
 // Функция для загрузки данных при скролле
 const loadMoreData = () => {
@@ -2442,7 +2379,7 @@ const formData2 = ref({
   zdatok: "",
   itog: "",
   plan: "",
-  comment: ""
+  comment: "",
 });
 const isEditing = ref(false);
 const currentClientId = ref(null);
@@ -2553,7 +2490,7 @@ const addClient = async () => {
       zdatok: "",
       itog: "",
       plan: "",
-      comment: ""
+      comment: "",
     };
 
     // Сбрасываем выбранный город и другие дропдауны
@@ -2803,7 +2740,6 @@ body {
 }
 
 .add__manager {
-
   .form-fields__select {
     width: 100%;
   }

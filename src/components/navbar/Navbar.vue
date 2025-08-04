@@ -36,13 +36,6 @@
         >
           <RouterLink class="nav__link" to="/">Все города</RouterLink>
         </div>
-        <!-- <div
-          class="nav__item"
-          :class="{ 'nav__item--active': activeSubmenu === 'dataEntry' }"
-          @click="setActiveSubmenu('dataEntry')"
-        >
-          <RouterLink class="nav__link" to="/dataEntry">Ввод данных</RouterLink>
-        </div> -->
       </div>
 
       <!-- Главное меню: Статистика -->
@@ -73,7 +66,7 @@
 
       <div v-if="showStatsSubmenu" class="nav__submenu">
         <div
-          v-if="isCityTable"
+          
           class="nav__item"
           :class="{ 'nav__item--active': activeSubmenu === 'statisticCity' }"
           @click="setActiveSubmenu('statisticCity')"
@@ -83,7 +76,7 @@
           >
         </div>
         <div
-          v-if="isTradeinTable"
+          
           class="nav__item"
           :class="{
             'nav__item--active': activeSubmenu === 'statisticCityTradeIn'
@@ -95,7 +88,7 @@
           >
         </div>
         <div
-          v-if="isManagersTable"
+         
           class="nav__item"
           :class="{ 'nav__item--active': activeSubmenu === 'statisticManager' }"
           @click="setActiveSubmenu('statisticManager')"
@@ -208,22 +201,22 @@
 import { ref } from "vue";
 
 
-const permissions = Object.fromEntries(new URLSearchParams(location.search))?.permissions?.split(",") || [];
-const isCityTable = ref(window.permissions.includes("tables_clients_analytics_cities_view"));
-const isTradeinTable = ref(window.permissions.includes("tables_clients_analytics_tradein_view"));
-const isManagersTable = ref(window.permissions.includes("tables_clients_analytics_managers_view"));
+// const permissions = Object.fromEntries(new URLSearchParams(location.search))?.permissions?.split(",") || [];
+// const isCityTable = ref(window.permissions.includes("tables_clients_analytics_cities_view"));
+// const isTradeinTable = ref(window.permissions.includes("tables_clients_analytics_tradein_view"));
+// const isManagersTable = ref(window.permissions.includes("tables_clients_analytics_managers_view"));
 
-const isManagersPage = ref(window.permissions.includes("tables_clients_permissions_view"));
+// const isManagersPage = ref(window.permissions.includes("tables_clients_permissions_view"));
 
-const isNpsStatisticsTable = ref(window.permissions.includes("tables_clients_nps_statistics_view"));
-const isNpsDataTable = ref(window.permissions.includes("tables_clients_nps_data_view"));
+// const isNpsStatisticsTable = ref(window.permissions.includes("tables_clients_nps_statistics_view"));
+// const isNpsDataTable = ref(window.permissions.includes("tables_clients_nps_data_view"));
 
 
 // Переменные для управления видимостью подменю и отслеживания активных пунктов меню
-const showCallsSubmenu = ref(false);
-const showStatsSubmenu = ref(false);
-const showNPSSubmenu = ref(false);
-const showNPSManagerSubmenu = ref(false);
+const showCallsSubmenu = ref(true);
+const showStatsSubmenu = ref(true);
+const showNPSSubmenu = ref(true);
+const showNPSManagerSubmenu = ref(true);
 const activeMenu = ref("allCities"); // Активное главное меню
 const activeSubmenu = ref("allCities"); // Активное подменю
 

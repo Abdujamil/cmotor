@@ -119,15 +119,17 @@ const showCityDropdown = ref(false);
 const selectedRegion = ref("");
 const selectedCity = ref("");
 
-const dateRange = ref(['', '']); // [startDate, endDate]
-
+const dateRange = ref(["", ""]); // [startDate, endDate]
 
 const handleDateChange = (dates) => {
   const startDate = dates && dates[0] ? new Date(dates[0]) : null;
   const endDate = dates && dates[1] ? new Date(dates[1]) : null;
 
   // Проверка на валидность дат
-  if ((startDate && isNaN(startDate.getTime())) || (endDate && isNaN(endDate.getTime()))) {
+  if (
+    (startDate && isNaN(startDate.getTime())) ||
+    (endDate && isNaN(endDate.getTime()))
+  ) {
     console.error("Ошибка: некорректные значения дат");
     return; // Прерываем выполнение функции при некорректных датах
   }
@@ -137,7 +139,7 @@ const handleDateChange = (dates) => {
     return; // Прерываем выполнение функции при некорректных датах
   }
 
-  console.log('Дата выбор:', startDate, endDate); // Лог для проверки
+  console.log("Дата выбор:", startDate, endDate); // Лог для проверки
   emit("filterChange", { startDate, endDate }); // Эмитим событие с объектами дат
 };
 
@@ -168,8 +170,15 @@ const cities = ref({
     "Томск",
     "Омск",
   ],
-  Юг: ["Тюмень", "Сургут", "Пермь", "Самара", "Челябинск",
-  "Сургут_ГИ", "Оренбург"]
+  Юг: [
+    "Тюмень",
+    "Сургут",
+    "Пермь",
+    "Самара",
+    "Челябинск",
+    "Сургут_ГИ",
+    "Оренбург",
+  ],
 });
 
 // Функция для обновления фильтров
@@ -177,7 +186,7 @@ const updateFilters = () => {
   // Отправляем событие родителю с текущими фильтрами
   emit("filterChange", {
     region: selectedRegion.value,
-    city: selectedCity.value
+    city: selectedCity.value,
   });
 };
 
@@ -214,7 +223,7 @@ const emit = defineEmits(["filterChange"]);
 const emitFilterChange = () => {
   emit("filterChange", {
     selectedRegion: selectedRegion.value,
-    selectedCity: selectedCity.value
+    selectedCity: selectedCity.value,
   });
 };
 
@@ -241,7 +250,6 @@ const handleClickOutside = (event) => {
     showCityDropdown.value = false;
   }
 };
-
 
 onMounted(() => {
   document.addEventListener("click", handleClickOutside);
@@ -281,7 +289,7 @@ onUnmounted(() => {
   border-color: #ffffff57;
 
   &:hover,
-  &:focus{
+  &:focus {
     border-color: #ffffff;
   }
 }
@@ -289,7 +297,7 @@ onUnmounted(() => {
 .my-calendar :deep(.dp__theme_dark) {
   color: #fff;
   &:hover,
-  &:focus{
+  &:focus {
     --dp-text-color: #fff;
   }
 }
@@ -323,7 +331,6 @@ onUnmounted(() => {
     fill: #cccaca;
   }
 }
-
 
 @import url("../table/table.scss");
 </style>

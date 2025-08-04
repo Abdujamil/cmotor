@@ -39,16 +39,9 @@ window.permissions = Object.fromEntries(new URLSearchParams(location.search))?.p
 })();
 
 
-// console.log("permissions", window.permissions);
-
-
 </script>
 
 <style lang="scss" scoped>
-header {
-  // height: 64px;
-}
-
 .main {
   width: 100%;
   height: 100%;
@@ -80,9 +73,5 @@ header {
   gap: 32px;
 
   padding: 64px 0 64px 0;
-}
-
-footer {
-  // height: 100px;
 }
 </style>
